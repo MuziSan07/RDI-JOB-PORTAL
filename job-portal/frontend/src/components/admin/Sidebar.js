@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, Briefcase, Users, FileText, Activity, LogOut, Menu, X } from 'lucide-react';
+import {
+    LayoutDashboard,
+    Building2,
+    Briefcase,
+    Users,
+    FileText,
+    Activity,
+    LogOut,
+    Menu,
+    X,
+} from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
 
 const Sidebar = ({ user, onLogout }) => {
@@ -25,7 +35,23 @@ const Sidebar = ({ user, onLogout }) => {
         if (isCompact) setOpen(false);
     };
 
-    // On compact screens the sidebar becomes a slide-in drawer.
+    const handleLogout = () => {
+        // Clear all stored authentication data
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Call parent logout if it exists
+        if (onLogout) {
+            onLogout();
+        }
+
+        // Close mobile sidebar
+        setOpen(false);
+
+        // Redirect to landing page
+        navigate('/', { replace: true });
+    };
+
     const sidebarStyle = {
         ...styles.sidebar,
         ...(isCompact
@@ -40,7 +66,6 @@ const Sidebar = ({ user, onLogout }) => {
 
     return (
         <>
-            {/* Mobile hamburger toggle */}
             {isCompact && !open && (
                 <button
                     aria-label="Open menu"
@@ -51,64 +76,79 @@ const Sidebar = ({ user, onLogout }) => {
                 </button>
             )}
 
-            {/* Backdrop */}
             {isCompact && open && (
-                <div style={styles.overlay} onClick={() => setOpen(false)} />
+                <div
+                    style={styles.overlay}
+                    onClick={() => setOpen(false)}
+                />
             )}
 
             <div style={sidebarStyle}>
-            {isCompact && (
-                <button
-                    aria-label="Close menu"
-                    onClick={() => setOpen(false)}
-                    style={styles.closeBtn}
-                >
-                    <X size={20} />
-                </button>
-            )}
-            {/* Logo */}
-            <div style={styles.logo}>
-                <div style={styles.logoIcon}>RDI</div>
-                <span style={styles.logoText}>Admin Portal</span>
-            </div>
-
-            {/* User Info */}
-            <div style={styles.userSection}>
-                {user?.profile_picture ? (
-                    <img src={user.profile_picture} alt="" style={styles.avatar} />
-                ) : (
-                    <div style={styles.avatarPlaceholder}>
-                        {user?.username?.charAt(0).toUpperCase()}
-                    </div>
-                )}
-                <div style={styles.userInfo}>
-                    <div style={styles.userName}>{user?.username || 'Admin'}</div>
-                    <div style={styles.userRole}>Super Admin</div>
-                </div>
-            </div>
-
-            {/* Menu Items */}
-            <nav style={styles.nav}>
-                {menuItems.map((item) => (
+                {isCompact && (
                     <button
-                        key={item.path}
-                        onClick={() => go(item.path)}
-                        style={{
-                            ...styles.menuItem,
-                            ...(isActive(item.path) ? styles.menuItemActive : {}),
-                        }}
+                        aria-label="Close menu"
+                        onClick={() => setOpen(false)}
+                        style={styles.closeBtn}
                     >
-                        <item.icon size={20} />
-                        <span>{item.label}</span>
+                        <X size={20} />
                     </button>
-                ))}
-            </nav>
+                )}
 
-            {/* Logout Button */}
-            <button onClick={onLogout} style={styles.logoutBtn}>
-                <LogOut size={20} />
-                <span>Logout</span>
-            </button>
+                {/* Logo */}
+                <div style={styles.logo}>
+                    <div style={styles.logoIcon}>RDI</div>
+                    <span style={styles.logoText}>Admin Portal</span>
+                </div>
+
+                {/* User */}
+                <div style={styles.userSection}>
+                    {user?.profile_picture ? (
+                        <img
+                            src={user.profile_picture}
+                            alt="Profile"
+                            style={styles.avatar}
+                        />
+                    ) : (
+                        <div style={styles.avatarPlaceholder}>
+                            {user?.username?.charAt(0).toUpperCase() || 'A'}
+                        </div>
+                    )}
+
+                    <div style={styles.userInfo}>
+                        <div style={styles.userName}>
+                            {user?.username || 'Admin'}
+                        </div>
+                        <div style={styles.userRole}>Super Admin</div>
+                    </div>
+                </div>
+
+                {/* Navigation */}
+                <nav style={styles.nav}>
+                    {menuItems.map((item) => (
+                        <button
+                            key={item.path}
+                            onClick={() => go(item.path)}
+                            style={{
+                                ...styles.menuItem,
+                                ...(isActive(item.path)
+                                    ? styles.menuItemActive
+                                    : {}),
+                            }}
+                        >
+                            <item.icon size={20} />
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                </nav>
+
+                {/* Logout */}
+                <button
+                    onClick={handleLogout}
+                    style={styles.logoutBtn}
+                >
+                    <LogOut size={20} />
+                    <span>Logout</span>
+                </button>
             </div>
         </>
     );
@@ -127,7 +167,7 @@ const styles = {
         top: 0,
         bottom: 0,
         overflowY: 'auto',
-        borderRight: '1px solid #2d3748', // Border to connect with navbar
+        borderRight: '1px solid #2d3748',
     },
     hamburger: {
         position: 'fixed',
@@ -177,12 +217,12 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'white',
+        color: '#fff',
         fontWeight: '800',
         fontSize: '16px',
     },
     logoText: {
-        color: 'white',
+        color: '#fff',
         fontSize: '20px',
         fontWeight: '700',
     },
@@ -209,7 +249,7 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'white',
+        color: '#fff',
         fontWeight: '700',
         fontSize: '20px',
     },
@@ -217,7 +257,7 @@ const styles = {
         flex: 1,
     },
     userName: {
-        color: 'white',
+        color: '#fff',
         fontWeight: '600',
         fontSize: '15px',
         marginBottom: '2px',
@@ -249,15 +289,15 @@ const styles = {
     },
     menuItemActive: {
         backgroundColor: '#2d3748',
-        color: 'white',
+        color: '#fff',
     },
     logoutBtn: {
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
         padding: '12px 16px',
-        backgroundColor: 'rgba(220, 53, 69, 0.1)',
-        border: '1px solid rgba(220, 53, 69, 0.3)',
+        backgroundColor: 'rgba(220,53,69,0.1)',
+        border: '1px solid rgba(220,53,69,0.3)',
         borderRadius: '8px',
         color: '#fc8181',
         fontSize: '15px',
