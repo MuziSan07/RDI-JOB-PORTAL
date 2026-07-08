@@ -15,6 +15,34 @@ from jobs.models import Job
 from applicants.models import Application
 from employees.models import Employee
 from tests.models import Chapter, Question
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+@receiver(post_migrate)
+def create_default_super_admin(sender, **kwargs):
+    email = "hr@rdi.com"
+
+    user, created = User.objects.get_or_create(
+        email=email,
+        defaults={
+            "username": "Rupani Development Initiatives",
+            "user_type": "super_admin",
+            "is_staff": True,
+            "is_superuser": True,
+            "is_active": True,
+        },
+    )
+
+    if created:
+        user.set_password("@RDI123")
+        user.save()
+        print("✓ Default Super Admin created.")
+    else:
+        print("✓ Default Super Admin already exists.")
 
 
 # Helper function to log activity
@@ -25,6 +53,8 @@ def log_activity(user, action, details=None, ip_address=None):
         details=details,
         ip_address=ip_address
     )
+
+
 
 
 # Helper function to get client IP
