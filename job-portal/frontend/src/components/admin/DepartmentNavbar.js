@@ -1,7 +1,8 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Bell, Search, ChevronDown, HelpCircle } from 'lucide-react';
+import { Search, ChevronDown, HelpCircle } from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
+import NotificationBell from '../common/NotificationBell';
 
 const DepartmentNavbar = () => {
     const { user } = useAuth();
@@ -49,10 +50,7 @@ const DepartmentNavbar = () => {
                         <button style={styles.iconBtn} title="Help">
                             <HelpCircle size={20} />
                         </button>
-                        <button style={styles.iconBtn} title="Notifications">
-                            <Bell size={20} />
-                            <span style={styles.activeDot}></span>
-                        </button>
+                        <NotificationBell buttonStyle={styles.iconBtn} iconColor="#94a3b8" iconSize={20} theme="dark" />
                     </div>
                     )}
 

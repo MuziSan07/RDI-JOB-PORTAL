@@ -25,6 +25,13 @@ urlpatterns = [
     path('job-seeker/resumes/<int:pk>/', views.resume_detail, name='resume-detail'),
     path('job-seeker/resumes/<int:pk>/set-primary/', views.set_primary_resume, name='set-primary-resume'),
 
+    # Notifications (all user types)
+    path('notifications/', views.notifications_list, name='notifications-list'),
+    path('notifications/unread-count/', views.notifications_unread_count, name='notifications-unread-count'),
+    path('notifications/mark-all-read/', views.notifications_mark_all_read, name='notifications-mark-all-read'),
+    path('notifications/clear/', views.notifications_clear, name='notifications-clear'),
+    path('notifications/<int:pk>/read/', views.notification_mark_read, name='notification-mark-read'),
+
     # Token refresh
     path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
 ]

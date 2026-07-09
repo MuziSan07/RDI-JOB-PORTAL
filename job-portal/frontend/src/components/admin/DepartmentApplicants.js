@@ -228,10 +228,19 @@ const DepartmentApplicants = () => {
                                 <span>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                             </div>
                             <button
+                                onClick={() => handleExport('excel')}
+                                disabled={!!exporting}
+                                style={{ ...s.exportBtn, color: '#166534', backgroundColor: '#052e16', border: '1px solid #14532d' }}
+                                title="Download a formatted Excel (.xlsx) with current filters"
+                            >
+                                <Download size={14} />
+                                {exporting === 'excel' ? 'Exporting...' : 'Excel'}
+                            </button>
+                            <button
                                 onClick={() => handleExport('csv')}
                                 disabled={!!exporting}
                                 style={s.exportBtn}
-                                title="Download CSV with current filters"
+                                title="Download raw CSV with current filters"
                             >
                                 <Download size={14} />
                                 {exporting === 'csv' ? 'Exporting...' : 'CSV'}

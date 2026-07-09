@@ -55,13 +55,13 @@ function App() {
                     <Route path="/jobs" element={<JobsBrowse />} />
                     <Route path="/jobs/:id" element={<JobDetail />} />
                     
-                    {/* Job Seeker Protected Routes */}
-                    <Route path="/dashboard" element={<JobSeekerDashboard />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/my-applications" element={<MyApplications />} />
-                    <Route path="/my-applications/:id" element={<ApplicationDetail />} />
-                    <Route path="/test/:applicationId" element={<TakeTest />} />
-                    <Route path="/test-results/:applicationId" element={<TestResults />} />
+                    {/* Job Seeker Protected Routes — job seekers only */}
+                    <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['job_seeker']}><JobSeekerDashboard /></ProtectedRoute>} />
+                    <Route path="/profile" element={<ProtectedRoute allowedRoles={['job_seeker']}><ProfilePage /></ProtectedRoute>} />
+                    <Route path="/my-applications" element={<ProtectedRoute allowedRoles={['job_seeker']}><MyApplications /></ProtectedRoute>} />
+                    <Route path="/my-applications/:id" element={<ProtectedRoute allowedRoles={['job_seeker']}><ApplicationDetail /></ProtectedRoute>} />
+                    <Route path="/test/:applicationId" element={<ProtectedRoute allowedRoles={['job_seeker']}><TakeTest /></ProtectedRoute>} />
+                    <Route path="/test-results/:applicationId" element={<ProtectedRoute allowedRoles={['job_seeker']}><TestResults /></ProtectedRoute>} />
                     
                     {/* Admin Login */}
                     <Route path="/admin/login" element={<Login />} />

@@ -1,14 +1,37 @@
+import os
 from rest_framework import status, generics
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.throttling import AnonRateThrottle
+
+
+# Brute-force protection: throttle anonymous login / registration attempts per IP.
+class LoginRateThrottle(AnonRateThrottle):
+    scope = 'login'
+
+
+class RegisterRateThrottle(AnonRateThrottle):
+    scope = 'register'
+
+
+def _clear_login_throttle(request):
+    """A *successful* login clears the brute-force counter for that IP, so only
+    failed attempts count toward the limit — a legitimate user is never locked out."""
+    try:
+        from django.core.cache import cache
+        key = LoginRateThrottle().get_cache_key(request, None)
+        if key:
+            cache.delete(key)
+    except Exception:
+        pass
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import User, ActivityLog, Resume
+from .models import User, ActivityLog, Resume, Notification
 from .serializers import AdminLoginSerializer, UserSerializer, ActivityLogSerializer,    JobSeekerRegistrationSerializer,JobSeekerLoginSerializer,JobSeekerProfileSerializer
 from departments.models import Department
 from jobs.models import Job
@@ -24,12 +47,16 @@ User = get_user_model()
 
 @receiver(post_migrate)
 def create_default_super_admin(sender, **kwargs):
-    email = "hr@rdi.com"
+    # Intentional pre-seeded admin for this project. Defaults kept by request
+    # (hr@rdi.com / @RDI123) but still overridable via env for production.
+    email = os.environ.get('DJANGO_SUPERADMIN_EMAIL', 'hr@rdi.com')
+    username = os.environ.get('DJANGO_SUPERADMIN_USERNAME', 'Rupani Development Initiatives')
+    password = os.environ.get('DJANGO_SUPERADMIN_PASSWORD', '@RDI123')
 
     user, created = User.objects.get_or_create(
         email=email,
         defaults={
-            "username": "Rupani Development Initiatives",
+            "username": username,
             "user_type": "super_admin",
             "is_staff": True,
             "is_superuser": True,
@@ -38,11 +65,11 @@ def create_default_super_admin(sender, **kwargs):
     )
 
     if created:
-        user.set_password("@RDI123")
+        user.set_password(password)
         user.save()
-        print("✓ Default Super Admin created.")
+        print(f"[OK] Default Super Admin created ({email}).")
     else:
-        print("✓ Default Super Admin already exists.")
+        print("[OK] Default Super Admin already exists.")
 
 
 # Helper function to log activity
@@ -55,6 +82,39 @@ def log_activity(user, action, details=None, ip_address=None):
     )
 
 
+# ─── Notification helpers (used across apps) ──────────────────────────────────
+
+def create_notification(recipient, title, message='', category='info', link=None):
+    """Create a single in-app notification. Safe no-op if recipient is None."""
+    if recipient is None:
+        return None
+    try:
+        return Notification.objects.create(
+            recipient=recipient,
+            title=title,
+            message=message or '',
+            category=category,
+            link=link,
+        )
+    except Exception:
+        # Notifications must never break the primary action
+        return None
+
+
+def notify_super_admins(title, message='', category='system', link=None, exclude=None):
+    """Send a notification to every active super admin (optionally excluding one user)."""
+    try:
+        admins = User.objects.filter(user_type='super_admin', is_active=True)
+        if exclude is not None:
+            admins = admins.exclude(pk=getattr(exclude, 'pk', exclude))
+        objs = [
+            Notification(recipient=a, title=title, message=message or '', category=category, link=link)
+            for a in admins
+        ]
+        if objs:
+            Notification.objects.bulk_create(objs)
+    except Exception:
+        pass
 
 
 # Helper function to get client IP
@@ -68,6 +128,7 @@ def get_client_ip(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([LoginRateThrottle])
 def admin_login(request):
     """
     Admin login endpoint for Super Admin and Department users
@@ -76,11 +137,12 @@ def admin_login(request):
     
     if serializer.is_valid():
         user = serializer.validated_data['user']
-        
+        _clear_login_throttle(request)  # success → reset this IP's brute-force counter
+
         # Generate tokens
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
-        
+
         # Add custom claims
         access['user_type'] = user.user_type
         access['username'] = user.username
@@ -487,6 +549,7 @@ def clear_activity_logs(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([RegisterRateThrottle])
 def job_seeker_register(request):
     """
     Job Seeker Registration
@@ -507,7 +570,22 @@ def job_seeker_register(request):
         # Log activity
         ip_address = get_client_ip(request)
         log_activity(user, 'Job Seeker Registration', 'New job seeker registered', ip_address)
-        
+
+        # Notify super admins + welcome the new job seeker
+        notify_super_admins(
+            'New job seeker registered',
+            f'{user.get_full_name() or user.username} just created an account.',
+            category='system',
+            link='/admin/dashboard',
+        )
+        create_notification(
+            user,
+            'Welcome to RDI JobPortal! 👋',
+            'Your account is ready. Complete your profile and start applying to jobs.',
+            category='success',
+            link='/profile',
+        )
+
         response_data = {
             'access': str(access),
             'refresh': str(refresh),
@@ -531,6 +609,7 @@ def job_seeker_register(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([LoginRateThrottle])
 def job_seeker_login(request):
     """
     Job Seeker Login
@@ -539,11 +618,12 @@ def job_seeker_login(request):
     
     if serializer.is_valid():
         user = serializer.validated_data['user']
-        
+        _clear_login_throttle(request)  # success → reset this IP's brute-force counter
+
         # Generate tokens
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
-        
+
         # Add custom claims
         access['user_type'] = user.user_type
         access['username'] = user.username
@@ -733,6 +813,41 @@ def job_seeker_dashboard(request):
 
 # ─── Resume CRUD ─────────────────────────────────────────────────────────────
 
+def _parse_bool(value):
+    """Normalize a boolean that may arrive as a real bool (JSON) or a string (multipart form)."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in ('true', '1', 'yes', 'on')
+    return bool(value)
+
+
+# Resume documents: PDF / DOC / DOCX only, max 5 MB. Prevents storing/serving
+# arbitrary (e.g. HTML/SVG with scripts) files from /media.
+_ALLOWED_RESUME_EXT = ('.pdf', '.doc', '.docx')
+_ALLOWED_RESUME_CT = (
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/octet-stream',  # some browsers send this for .doc/.docx
+)
+
+
+def _validate_resume_file(f):
+    """Return (ok, error_message) for an uploaded resume document."""
+    if f is None:
+        return True, None
+    name = (getattr(f, 'name', '') or '').lower()
+    if not name.endswith(_ALLOWED_RESUME_EXT):
+        return False, 'Resume file must be a PDF, DOC or DOCX.'
+    ct = (getattr(f, 'content_type', '') or '').lower()
+    if ct and ct not in _ALLOWED_RESUME_CT:
+        return False, 'Invalid file type. Please upload a PDF or Word document.'
+    if getattr(f, 'size', 0) > 5 * 1024 * 1024:
+        return False, 'Resume file must be under 5 MB.'
+    return True, None
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def resume_list_create(request):
@@ -750,12 +865,16 @@ def resume_list_create(request):
             data.append({
                 'id': r.id,
                 'title': r.title,
+                'first_name': r.first_name,
+                'last_name': r.last_name,
                 'father_name': r.father_name,
                 'address': r.address,
+                'country': r.country,
                 'cnic': r.cnic,
                 'current_job': r.current_job,
                 'experience': r.experience,
                 'education': r.education,
+                'resume_file': request.build_absolute_uri(r.resume_file.url) if r.resume_file else None,
                 'is_primary': r.is_primary,
                 'created_at': r.created_at,
                 'updated_at': r.updated_at,
@@ -764,16 +883,31 @@ def resume_list_create(request):
 
     elif request.method == 'POST':
         title = request.data.get('title', '').strip()
+        first_name = request.data.get('first_name', '').strip()
+        last_name = request.data.get('last_name', '').strip()
         father_name = request.data.get('father_name', '').strip()
         address = request.data.get('address', '').strip()
+        country = (request.data.get('country', '') or '').strip() or None
         cnic = request.data.get('cnic', '').strip()
         current_job = request.data.get('current_job', '').strip()
         experience = request.data.get('experience', '').strip()
         education = request.data.get('education', '').strip()
-        is_primary = request.data.get('is_primary', False)
+        is_primary = _parse_bool(request.data.get('is_primary', False))
+        resume_file = request.FILES.get('resume_file')
 
         if not all([title, father_name, address, cnic, experience, education]):
             return Response({'error': 'title, father_name, address, cnic, experience and education are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate national ID against selected country
+        from .countries import validate_national_id
+        ok, msg = validate_national_id(country, cnic)
+        if not ok:
+            return Response({'error': msg, 'cnic': msg}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate the uploaded resume document (type/size)
+        ok, fmsg = _validate_resume_file(resume_file)
+        if not ok:
+            return Response({'error': fmsg, 'resume_file': fmsg}, status=status.HTTP_400_BAD_REQUEST)
 
         # If setting as primary, unset others
         if is_primary:
@@ -786,21 +920,29 @@ def resume_list_create(request):
         resume = Resume.objects.create(
             user=request.user,
             title=title,
+            first_name=first_name,
+            last_name=last_name,
             father_name=father_name,
             address=address,
+            country=country,
             cnic=cnic,
             current_job=current_job,
             experience=experience,
             education=education,
             is_primary=is_primary,
         )
+        if resume_file:
+            resume.resume_file = resume_file
+            resume.save()
 
         log_activity(request.user, 'Resume Created', f'Created resume: {title}', get_client_ip(request))
 
         return Response({
-            'id': resume.id, 'title': resume.title, 'father_name': resume.father_name,
-            'address': resume.address, 'cnic': resume.cnic, 'current_job': resume.current_job,
+            'id': resume.id, 'title': resume.title,
+            'first_name': resume.first_name, 'last_name': resume.last_name, 'father_name': resume.father_name,
+            'address': resume.address, 'country': resume.country, 'cnic': resume.cnic, 'current_job': resume.current_job,
             'experience': resume.experience, 'education': resume.education,
+            'resume_file': request.build_absolute_uri(resume.resume_file.url) if resume.resume_file else None,
             'is_primary': resume.is_primary, 'created_at': resume.created_at,
         }, status=status.HTTP_201_CREATED)
 
@@ -821,29 +963,57 @@ def resume_detail(request, pk):
 
     if request.method == 'GET':
         return Response({
-            'id': resume.id, 'title': resume.title, 'father_name': resume.father_name,
-            'address': resume.address, 'cnic': resume.cnic, 'current_job': resume.current_job,
+            'id': resume.id, 'title': resume.title,
+            'first_name': resume.first_name, 'last_name': resume.last_name, 'father_name': resume.father_name,
+            'address': resume.address, 'country': resume.country, 'cnic': resume.cnic, 'current_job': resume.current_job,
             'experience': resume.experience, 'education': resume.education,
+            'resume_file': request.build_absolute_uri(resume.resume_file.url) if resume.resume_file else None,
             'is_primary': resume.is_primary, 'created_at': resume.created_at,
         })
 
     elif request.method == 'PUT':
         resume.title = request.data.get('title', resume.title)
+        resume.first_name = request.data.get('first_name', resume.first_name)
+        resume.last_name = request.data.get('last_name', resume.last_name)
         resume.father_name = request.data.get('father_name', resume.father_name)
         resume.address = request.data.get('address', resume.address)
-        resume.cnic = request.data.get('cnic', resume.cnic)
+        new_country = request.data.get('country', resume.country)
+        new_country = (new_country or '').strip() or None
+        new_cnic = request.data.get('cnic', resume.cnic)
+
+        # Validate national ID against the (possibly new) country
+        from .countries import validate_national_id
+        ok, msg = validate_national_id(new_country, new_cnic)
+        if not ok:
+            return Response({'error': msg, 'cnic': msg}, status=status.HTTP_400_BAD_REQUEST)
+
+        resume.country = new_country
+        resume.cnic = new_cnic
         resume.current_job = request.data.get('current_job', resume.current_job)
         resume.experience = request.data.get('experience', resume.experience)
         resume.education = request.data.get('education', resume.education)
 
-        is_primary = request.data.get('is_primary', resume.is_primary)
+        # Replace the attached document if a new one was uploaded, or clear it if asked
+        if request.FILES.get('resume_file'):
+            ok, fmsg = _validate_resume_file(request.FILES['resume_file'])
+            if not ok:
+                return Response({'error': fmsg, 'resume_file': fmsg}, status=status.HTTP_400_BAD_REQUEST)
+            resume.resume_file = request.FILES['resume_file']
+        elif _parse_bool(request.data.get('remove_resume_file', False)):
+            resume.resume_file = None
+
+        is_primary = _parse_bool(request.data.get('is_primary', resume.is_primary))
         if is_primary and not resume.is_primary:
             Resume.objects.filter(user=request.user, is_primary=True).update(is_primary=False)
         resume.is_primary = is_primary
         resume.save()
 
         log_activity(request.user, 'Resume Updated', f'Updated resume: {resume.title}', get_client_ip(request))
-        return Response({'message': 'Resume updated', 'id': resume.id, 'title': resume.title, 'is_primary': resume.is_primary})
+        return Response({
+            'message': 'Resume updated', 'id': resume.id, 'title': resume.title,
+            'resume_file': request.build_absolute_uri(resume.resume_file.url) if resume.resume_file else None,
+            'is_primary': resume.is_primary,
+        })
 
     elif request.method == 'DELETE':
         if resume.is_primary and Resume.objects.filter(user=request.user).count() > 1:
@@ -895,3 +1065,71 @@ def upload_profile_picture(request):
     pic_url = request.build_absolute_uri(request.user.profile_picture.url)
     log_activity(request.user, 'Profile Picture Updated', 'Uploaded new profile picture', get_client_ip(request))
     return Response({'message': 'Profile picture updated', 'profile_picture_url': pic_url})
+
+
+# ─── Notifications (all user types) ───────────────────────────────────────────
+
+def _serialize_notification(n):
+    return {
+        'id': n.id,
+        'title': n.title,
+        'message': n.message,
+        'category': n.category,
+        'link': n.link,
+        'is_read': n.is_read,
+        'created_at': n.created_at,
+    }
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def notifications_list(request):
+    """List the current user's notifications (any role). Query: ?unread=true, ?limit=N."""
+    qs = Notification.objects.filter(recipient=request.user)
+    unread_count = qs.filter(is_read=False).count()
+
+    if request.query_params.get('unread') in ('1', 'true', 'yes'):
+        qs = qs.filter(is_read=False)
+
+    try:
+        limit = int(request.query_params.get('limit', 30))
+    except (TypeError, ValueError):
+        limit = 30
+    limit = max(1, min(limit, 100))
+
+    data = [_serialize_notification(n) for n in qs[:limit]]
+    return Response({'results': data, 'unread_count': unread_count})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def notifications_unread_count(request):
+    count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    return Response({'unread_count': count})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def notification_mark_read(request, pk):
+    try:
+        n = Notification.objects.get(pk=pk, recipient=request.user)
+    except Notification.DoesNotExist:
+        return Response({'error': 'Notification not found'}, status=status.HTTP_404_NOT_FOUND)
+    if not n.is_read:
+        n.is_read = True
+        n.save(update_fields=['is_read'])
+    return Response({'message': 'Marked as read', 'id': n.id})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def notifications_mark_all_read(request):
+    updated = Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+    return Response({'message': 'All marked as read', 'updated': updated})
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def notifications_clear(request):
+    deleted, _ = Notification.objects.filter(recipient=request.user).delete()
+    return Response({'message': 'Notifications cleared', 'deleted': deleted})

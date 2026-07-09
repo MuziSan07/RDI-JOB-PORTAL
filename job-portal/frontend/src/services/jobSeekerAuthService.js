@@ -33,13 +33,22 @@ export const jobSeekerAuthService = {
         localStorage.removeItem('user');
     },
 
+    // Only treat the stored session as a job seeker. A logged-in department /
+    // super admin is NOT a job seeker, so on public pages they are treated as a
+    // guest (they never see job-seeker chrome, dashboard links, or "apply").
     getCurrentUser: () => {
-        const user = localStorage.getItem('user');
-        return user ? JSON.parse(user) : null;
+        const raw = localStorage.getItem('user');
+        if (!raw) return null;
+        try {
+            const user = JSON.parse(raw);
+            return user && user.user_type === 'job_seeker' ? user : null;
+        } catch (e) {
+            return null;
+        }
     },
 
     isAuthenticated: () => {
-        return !!localStorage.getItem('token');
+        return !!localStorage.getItem('token') && jobSeekerAuthService.getCurrentUser() !== null;
     },
 
     getProfile: async () => {

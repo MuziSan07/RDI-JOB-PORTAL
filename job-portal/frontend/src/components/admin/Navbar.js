@@ -1,6 +1,7 @@
 import React from 'react';
-import { Bell, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
+import NotificationBell from '../common/NotificationBell';
 
 const Navbar = ({ title, user }) => {
     const { isCompact, isMobile } = useResponsive();
@@ -16,10 +17,7 @@ const Navbar = ({ title, user }) => {
                 <button style={styles.searchBtn}>
                     <Search size={20} />
                 </button>
-                <button style={styles.notificationBtn}>
-                    <Bell size={20} />
-                    <span style={styles.badge}>3</span>
-                </button>
+                <NotificationBell buttonStyle={styles.notificationBtn} iconColor="#a0aec0" iconSize={20} theme="dark" />
                 
                 {/* User Avatar */}
                 {user?.profile_picture ? (

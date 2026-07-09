@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, X, LayoutDashboard, Briefcase, FileText, User, LogOut, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, Menu, X, LayoutDashboard, Briefcase, FileText, User, LogOut, ChevronRight, ChevronDown } from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
 import { jobSeekerAuthService } from '../../services/jobSeekerAuthService';
+import NotificationBell from '../common/NotificationBell';
 
 const RDI_THEME = {
     green: '#0B5D39',
@@ -224,6 +225,14 @@ const UserNavbar = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: isCompact ? 'auto' : 0 }}>
                     {isLoggedIn ? (
                         <>
+                            {!isMobile && (
+                                <NotificationBell
+                                    buttonStyle={{ position: 'relative', width: 40, height: 40, borderRadius: 8, border: `1px solid ${RDI_THEME.line}`, background: RDI_THEME.white, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                    iconColor={RDI_THEME.inkMuted}
+                                    iconSize={19}
+                                    theme="light"
+                                />
+                            )}
 
                             {/* Dropdown Frame setup */}
                             <div ref={menuRef} style={{ position: 'relative' }}>

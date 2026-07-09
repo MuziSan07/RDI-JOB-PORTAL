@@ -10,12 +10,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key-here'  # Keep your existing key
+# Loaded from the environment; the fallback is a strong random key (NOT the old
+# public "django-insecure-*" placeholder that made JWTs forgeable). In production
+# always set DJANGO_SECRET_KEY to a private value.
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'rd3(62wat=@##or3)=w^xgp=6v_o%+g_u3a-3u6whw)4km@x3v'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get(
+    'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1'
+).split(',') if h.strip()]
 
 
 # Application definition
@@ -151,6 +159,12 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    # Rates for scoped throttles (applied only to the login/register views —
+    # not a global default, so normal API traffic is unaffected).
+    'DEFAULT_THROTTLE_RATES': {
+        'login': '10/min',
+        'register': '5/min',
+    },
 }
 
 # JWT Settings
@@ -179,12 +193,12 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only
-# For production, use:
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-# ]
+# Allow-all only in DEBUG (local dev). In production (DEBUG=False) restrict to an
+# explicit allow-list from CORS_ALLOWED_ORIGINS so arbitrary sites can't call the API.
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOWED_ORIGINS = [o.strip() for o in os.environ.get(
+    'CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000'
+).split(',') if o.strip()]
 
 CORS_ALLOW_CREDENTIALS = True
 

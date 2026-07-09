@@ -51,7 +51,8 @@ export const applicantService = {
     // Export applications as CSV or PDF with current filters applied
     exportApplications: (format, search = '', status = '', job = '') => {
         const token = localStorage.getItem('token');
-        const params = new URLSearchParams({ format });
+        // Use 'fmt' — DRF reserves 'format' for content negotiation (would 404).
+        const params = new URLSearchParams({ fmt: format });
         if (search) params.append('search', search);
         if (status) params.append('status', status);
         if (job)    params.append('job', job);
@@ -63,10 +64,11 @@ export const applicantService = {
                 return res.blob();
             })
             .then(blob => {
+                const ext = format === 'excel' ? 'xlsx' : format;
                 const objectUrl = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = objectUrl;
-                link.download = `applicants_export.${format}`;
+                link.download = `applicants_export.${ext}`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

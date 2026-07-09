@@ -15,7 +15,7 @@ from .serializers import (
 )
 from jobs.models import Job
 from employees.models import Employee
-from accounts.views import log_activity, get_client_ip
+from accounts.views import log_activity, get_client_ip, create_notification, notify_super_admins
 
 
 # ==================== JOB SEEKER ENDPOINTS ====================
@@ -72,6 +72,32 @@ def apply_for_job(request, job_id):
 
         ip_address = get_client_ip(request)
         log_activity(request.user, 'Job Application', f'Applied for {job.title} at {job.department.name}', ip_address)
+
+        # ── Notifications ──
+        applicant_name = request.user.get_full_name() or request.user.username
+        # Applicant confirmation
+        create_notification(
+            request.user,
+            'Application submitted',
+            f'You applied for "{job.title}" at {job.department.name}.',
+            category='application',
+            link='/my-applications',
+        )
+        # Department that owns the job
+        create_notification(
+            getattr(job.department, 'user', None),
+            'New applicant',
+            f'{applicant_name} applied for "{job.title}".',
+            category='application',
+            link='/department/applicants',
+        )
+        # Super admins
+        notify_super_admins(
+            'New job application',
+            f'{applicant_name} applied for "{job.title}" at {job.department.name}.',
+            category='application',
+            link='/admin/dashboard',
+        )
 
         result = ApplicationSerializer(application, context={'request': request})
         return Response(result.data, status=status.HTTP_201_CREATED)
@@ -305,7 +331,15 @@ def assign_test(request, pk):
             f'Assigned test to {application.applicant.username} for {application.job.title}',
             ip_address
         )
-        
+
+        create_notification(
+            application.applicant,
+            'Test assigned',
+            f'A test has been assigned for your application to "{application.job.title}". Complete it before the deadline.',
+            category='test',
+            link='/my-applications',
+        )
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -350,7 +384,15 @@ def schedule_interview(request, pk):
             f'Scheduled interview for {application.applicant.username} for {application.job.title}',
             ip_address
         )
-        
+
+        create_notification(
+            application.applicant,
+            'Interview scheduled',
+            f'An interview has been scheduled for your application to "{application.job.title}". Check the details.',
+            category='interview',
+            link='/my-applications',
+        )
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -396,7 +438,20 @@ def update_status(request, pk):
         f'Updated {application.applicant.username} status to {new_status} for {application.job.title}',
         ip_address
     )
-    
+
+    status_label = new_status.replace('_', ' ').title()
+    _cat = 'success' if new_status in ('hired', 'test_passed') else 'warning' if new_status in ('rejected', 'test_failed') else 'application'
+    _msg = f'Your application for "{application.job.title}" is now: {status_label}.'
+    if new_status == 'rejected' and rejection_reason:
+        _msg += f' Reason: {rejection_reason}'
+    create_notification(
+        application.applicant,
+        f'Application update: {status_label}',
+        _msg,
+        category=_cat,
+        link='/my-applications',
+    )
+
     serializer = ApplicationSerializer(application, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -472,7 +527,15 @@ def hire_applicant(request, pk):
         f'Hired {application.applicant.username} as {employee.designation}',
         ip_address
     )
-    
+
+    create_notification(
+        application.applicant,
+        '🎉 You’re hired!',
+        f'Congratulations! You have been hired as {employee.designation} for "{application.job.title}" at {application.job.department.name}.',
+        category='success',
+        link='/my-applications',
+    )
+
     return Response({
         'message': 'Applicant hired successfully',
         'employee_id': employee.id
@@ -510,7 +573,16 @@ def reject_applicant(request, pk):
         f'Rejected {application.applicant.username} for {application.job.title}. Reason: {rejection_reason}',
         ip_address
     )
-    
+
+    create_notification(
+        application.applicant,
+        'Application update',
+        f'Update on your application for "{application.job.title}": unfortunately it was not successful this time.'
+        + (f' Reason: {rejection_reason}' if rejection_reason and rejection_reason != 'No reason provided' else ''),
+        category='warning',
+        link='/my-applications',
+    )
+
     return Response({
         'message': 'Applicant rejected successfully'
     }, status=status.HTTP_200_OK)
@@ -556,12 +628,150 @@ def export_applications(request):
         applications = applications.filter(job_id=job_filter)
 
     applications = applications.order_by('-applied_at')
-    export_format = request.query_params.get('format', 'csv').lower()
+    # NOTE: use 'fmt' (not 'format') — DRF reserves the 'format' query param for
+    # content negotiation and would 404 before this view runs. Fall back to 'format'
+    # only for backward compatibility (harmless when unused).
+    export_format = (request.query_params.get('fmt')
+                     or request.query_params.get('format')
+                     or 'csv').lower()
+
+    dept = request.user.department
+
+    def _pdf_url(r):
+        if r and getattr(r, 'resume_file', None):
+            return request.build_absolute_uri(r.resume_file.url)
+        return ''
+
+    def _row_values(app):
+        """Shared row extraction for CSV/Excel."""
+        u = app.applicant
+        r = app.resume
+        test_score = test_passed = test_completed_at = ''
+        if hasattr(app, 'test_assignment') and hasattr(app.test_assignment, 'result'):
+            res = app.test_assignment.result
+            test_score = f"{res.percentage:.1f}"
+            test_passed = 'Yes' if res.passed else 'No'
+            test_completed_at = res.completed_at.strftime('%Y-%m-%d %H:%M')
+        return {
+            'id': app.id,
+            'name': u.get_full_name() or u.username,
+            'email': u.email,
+            'father': u.father_name or (r.father_name if r else ''),
+            'cnic': u.cnic or (r.cnic if r else ''),
+            'address': u.address or (r.address if r else ''),
+            'current_job': u.current_job or (r.current_job if r else ''),
+            'job': app.job.title,
+            'status': app.status.replace('_', ' ').title(),
+            'applied': app.applied_at.strftime('%Y-%m-%d'),
+            'resume_title': r.title if r else '',
+            'education': r.education if r else (u.education or ''),
+            'experience': r.experience if r else (u.experience or ''),
+            'test_score': test_score,
+            'test_passed': test_passed,
+            'test_completed': test_completed_at,
+            'pdf': _pdf_url(r),
+        }
+
+    # ── Excel (.xlsx) Export — wide, readable, styled ───────────────────────────
+    if export_format in ('excel', 'xlsx'):
+        try:
+            from openpyxl import Workbook
+            from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+            from openpyxl.utils import get_column_letter
+        except ImportError:
+            return Response({'error': 'Excel export requires openpyxl. Install with: pip install openpyxl'}, status=500)
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = 'Applicants'
+
+        # (header label, column width, wrap-text?)
+        columns = [
+            ('#', 6, False), ('Applicant Name', 24, False), ('Email', 30, False),
+            ('Father Name', 20, False), ('CNIC', 18, False), ('Address', 34, True),
+            ('Current Job', 20, False), ('Job Title', 26, False), ('Status', 18, False),
+            ('Applied On', 14, False), ('Resume Title', 22, False), ('Education', 40, True),
+            ('Experience', 46, True), ('Test Score (%)', 13, False), ('Test Passed', 12, False),
+            ('Test Completed At', 20, False), ('PDF Resume', 26, False),
+        ]
+
+        header_fill = PatternFill('solid', fgColor='4F46E5')
+        header_font = Font(bold=True, color='FFFFFF', size=11)
+        title_font = Font(bold=True, color='0F172A', size=15)
+        sub_font = Font(color='64748B', size=10)
+        thin = Side(style='thin', color='E2E8F0')
+        border = Border(left=thin, right=thin, top=thin, bottom=thin)
+        center = Alignment(horizontal='center', vertical='center')
+
+        # Title band (rows 1-2)
+        last_col = get_column_letter(len(columns))
+        ws.merge_cells(f'A1:{last_col}1')
+        ws['A1'] = f'{dept.name} — Applicants Export'
+        ws['A1'].font = title_font
+        ws.merge_cells(f'A2:{last_col}2')
+        import datetime as _dt
+        ws['A2'] = f'{applications.count()} applicant(s)  ·  Generated {_dt.datetime.now().strftime("%d %b %Y, %H:%M")}'
+        ws['A2'].font = sub_font
+        ws.row_dimensions[1].height = 24
+
+        # Header row (row 4)
+        HEADER_ROW = 4
+        for c, (label, width, _wrap) in enumerate(columns, start=1):
+            cell = ws.cell(row=HEADER_ROW, column=c, value=label)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            cell.border = border
+            ws.column_dimensions[get_column_letter(c)].width = width
+        ws.row_dimensions[HEADER_ROW].height = 22
+
+        # Data rows
+        keys = ['id', 'name', 'email', 'father', 'cnic', 'address', 'current_job', 'job',
+                'status', 'applied', 'resume_title', 'education', 'experience',
+                'test_score', 'test_passed', 'test_completed', 'pdf']
+        rownum = HEADER_ROW + 1
+        for app in applications:
+            v = _row_values(app)
+            for c, (key, (label, width, wrap)) in enumerate(zip(keys, columns), start=1):
+                cell = ws.cell(row=rownum, column=c)
+                if key == 'pdf' and v['pdf']:
+                    cell.value = 'Open PDF'
+                    cell.hyperlink = v['pdf']
+                    cell.font = Font(color='2563EB', underline='single')
+                else:
+                    cell.value = v[key]
+                cell.alignment = Alignment(
+                    vertical='top',
+                    wrap_text=wrap,
+                    horizontal='center' if key in ('id', 'test_score', 'test_passed') else 'left',
+                )
+                cell.border = border
+            rownum += 1
+
+        # Freeze header + rows, add filter, subtle zebra handled by borders
+        ws.freeze_panes = f'A{HEADER_ROW + 1}'
+        ws.auto_filter.ref = f'A{HEADER_ROW}:{last_col}{max(rownum - 1, HEADER_ROW)}'
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = 'attachment; filename="applicants_export.xlsx"'
+        return response
 
     # ── CSV Export ────────────────────────────────────────────────────────────
     if export_format == 'csv':
-        response = HttpResponse(content_type='text/csv')
+        # UTF-8 BOM lets Excel auto-detect encoding + comma delimiter (fixes garbled/merged columns)
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="applicants_export.csv"'
+        response.write('﻿')
+
+        def clean(val):
+            # Collapse newlines/tabs so multi-line resume text stays inside one cell
+            return ' '.join(str(val or '').split())
 
         writer = csv.writer(response)
         writer.writerow([
@@ -569,40 +779,17 @@ def export_applications(request):
             'Current Job', 'Job Title', 'Status', 'Applied On',
             'Resume Title', 'Education', 'Experience',
             'Test Score (%)', 'Test Passed', 'Test Completed At',
+            'PDF Resume',
         ])
 
         for app in applications:
-            u = app.applicant
-            r = app.resume
-            test_score = ''
-            test_passed = ''
-            test_completed_at = ''
-
-            if hasattr(app, 'test_assignment') and hasattr(app.test_assignment, 'result'):
-                res = app.test_assignment.result
-                test_score = f"{res.percentage:.1f}"
-                test_passed = 'Yes' if res.passed else 'No'
-                test_completed_at = res.completed_at.strftime('%Y-%m-%d %H:%M')
-
-            full_name = u.get_full_name() or u.username
-
+            v = _row_values(app)
             writer.writerow([
-                app.id,
-                full_name,
-                u.email,
-                u.father_name or (r.father_name if r else ''),
-                u.cnic or (r.cnic if r else ''),
-                u.address or (r.address if r else ''),
-                u.current_job or (r.current_job if r else ''),
-                app.job.title,
-                app.status.replace('_', ' ').title(),
-                app.applied_at.strftime('%Y-%m-%d'),
-                r.title if r else '',
-                r.education if r else (u.education or ''),
-                r.experience if r else (u.experience or ''),
-                test_score,
-                test_passed,
-                test_completed_at,
+                v['id'], clean(v['name']), clean(v['email']), clean(v['father']),
+                clean(v['cnic']), clean(v['address']), clean(v['current_job']),
+                clean(v['job']), v['status'], v['applied'], clean(v['resume_title']),
+                clean(v['education']), clean(v['experience']),
+                v['test_score'], v['test_passed'], v['test_completed'], v['pdf'],
             ])
 
         return response
@@ -631,8 +818,8 @@ def export_applications(request):
         dept = request.user.department
 
         # Custom styles
-        title_style = ParagraphStyle('title', fontSize=18, fontName='Helvetica-Bold', textColor=colors.HexColor('#1e293b'), spaceAfter=4)
-        sub_style   = ParagraphStyle('sub',   fontSize=10, fontName='Helvetica',     textColor=colors.HexColor('#64748b'), spaceAfter=2)
+        title_style = ParagraphStyle('title', fontSize=18, leading=24, fontName='Helvetica-Bold', textColor=colors.HexColor('#1e293b'), spaceAfter=6)
+        sub_style   = ParagraphStyle('sub',   fontSize=10, leading=14, fontName='Helvetica',     textColor=colors.HexColor('#64748b'), spaceAfter=2)
         cell_style  = ParagraphStyle('cell',  fontSize=8,  fontName='Helvetica',     textColor=colors.HexColor('#1e293b'), leading=11)
         head_style  = ParagraphStyle('head',  fontSize=8,  fontName='Helvetica-Bold',textColor=colors.white, leading=11)
 
@@ -704,9 +891,16 @@ def export_applications(request):
 
             st_color = STATUS_COLORS.get(app.status, '#64748b')
 
+            # Link the applicant name to their uploaded PDF resume when available
+            if r and getattr(r, 'resume_file', None):
+                pdf_url = request.build_absolute_uri(r.resume_file.url)
+                name_cell = f'<a href="{pdf_url}" color="#4f46e5"><b>{full_name}</b></a> <font color="#4f46e5" size="7">[PDF]</font>'
+            else:
+                name_cell = f'<b>{full_name}</b>'
+
             rows.append([
                 Paragraph(str(app.id), cell_style),
-                Paragraph(f'<b>{full_name}</b>', cell_style),
+                Paragraph(name_cell, cell_style),
                 Paragraph(u.email, cell_style),
                 Paragraph(f'{father}<br/><font color="#64748b" size="7">{cnic}</font>', cell_style),
                 Paragraph(app.job.title, cell_style),
@@ -758,4 +952,4 @@ def export_applications(request):
         response['Content-Disposition'] = 'attachment; filename="applicants_export.pdf"'
         return response
 
-    return Response({'error': 'Invalid format. Use ?format=csv or ?format=pdf'}, status=400)
+    return Response({'error': 'Invalid format. Use ?fmt=csv or ?fmt=pdf'}, status=400)

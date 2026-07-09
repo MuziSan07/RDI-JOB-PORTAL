@@ -6,7 +6,7 @@ from django.db.models import Q, Count
 
 from .models import Job
 from .serializers import JobSerializer, JobDetailSerializer, JobCreateSerializer
-from accounts.views import log_activity, get_client_ip
+from accounts.views import log_activity, get_client_ip, notify_super_admins
 
 
 @api_view(['GET', 'POST'])
@@ -97,12 +97,19 @@ def job_list_create(request):
             # Log activity
             ip_address = get_client_ip(request)
             log_activity(
-                request.user, 
-                'Job Created', 
+                request.user,
+                'Job Created',
                 f'Created job: {job.title}',
                 ip_address
             )
-            
+
+            notify_super_admins(
+                'New job posted',
+                f'{request.user.department.name} posted a new job: "{job.title}".',
+                category='system',
+                link='/admin/jobs',
+            )
+
             response_serializer = JobSerializer(
                 job, 
                 context={'request': request}

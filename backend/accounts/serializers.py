@@ -69,9 +69,9 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'user_type', 
-                  'profile_picture', 'profile_picture_url', 'father_name', 'address', 
-                  'cnic', 'current_job', 'experience', 'education', 'created_at', 'updated_at']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'user_type',
+                  'profile_picture', 'profile_picture_url', 'father_name', 'address',
+                  'country', 'cnic', 'current_job', 'experience', 'education', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
     
     def get_profile_picture_url(self, obj):
@@ -101,23 +101,31 @@ class JobSeekerRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'username', 'email', 'password', 'confirm_password',
-            'first_name', 'last_name', 'father_name', 'cnic',
+            'first_name', 'last_name', 'father_name', 'country', 'cnic',
             'address', 'current_job', 'experience', 'education',
             'profile_picture'
         ]
-    
+
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
             raise serializers.ValidationError({'error': 'Passwords do not match'})
-        
+
         # Check if email already exists
         if User.objects.filter(email=attrs['email']).exists():
             raise serializers.ValidationError({'error': 'Email already registered'})
-        
+
         # Check if username already exists
         if User.objects.filter(username=attrs['username']).exists():
             raise serializers.ValidationError({'error': 'Username already taken'})
-        
+
+        # Validate national ID against the selected country's format
+        from .countries import validate_national_id
+        cnic = (attrs.get('cnic') or '').strip()
+        if cnic:
+            ok, msg = validate_national_id(attrs.get('country'), cnic)
+            if not ok:
+                raise serializers.ValidationError({'cnic': msg})
+
         return attrs
     
     def create(self, validated_data):
@@ -169,12 +177,24 @@ class JobSeekerProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
-            'father_name', 'cnic', 'address', 'current_job',
+            'father_name', 'country', 'cnic', 'address', 'current_job',
             'experience', 'education', 'profile_picture', 'profile_picture_url',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'email', 'username', 'created_at', 'updated_at']
-    
+
+    def validate(self, attrs):
+        # Validate national ID against the selected country when either is being set
+        from .countries import validate_national_id
+        cnic = attrs.get('cnic', getattr(self.instance, 'cnic', None))
+        country = attrs.get('country', getattr(self.instance, 'country', None))
+        cnic = (cnic or '').strip()
+        if cnic:
+            ok, msg = validate_national_id(country, cnic)
+            if not ok:
+                raise serializers.ValidationError({'cnic': msg})
+        return attrs
+
     def get_profile_picture_url(self, obj):
         if obj.profile_picture:
             request = self.context.get('request')

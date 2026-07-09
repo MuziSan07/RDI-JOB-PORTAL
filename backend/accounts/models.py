@@ -12,7 +12,8 @@ class User(AbstractUser):
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     father_name = models.CharField(max_length=200, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
-    cnic = models.CharField(max_length=15, null=True, blank=True, unique=True)
+    country = models.CharField(max_length=2, null=True, blank=True)  # ISO 3166-1 alpha-2 code
+    cnic = models.CharField(max_length=32, null=True, blank=True, unique=True)  # national ID (format varies by country)
     current_job = models.CharField(max_length=200, null=True, blank=True)
     experience = models.TextField(null=True, blank=True)
     education = models.TextField(null=True, blank=True)
@@ -25,16 +26,21 @@ class User(AbstractUser):
 class Resume(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resumes')
     title = models.CharField(max_length=200)
+    first_name = models.CharField(max_length=150, blank=True, default='')
+    last_name = models.CharField(max_length=150, blank=True, default='')
     father_name = models.CharField(max_length=200)
     address = models.TextField()
-    cnic = models.CharField(max_length=15)
+    country = models.CharField(max_length=2, null=True, blank=True)  # ISO 3166-1 alpha-2 code
+    cnic = models.CharField(max_length=32)  # national ID (format varies by country)
     current_job = models.CharField(max_length=200, null=True, blank=True)
     experience = models.TextField()
     education = models.TextField()
+    # Optional uploaded resume document (PDF/DOC) attached alongside the structured resume
+    resume_file = models.FileField(upload_to='resumes/', null=True, blank=True)
     is_primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.user.username} - {self.title}"
     
@@ -50,6 +56,32 @@ class ActivityLog(models.Model):
     
     def __str__(self):
         return f"{self.user.username if self.user else 'Unknown'} - {self.action} - {self.timestamp}"
-    
+
     class Meta:
         ordering = ['-timestamp']
+
+
+class Notification(models.Model):
+    """In-app notification delivered to any user (job seeker, department, super admin)."""
+    CATEGORY_CHOICES = [
+        ('info', 'Info'),
+        ('success', 'Success'),
+        ('warning', 'Warning'),
+        ('application', 'Application'),
+        ('test', 'Test'),
+        ('interview', 'Interview'),
+        ('system', 'System'),
+    ]
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField(blank=True, default='')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='info')
+    link = models.CharField(max_length=255, null=True, blank=True)  # optional frontend route
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.recipient.username} - {self.title}"

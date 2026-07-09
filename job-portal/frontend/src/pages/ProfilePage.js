@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import {
     User, Camera, Save, Plus, Trash2, Edit3, Star,
     Briefcase, FileText, CheckCircle, AlertCircle, ChevronRight,
-    X, Eye, EyeOff, Award, MapPin, Phone, Mail, BookOpen, Clock
+    X, Eye, EyeOff, Award, MapPin, Phone, Mail, BookOpen, Clock,
+    Upload, Download, Globe
 } from 'lucide-react';
 import { COLORS } from '../constants/colors';
+import { COUNTRIES, idLabelFor, placeholderFor, validateNationalId, getCountry } from '../constants/countries';
 import { profileService } from '../services/profileService';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { useResponsive } from '../hooks/useResponsive';
@@ -30,7 +32,7 @@ const Toast = ({ msg, type, onClose }) => (
     </div>
 );
 
-const emptyResume = { title: '', father_name: '', cnic: '', address: '', current_job: '', experience: '', education: '' };
+const emptyResume = { title: '', first_name: '', last_name: '', father_name: '', country: '', cnic: '', address: '', current_job: '', experience: '', education: '' };
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
@@ -49,11 +51,12 @@ const ProfilePage = () => {
     const [toast, setToast] = useState(null);
     const [editingResume, setEditingResume] = useState(null); // null | resume object | 'new'
     const [resumeForm, setResumeForm] = useState(emptyResume);
+    const [resumeFile, setResumeFile] = useState(null); // uploaded PDF (File) to attach
     const [previewPic, setPreviewPic] = useState(null);
 
     // Profile form state
     const [profileForm, setProfileForm] = useState({
-        first_name: '', last_name: '', father_name: '', cnic: '',
+        first_name: '', last_name: '', father_name: '', country: '', cnic: '',
         address: '', current_job: '', experience: '', education: '',
     });
 
@@ -77,6 +80,7 @@ const ProfilePage = () => {
                 first_name: profileData.first_name || '',
                 last_name: profileData.last_name || '',
                 father_name: profileData.father_name || '',
+                country: profileData.country || '',
                 cnic: profileData.cnic || '',
                 address: profileData.address || '',
                 current_job: profileData.current_job || '',
@@ -121,6 +125,11 @@ const ProfilePage = () => {
     // ── Profile Save ──────────────────────────────────────────────────────────
 
     const handleProfileSave = async () => {
+        if (profileForm.cnic) {
+            if (!profileForm.country) { showToast('Please select your country first', 'error'); return; }
+            const check = validateNationalId(profileForm.country, profileForm.cnic);
+            if (!check.valid) { showToast(check.message, 'error'); return; }
+        }
         setSaving(true);
         try {
             await profileService.updateProfile(profileForm);
@@ -138,16 +147,31 @@ const ProfilePage = () => {
     // ── Resume CRUD ───────────────────────────────────────────────────────────
 
     const openNewResume = () => {
-        setResumeForm({ ...emptyResume });
+        // Auto-fill details from the profile to save re-typing (all editable afterwards)
+        setResumeForm({
+            ...emptyResume,
+            first_name: profileForm.first_name || '',
+            last_name: profileForm.last_name || '',
+            father_name: profileForm.father_name || '',
+            country: profileForm.country || '',
+            cnic: profileForm.cnic || '',
+            address: profileForm.address || '',
+            current_job: profileForm.current_job || '',
+            experience: profileForm.experience || '',
+            education: profileForm.education || '',
+        });
+        setResumeFile(null);
         setEditingResume('new');
     };
 
     const openEditResume = (r) => {
         setResumeForm({
-            title: r.title, father_name: r.father_name, cnic: r.cnic,
+            title: r.title, first_name: r.first_name || '', last_name: r.last_name || '',
+            father_name: r.father_name, country: r.country || '', cnic: r.cnic,
             address: r.address, current_job: r.current_job || '',
             experience: r.experience, education: r.education,
         });
+        setResumeFile(null);
         setEditingResume(r);
     };
 
@@ -157,18 +181,29 @@ const ProfilePage = () => {
             showToast('Please fill all required fields', 'error');
             return;
         }
+        if (!resumeForm.country) { showToast('Please select a country', 'error'); return; }
+        const idCheck = validateNationalId(resumeForm.country, resumeForm.cnic);
+        if (!idCheck.valid) { showToast(idCheck.message, 'error'); return; }
+        if (resumeFile && resumeFile.size > 5 * 1024 * 1024) {
+            showToast('PDF must be under 5 MB', 'error');
+            return;
+        }
+        const payload = { ...resumeForm, ...(resumeFile ? { resume_file: resumeFile } : {}) };
         setSaving(true);
         try {
             if (editingResume === 'new') {
-                const created = await profileService.createResume(resumeForm);
+                const created = await profileService.createResume(payload);
                 setResumes(prev => [created, ...prev]);
                 showToast('Resume created!');
             } else {
-                await profileService.updateResume(editingResume.id, resumeForm);
-                setResumes(prev => prev.map(r => r.id === editingResume.id ? { ...r, ...resumeForm } : r));
+                const updated = await profileService.updateResume(editingResume.id, payload);
+                setResumes(prev => prev.map(r => r.id === editingResume.id
+                    ? { ...r, ...resumeForm, resume_file: updated?.resume_file ?? r.resume_file }
+                    : r));
                 showToast('Resume updated!');
             }
             setEditingResume(null);
+            setResumeFile(null);
         } catch (err) {
             showToast(err.response?.data?.error || 'Failed to save resume', 'error');
         } finally {
@@ -352,8 +387,23 @@ const ProfilePage = () => {
                                 <Field label="Father's Name *" icon={<User size={14} />}>
                                     <input style={s.input} value={profileForm.father_name} onChange={e => setProfileForm(p => ({ ...p, father_name: e.target.value }))} placeholder="Father's full name" />
                                 </Field>
-                                <Field label="CNIC *" icon={<FileText size={14} />}>
-                                    <input style={s.input} value={profileForm.cnic} onChange={e => setProfileForm(p => ({ ...p, cnic: e.target.value }))} placeholder="12345-1234567-1" />
+                                <Field label="Country *" icon={<Globe size={14} />}>
+                                    <select style={s.input} value={profileForm.country} onChange={e => setProfileForm(p => ({ ...p, country: e.target.value, cnic: '' }))}>
+                                        <option value="">Select your country…</option>
+                                        {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                                    </select>
+                                </Field>
+                                <Field label={`${idLabelFor(profileForm.country)} *`} icon={<FileText size={14} />}>
+                                    <input
+                                        style={{ ...s.input, ...(profileForm.cnic && !validateNationalId(profileForm.country, profileForm.cnic).valid ? { borderColor: '#EF4444' } : {}) }}
+                                        value={profileForm.cnic}
+                                        onChange={e => setProfileForm(p => ({ ...p, cnic: e.target.value }))}
+                                        placeholder={placeholderFor(profileForm.country)}
+                                        disabled={!profileForm.country}
+                                    />
+                                    {profileForm.cnic && !validateNationalId(profileForm.country, profileForm.cnic).valid && (
+                                        <span style={s.fieldError}>{validateNationalId(profileForm.country, profileForm.cnic).message}</span>
+                                    )}
                                 </Field>
                                 <Field label="Current Job Title" icon={<Briefcase size={14} />}>
                                     <input style={s.input} value={profileForm.current_job} onChange={e => setProfileForm(p => ({ ...p, current_job: e.target.value }))} placeholder="e.g. Software Engineer" />
@@ -428,11 +478,32 @@ const ProfilePage = () => {
                                         <Field label="Resume Title *" icon={<FileText size={14} />} full>
                                             <input style={s.input} value={resumeForm.title} onChange={e => setResumeForm(p => ({ ...p, title: e.target.value }))} placeholder='e.g. "Senior Dev Resume" or "Management Application"' />
                                         </Field>
+                                        <Field label="First Name" icon={<User size={14} />}>
+                                            <input style={s.input} value={resumeForm.first_name} onChange={e => setResumeForm(p => ({ ...p, first_name: e.target.value }))} placeholder="First name" />
+                                        </Field>
+                                        <Field label="Last Name" icon={<User size={14} />}>
+                                            <input style={s.input} value={resumeForm.last_name} onChange={e => setResumeForm(p => ({ ...p, last_name: e.target.value }))} placeholder="Last name" />
+                                        </Field>
                                         <Field label="Father's Name *" icon={<User size={14} />}>
                                             <input style={s.input} value={resumeForm.father_name} onChange={e => setResumeForm(p => ({ ...p, father_name: e.target.value }))} placeholder="Father's full name" />
                                         </Field>
-                                        <Field label="CNIC *" icon={<FileText size={14} />}>
-                                            <input style={s.input} value={resumeForm.cnic} onChange={e => setResumeForm(p => ({ ...p, cnic: e.target.value }))} placeholder="12345-1234567-1" />
+                                        <Field label="Country *" icon={<Globe size={14} />}>
+                                            <select style={s.input} value={resumeForm.country} onChange={e => setResumeForm(p => ({ ...p, country: e.target.value, cnic: '' }))}>
+                                                <option value="">Select country…</option>
+                                                {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                                            </select>
+                                        </Field>
+                                        <Field label={`${idLabelFor(resumeForm.country)} *`} icon={<FileText size={14} />}>
+                                            <input
+                                                style={{ ...s.input, ...(resumeForm.cnic && !validateNationalId(resumeForm.country, resumeForm.cnic).valid ? { borderColor: '#EF4444' } : {}) }}
+                                                value={resumeForm.cnic}
+                                                onChange={e => setResumeForm(p => ({ ...p, cnic: e.target.value }))}
+                                                placeholder={placeholderFor(resumeForm.country)}
+                                                disabled={!resumeForm.country}
+                                            />
+                                            {resumeForm.cnic && !validateNationalId(resumeForm.country, resumeForm.cnic).valid && (
+                                                <span style={s.fieldError}>{validateNationalId(resumeForm.country, resumeForm.cnic).message}</span>
+                                            )}
                                         </Field>
                                         <Field label="Current Job Title" icon={<Briefcase size={14} />}>
                                             <input style={s.input} value={resumeForm.current_job} onChange={e => setResumeForm(p => ({ ...p, current_job: e.target.value }))} placeholder="e.g. Software Engineer" />
@@ -446,6 +517,37 @@ const ProfilePage = () => {
                                     </Field>
                                     <Field label="Experience *" icon={<Clock size={14} />} full>
                                         <textarea style={s.textarea} rows={5} value={resumeForm.experience} onChange={e => setResumeForm(p => ({ ...p, experience: e.target.value }))} placeholder="Work experience, skills, achievements..." />
+                                    </Field>
+
+                                    {/* Optional PDF/DOC upload — attached alongside the structured resume */}
+                                    <Field label="Attach Resume File (PDF/DOC — optional)" icon={<Upload size={14} />} full>
+                                        <label style={s.uploadBox}>
+                                            <input
+                                                type="file"
+                                                accept=".pdf,.doc,.docx,application/pdf"
+                                                style={{ display: 'none' }}
+                                                onChange={e => setResumeFile(e.target.files?.[0] || null)}
+                                            />
+                                            <Upload size={18} color={COLORS.primary} />
+                                            <span style={s.uploadBoxText}>
+                                                {resumeFile
+                                                    ? resumeFile.name
+                                                    : 'Click to upload a PDF or DOC (max 5 MB)'}
+                                            </span>
+                                        </label>
+                                        {/* existing / newly-selected file indicators */}
+                                        {resumeFile ? (
+                                            <div style={s.fileHint}>
+                                                <CheckCircle size={13} color={COLORS.secondary} /> New file selected — save to upload.
+                                                <button type="button" onClick={() => setResumeFile(null)} style={s.fileRemoveBtn}>Remove</button>
+                                            </div>
+                                        ) : editingResume?.resume_file ? (
+                                            <div style={s.fileHint}>
+                                                <FileText size={13} color={COLORS.primary} />
+                                                <a href={editingResume.resume_file} target="_blank" rel="noopener noreferrer" style={s.fileLink}>View current file</a>
+                                                <span style={{ color: '#94A3B8' }}>· upload a new one to replace it</span>
+                                            </div>
+                                        ) : null}
                                     </Field>
 
                                     <div style={s.resumeFormActions}>
@@ -498,6 +600,11 @@ const ResumeCard = ({ resume: r, isMobile, onEdit, onDelete, onSetPrimary }) => 
                     </div>
                 </div>
                 <div style={s.resumeCardActions}>
+                    {r.resume_file && (
+                        <a href={r.resume_file} target="_blank" rel="noopener noreferrer" style={{ ...s.rcBtn, color: COLORS.secondary, textDecoration: 'none' }} title="View attached PDF/DOC">
+                            <Download size={15} />
+                        </a>
+                    )}
                     <button onClick={() => setExpanded(v => !v)} style={s.rcBtn} title="Preview">
                         {expanded ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
@@ -519,8 +626,10 @@ const ResumeCard = ({ resume: r, isMobile, onEdit, onDelete, onSetPrimary }) => 
             {expanded && (
                 <div style={s.resumePreview}>
                     <div style={{ ...s.previewGrid, ...(isMobile ? { gridTemplateColumns: '1fr' } : {}) }}>
+                        <PreviewRow label="Name" value={[r.first_name, r.last_name].filter(Boolean).join(' ') || '—'} />
                         <PreviewRow label="Father's Name" value={r.father_name} />
-                        <PreviewRow label="CNIC" value={r.cnic} />
+                        <PreviewRow label="Country" value={getCountry(r.country)?.name || r.country || '—'} />
+                        <PreviewRow label={idLabelFor(r.country)} value={r.cnic} />
                         <PreviewRow label="Address" value={r.address} />
                         {r.current_job && <PreviewRow label="Current Job" value={r.current_job} />}
                     </div>
@@ -603,7 +712,13 @@ const s = {
     formGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px', marginBottom: 14 },
     fieldLabel: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 6 },
     input: { width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, color: '#0F172A', outline: 'none', background: '#FAFAFA', boxSizing: 'border-box' },
+    fieldError: { display: 'block', marginTop: 5, fontSize: 12, color: '#DC2626', fontWeight: 500 },
     textarea: { width: '100%', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: 8, fontSize: 14, color: '#0F172A', outline: 'none', background: '#FAFAFA', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' },
+    uploadBox: { display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', border: '1.5px dashed #CBD5E1', borderRadius: 10, background: '#F8FAFC', cursor: 'pointer', boxSizing: 'border-box' },
+    uploadBoxText: { fontSize: 13.5, color: '#475569', fontWeight: 500, wordBreak: 'break-all' },
+    fileHint: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 8, fontSize: 12.5, color: '#475569' },
+    fileLink: { color: COLORS.primary, fontWeight: 600, textDecoration: 'none' },
+    fileRemoveBtn: { background: 'none', border: 'none', color: '#EF4444', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', padding: 0, marginLeft: 4 },
     hintBox: { display: 'flex', alignItems: 'flex-start', gap: 8, background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#1E40AF' },
 
     resumeHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
