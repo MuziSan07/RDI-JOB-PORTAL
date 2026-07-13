@@ -10,6 +10,7 @@ import { jobsService } from '../services/jobsService';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
+import { JobListSkeleton } from '../components/common/Skeleton';
 
 injectBrandStyles();
 
@@ -305,10 +306,7 @@ const JobsBrowse = () => {
                     </div>
 
                     {loading ? (
-                        <div style={s.loader}>
-                            <div style={s.spinner} />
-                            <p style={{ color: BRAND.muted, marginTop: 12, fontSize: 14 }}>Loading jobs...</p>
-                        </div>
+                        <JobListSkeleton count={5} />
                     ) : jobs.length === 0 ? (
                         <div style={s.emptyState}>
                             <Briefcase size={52} color={BRAND.line} strokeWidth={1.5} />
@@ -319,7 +317,7 @@ const JobsBrowse = () => {
                     ) : (
                         <>
                             {jobs.map(job => (
-                                <JobCard key={job.id} job={job} onClick={() => navigate(`/jobs/${job.id}`)} myApplications={myApplications} isMobile={isMobile} />
+                                <JobCard key={job.id} job={job} onClick={() => navigate(`/jobs/${job.slug || job.id}`)} myApplications={myApplications} isMobile={isMobile} />
                             ))}
                             {pagination.total_pages > 1 && (
                                 <div style={s.pagination}>

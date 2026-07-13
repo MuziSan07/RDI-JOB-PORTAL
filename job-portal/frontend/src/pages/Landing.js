@@ -404,7 +404,7 @@ const JobRow = ({ job, isLoggedIn, navigate, isMobile }) => {
         <div
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
-            onClick={() => navigate(`/jobs/${job.id}`)}
+            onClick={() => navigate(`/jobs/${job.slug || job.id}`)}
             style={{
                 display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center',
                 justifyContent: 'space-between', gap: isMobile ? 10 : 24,
@@ -430,7 +430,7 @@ const JobRow = ({ job, isLoggedIn, navigate, isMobile }) => {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0, width: isMobile ? '100%' : 'auto', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
                 <button
-                    onClick={(e) => { e.stopPropagation(); navigate(isLoggedIn ? `/jobs/${job.id}` : '/register'); }}
+                    onClick={(e) => { e.stopPropagation(); navigate(isLoggedIn ? `/jobs/${job.slug || job.id}` : '/register'); }}
                     disabled={isLoggedIn && left === 0}
                     style={{
                         ...btn.text,

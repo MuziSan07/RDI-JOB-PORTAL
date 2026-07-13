@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, LayoutDashboard, Briefcase, FileText, User, LogOut, ChevronRight, ChevronDown } from 'lucide-react';
+import { Search, Menu, X, LayoutDashboard, Briefcase, FileText, User, LogOut, ChevronRight, ChevronDown, Bookmark } from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
 import { jobSeekerAuthService } from '../../services/jobSeekerAuthService';
 import NotificationBell from '../common/NotificationBell';
@@ -149,6 +149,7 @@ const UserNavbar = () => {
             { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
             { label: 'Find Jobs', path: '/jobs', icon: Briefcase },
             { label: 'My Applications', path: '/my-applications', icon: FileText },
+            { label: 'Saved Jobs', path: '/saved-jobs', icon: Bookmark },
           ]
         : [
             { label: 'Find Jobs', path: '/jobs', icon: Briefcase },
@@ -258,6 +259,7 @@ const UserNavbar = () => {
                                             { label: 'My Profile', icon: User, path: '/profile' },
                                             { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
                                             { label: 'My Applications', icon: FileText, path: '/my-applications' },
+                                            { label: 'Saved Jobs', icon: Bookmark, path: '/saved-jobs' },
                                         ].map((m) => (
                                             <button key={m.path} onClick={() => go(m.path)} className="rdi-menu-item" style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 16px', cursor: 'pointer', fontSize: 13.5, fontWeight: 600, color: RDI_THEME.ink, textAlign: 'left', transition: 'all 0.15s ease' }}>
                                                 <m.icon size={16} color={RDI_THEME.inkMuted} /> {m.label}

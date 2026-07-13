@@ -8,6 +8,6 @@ urlpatterns = [
     
     # Public endpoints (NEW - ADD THESE)
     path('public/', views.public_job_list, name='public-job-list'),
-    path('public/<int:pk>/', views.public_job_detail, name='public-job-detail'),
+    path('public/<str:identifier>/', views.public_job_detail, name='public-job-detail'),
     path('statistics/', views.job_statistics, name='job-statistics'),
 ]

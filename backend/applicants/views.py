@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
 from django.utils import timezone
 
-from .models import Application, TestAssignment, TestResult, TestAnswer, Interview
+from .models import Application, TestAssignment, TestResult, TestAnswer, Interview, SavedJob
 from .serializers import (
     ApplicationSerializer, 
     ApplicationDetailSerializer,
@@ -201,6 +201,55 @@ def withdraw_application(request, pk):
         {'message': 'Application withdrawn successfully'},
         status=status.HTTP_200_OK
     )
+
+
+# ==================== SAVED JOBS (BOOKMARKS) ====================
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def saved_jobs_list(request):
+    """
+    GET: List the current job seeker's saved (bookmarked) jobs.
+    """
+    if request.user.user_type != 'job_seeker':
+        return Response(
+            {'error': 'Only job seekers can access saved jobs'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    from jobs.serializers import JobSerializer
+    saved = SavedJob.objects.filter(user=request.user).select_related('job', 'job__department')
+    jobs = [s.job for s in saved]
+    serializer = JobSerializer(jobs, many=True, context={'request': request})
+    return Response({'results': serializer.data}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_saved_job(request, job_id):
+    """
+    POST: Toggle a saved job for the current job seeker.
+    Creates the bookmark if missing (returns {'saved': True}), or removes it
+    if present (returns {'saved': False}). 404 if the job doesn't exist.
+    """
+    if request.user.user_type != 'job_seeker':
+        return Response(
+            {'error': 'Only job seekers can save jobs'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    try:
+        job = Job.objects.get(pk=job_id)
+    except Job.DoesNotExist:
+        return Response({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    existing = SavedJob.objects.filter(user=request.user, job=job).first()
+    if existing:
+        existing.delete()
+        return Response({'saved': False}, status=status.HTTP_200_OK)
+
+    SavedJob.objects.create(user=request.user, job=job)
+    return Response({'saved': True}, status=status.HTTP_201_CREATED)
 
 
 # ==================== DEPARTMENT ENDPOINTS ====================

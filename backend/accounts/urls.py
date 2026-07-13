@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
+from . import alerts_views
 
 urlpatterns = [
     # Admin endpoints
@@ -31,6 +32,10 @@ urlpatterns = [
     path('notifications/mark-all-read/', views.notifications_mark_all_read, name='notifications-mark-all-read'),
     path('notifications/clear/', views.notifications_clear, name='notifications-clear'),
     path('notifications/<int:pk>/read/', views.notification_mark_read, name='notification-mark-read'),
+
+    # Job Alerts by email (public)
+    path('job-alerts/subscribe/', alerts_views.subscribe_alert, name='subscribe-alert'),
+    path('job-alerts/unsubscribe/<str:token>/', alerts_views.unsubscribe_alert, name='unsubscribe-alert'),
 
     # Token refresh
     path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),

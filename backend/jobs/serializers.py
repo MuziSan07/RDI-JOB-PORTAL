@@ -9,12 +9,14 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
-            'id', 'department', 'department_name', 'department_logo',
-            'title', 'description', 'required_skills', 'job_type', 
-            'selection_type', 'salary_range', 'status', 'vacancies', 
+            'id', 'slug', 'department', 'department_name', 'department_logo',
+            'title', 'description', 'required_skills', 'job_type',
+            'selection_type', 'salary_range', 'salary_currency', 'salary_min',
+            'salary_max', 'salary_period', 'employment_type', 'location_city',
+            'location_country', 'status', 'vacancies',
             'filled_positions', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'slug', 'created_at', 'updated_at']
     
     def get_department_logo(self, obj):
         if obj.department.logo:
@@ -36,10 +38,12 @@ class JobDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
-            'id', 'department', 'department_name', 'department_logo',
+            'id', 'slug', 'department', 'department_name', 'department_logo',
             'department_tagline', 'department_bio', 'department_ceo', 'department_email',
-            'title', 'description', 'required_skills', 'job_type', 
-            'selection_type', 'salary_range', 'status', 'vacancies', 
+            'title', 'description', 'required_skills', 'job_type',
+            'selection_type', 'salary_range', 'salary_currency', 'salary_min',
+            'salary_max', 'salary_period', 'employment_type', 'location_city',
+            'location_country', 'status', 'vacancies',
             'filled_positions', 'total_applications', 'created_at', 'updated_at'
         ]
     
@@ -58,8 +62,10 @@ class JobCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
-            'title', 'description', 'required_skills', 'job_type', 
-            'selection_type', 'salary_range', 'vacancies'
+            'title', 'description', 'required_skills', 'job_type',
+            'selection_type', 'salary_range', 'salary_currency', 'salary_min',
+            'salary_max', 'salary_period', 'employment_type', 'location_city',
+            'location_country', 'vacancies'
         ]
     
     def validate_vacancies(self, value):

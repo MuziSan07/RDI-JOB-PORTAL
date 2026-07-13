@@ -330,18 +330,21 @@ def public_job_list(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])  # Public endpoint
-def public_job_detail(request, pk):
+def public_job_detail(request, identifier):
     """
-    GET: Get job details (Public - no authentication required)
+    GET: Get job details (Public - no auth). Accepts either the numeric id
+    (backward compatible) or the SEO slug.
     """
+    identifier = str(identifier)
+    lookup = {'pk': identifier} if identifier.isdigit() else {'slug': identifier}
     try:
-        job = Job.objects.get(pk=pk, status='open')
+        job = Job.objects.get(status='open', **lookup)
     except Job.DoesNotExist:
         return Response(
             {'error': 'Job not found or closed'},
             status=status.HTTP_404_NOT_FOUND
         )
-    
+
     serializer = JobDetailSerializer(job, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 

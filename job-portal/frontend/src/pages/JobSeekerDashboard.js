@@ -264,7 +264,7 @@ const JobSeekerDashboard = () => {
                         ) : (
                             <div style={s.jobsGrid}>
                                 {recommendedJobs.map(job => (
-                                    <RecommendedJobCard key={job.id} job={job} onClick={() => navigate(`/jobs/${job.id}`)} />
+                                    <RecommendedJobCard key={job.id} job={job} onClick={() => navigate(`/jobs/${job.slug || job.id}`)} />
                                 ))}
                             </div>
                         )}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Send } from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
+import { jobAlertService } from '../../services/jobAlertService';
 
 const RDI_THEME = {
     green: '#0B5D39',
@@ -48,13 +49,15 @@ const COLUMNS = [
             { label: 'Create Account', path: '/register' },
             { label: 'Sign In', path: '/login' },
             { label: 'My Applications', path: '/my-applications' },
+            { label: 'Saved Jobs', path: '/saved-jobs' },
         ],
     },
     {
-        title: 'Employers',
+        title: 'Legal',
         links: [
-            { label: 'Post a Job', path: '/for-employers' },
-            { label: 'Hiring Solutions', path: '/for-employers' },
+            { label: 'Privacy Policy', path: '/privacy-policy' },
+            { label: 'Terms & Conditions', path: '/terms' },
+            { label: 'Cookie Policy', path: '/cookie-policy' },
             { label: 'Contact Sales', path: '/contact' },
         ],
     },
@@ -66,11 +69,19 @@ const BrandFooter = () => {
     const [email, setEmail] = useState('');
     const [sent, setSent] = useState(false);
 
-    const submit = (e) => {
+    const submit = async (e) => {
         e?.preventDefault?.();
-        if (!email.trim()) return;
+        const value = email.trim();
+        if (!value) return;
+        // Optimistic UI — subscribe via the real endpoint; ignore failures so the
+        // footer never blocks (the API is idempotent by email).
         setSent(true);
         setEmail('');
+        try {
+            await jobAlertService.subscribe({ email: value });
+        } catch (_) {
+            /* no-op: keep the friendly confirmation */
+        }
         setTimeout(() => setSent(false), 3500);
     };
 

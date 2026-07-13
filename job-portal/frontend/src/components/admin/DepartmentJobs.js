@@ -22,7 +22,14 @@ const DepartmentJobs = () => {
         required_skills: '',
         job_type: 'onsite',
         selection_type: 'test',
+        employment_type: 'FULL_TIME',
         salary_range: '',
+        salary_currency: 'USD',
+        salary_min: '',
+        salary_max: '',
+        salary_period: 'MONTH',
+        location_city: '',
+        location_country: '',
         vacancies: 1,
     });
     const [error, setError] = useState('');
@@ -78,7 +85,14 @@ const DepartmentJobs = () => {
             required_skills: job.required_skills,
             job_type: job.job_type,
             selection_type: job.selection_type,
+            employment_type: job.employment_type || 'FULL_TIME',
             salary_range: job.salary_range || '',
+            salary_currency: job.salary_currency || 'USD',
+            salary_min: job.salary_min ?? '',
+            salary_max: job.salary_max ?? '',
+            salary_period: job.salary_period || 'MONTH',
+            location_city: job.location_city || '',
+            location_country: job.location_country || '',
             vacancies: job.vacancies,
         });
         setIsEditing(true);
@@ -113,7 +127,7 @@ const DepartmentJobs = () => {
     };
 
     const resetForm = () => {
-        setFormData({ title: '', description: '', required_skills: '', job_type: 'onsite', selection_type: 'test', salary_range: '', vacancies: 1 });
+        setFormData({ title: '', description: '', required_skills: '', job_type: 'onsite', selection_type: 'test', employment_type: 'FULL_TIME', salary_range: '', salary_currency: 'USD', salary_min: '', salary_max: '', salary_period: 'MONTH', location_city: '', location_country: '', vacancies: 1 });
         setIsEditing(false);
         setSelectedJob(null);
     };
@@ -286,12 +300,57 @@ const DepartmentJobs = () => {
                             </div>
                             <div style={{ ...styles.formRow, ...(isMobile ? { flexDirection: 'column', gap: 0 } : {}) }}>
                                 <div style={styles.formGroup}>
-                                    <label style={styles.label}>Salary Range (Optional)</label>
-                                    <input type="text" name="salary_range" value={formData.salary_range} onChange={handleInputChange} style={styles.input} placeholder="e.g., $50,000 - $80,000" />
+                                    <label style={styles.label}>Employment Type *</label>
+                                    <select name="employment_type" value={formData.employment_type} onChange={handleInputChange} required style={styles.input}>
+                                        <option value="FULL_TIME">Full-time</option>
+                                        <option value="PART_TIME">Part-time</option>
+                                        <option value="CONTRACTOR">Contract</option>
+                                        <option value="TEMPORARY">Temporary</option>
+                                        <option value="INTERN">Internship</option>
+                                        <option value="VOLUNTEER">Volunteer</option>
+                                    </select>
                                 </div>
                                 <div style={styles.formGroup}>
                                     <label style={styles.label}>Vacancies *</label>
                                     <input type="number" name="vacancies" value={formData.vacancies} onChange={handleInputChange} required min="1" style={styles.input} />
+                                </div>
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Salary Range (display text, optional)</label>
+                                <input type="text" name="salary_range" value={formData.salary_range} onChange={handleInputChange} style={styles.input} placeholder="e.g., $50,000 - $80,000" />
+                            </div>
+                            <div style={{ ...styles.formRow, ...(isMobile ? { flexDirection: 'column', gap: 0 } : {}) }}>
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Currency</label>
+                                    <input type="text" name="salary_currency" value={formData.salary_currency} onChange={handleInputChange} maxLength="3" style={styles.input} placeholder="USD" />
+                                </div>
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Salary Min</label>
+                                    <input type="number" name="salary_min" value={formData.salary_min} onChange={handleInputChange} min="0" step="0.01" style={styles.input} placeholder="e.g., 50000" />
+                                </div>
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Salary Max</label>
+                                    <input type="number" name="salary_max" value={formData.salary_max} onChange={handleInputChange} min="0" step="0.01" style={styles.input} placeholder="e.g., 80000" />
+                                </div>
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Pay Period</label>
+                                    <select name="salary_period" value={formData.salary_period} onChange={handleInputChange} style={styles.input}>
+                                        <option value="HOUR">Per hour</option>
+                                        <option value="DAY">Per day</option>
+                                        <option value="WEEK">Per week</option>
+                                        <option value="MONTH">Per month</option>
+                                        <option value="YEAR">Per year</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style={{ ...styles.formRow, ...(isMobile ? { flexDirection: 'column', gap: 0 } : {}) }}>
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Location City {formData.job_type !== 'remote' ? '' : '(ignored for remote)'}</label>
+                                    <input type="text" name="location_city" value={formData.location_city} onChange={handleInputChange} style={styles.input} placeholder="e.g., Dubai" />
+                                </div>
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Location Country</label>
+                                    <input type="text" name="location_country" value={formData.location_country} onChange={handleInputChange} style={styles.input} placeholder="e.g., UAE" />
                                 </div>
                             </div>
                             <div style={styles.modalFooter}>

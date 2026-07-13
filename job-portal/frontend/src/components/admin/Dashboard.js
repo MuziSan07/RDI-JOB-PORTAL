@@ -2,18 +2,37 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import StatCard from './StatCard';
+import { BarChart, DonutChart, LineChart } from './Charts';
 import { authService } from '../../services/authService';
 import Loader from '../common/Loader';
 import { useResponsive } from '../../hooks/useResponsive';
 import {
     Zap,
-    Target, 
-    ArrowUpRight, 
+    Target,
+    ArrowUpRight,
     Briefcase,
     Globe,
     Layers,
-    Activity
+    Activity,
+    PieChart,
+    BarChart2,
+    TrendingUp
 } from 'lucide-react';
+
+// Human-readable labels + palette for application-status donut slices
+const STATUS_META = {
+    applied: { label: 'Applied', color: '#818cf8' },
+    test_assigned: { label: 'Test Assigned', color: '#60a5fa' },
+    test_completed: { label: 'Test Completed', color: '#22d3ee' },
+    test_passed: { label: 'Test Passed', color: '#34d399' },
+    test_failed: { label: 'Test Failed', color: '#f87171' },
+    interview_scheduled: { label: 'Interview Scheduled', color: '#fbbf24' },
+    interview_completed: { label: 'Interview Done', color: '#a78bfa' },
+    waiting: { label: 'Waiting', color: '#94a3b8' },
+    notice_period: { label: 'Notice Period', color: '#2dd4bf' },
+    hired: { label: 'Hired', color: '#4ade80' },
+    rejected: { label: 'Rejected', color: '#fb7185' },
+};
 
 const Dashboard = () => {
     const { isMobile, isTablet, isCompact } = useResponsive();
@@ -41,6 +60,24 @@ const Dashboard = () => {
     const active = dashboardData?.total_counts?.active_jobs || 0;
     const total = dashboardData?.total_counts?.jobs || 1;
     const fillRate = Math.round(((total - active) / total) * 100);
+
+    // ── Analytics chart data (derived from the dashboard endpoint) ──
+    const statusData = (dashboardData?.applications_by_status || []).map((row) => {
+        const meta = STATUS_META[row.status] || { label: row.status, color: '#818cf8' };
+        return { label: meta.label, value: row.count || 0, color: meta.color };
+    });
+
+    const deptData = (dashboardData?.jobs_per_department || []).map((row) => ({
+        label: row.name,
+        value: row.job_count || 0,
+    }));
+
+    const trendData = (dashboardData?.applications_last_7_days || []).map((row) => ({
+        label: row.label,
+        value: row.count || 0,
+    }));
+
+    const chartCols = isCompact ? '1fr' : 'repeat(2, 1fr)';
 
     return (
         <div style={styles.container}>
@@ -140,6 +177,40 @@ const Dashboard = () => {
                             </div>
                         </aside>
                     </div>
+
+                    {/* ── Analytics ── */}
+                    <section style={styles.analyticsSection}>
+                        <div style={styles.analyticsHeading}>
+                            <TrendingUp size={18} color="#818cf8" />
+                            <h2 style={styles.analyticsTitle}>Analytics</h2>
+                        </div>
+
+                        <div style={{ ...styles.chartsGrid, gridTemplateColumns: chartCols }}>
+                            <div style={styles.chartCard}>
+                                <div style={styles.chartCardHead}>
+                                    <PieChart size={16} color="#818cf8" />
+                                    <span style={styles.chartCardTitle}>Applications by Status</span>
+                                </div>
+                                <DonutChart data={statusData} title="Applications by status" />
+                            </div>
+
+                            <div style={styles.chartCard}>
+                                <div style={styles.chartCardHead}>
+                                    <BarChart2 size={16} color="#34d399" />
+                                    <span style={styles.chartCardTitle}>Jobs per Department</span>
+                                </div>
+                                <BarChart data={deptData} color="#818cf8" title="Jobs per department" />
+                            </div>
+
+                            <div style={{ ...styles.chartCard, ...(isCompact ? {} : { gridColumn: '1 / -1' }) }}>
+                                <div style={styles.chartCardHead}>
+                                    <Activity size={16} color="#34d399" />
+                                    <span style={styles.chartCardTitle}>Applications — Last 7 Days</span>
+                                </div>
+                                <LineChart data={trendData} color="#34d399" title="Applications over the last 7 days" />
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </main>
         </div>
@@ -205,6 +276,44 @@ const styles = {
         display: 'grid',
         gridTemplateColumns: '1.7fr 1.3fr',
         gap: '24px',
+    },
+    analyticsSection: {
+        marginTop: '32px',
+    },
+    analyticsHeading: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        marginBottom: '18px',
+    },
+    analyticsTitle: {
+        fontSize: '18px',
+        fontWeight: '800',
+        color: '#f1f5f9',
+        margin: 0,
+        letterSpacing: '-0.3px',
+    },
+    chartsGrid: {
+        display: 'grid',
+        gap: '24px',
+    },
+    chartCard: {
+        backgroundColor: '#0f172a',
+        borderRadius: '14px',
+        padding: '22px',
+        border: '1px solid #1e293b',
+        minWidth: 0,
+    },
+    chartCardHead: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        marginBottom: '18px',
+    },
+    chartCardTitle: {
+        fontSize: '14px',
+        fontWeight: '700',
+        color: '#e2e8f0',
     },
     mainAnalysis: {
         // card background is one shade lighter than body

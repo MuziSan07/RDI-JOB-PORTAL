@@ -1,3 +1,5 @@
+import secrets
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -85,3 +87,37 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.recipient.username} - {self.title}"
+
+
+class JobAlert(models.Model):
+    """An email subscription for new-job notifications.
+
+    Anonymous visitors can subscribe by email; logged-in users can optionally be
+    linked via ``user``. Matching + delivery is handled by the
+    ``send_job_alerts`` management command.
+    """
+    email = models.EmailField()
+    # Comma-separated keywords matched against job title/description/skills.
+    keywords = models.CharField(max_length=255, blank=True, default='')
+    # '' means any job type; otherwise onsite / remote / hybrid.
+    job_type = models.CharField(max_length=20, blank=True, default='')
+    user = models.ForeignKey(
+        'accounts.User', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='job_alerts',
+    )
+    is_active = models.BooleanField(default=True)
+    # Random opaque token used for one-click unsubscribe links.
+    token = models.CharField(max_length=64, unique=True)
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(24)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.email} ({'active' if self.is_active else 'inactive'})"

@@ -11,6 +11,22 @@
       content="RDI Job Portal — discover jobs, apply in one click, and track every stage from application to offer."
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/RDI.png" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn link previews) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="RDI Job Portal" />
+    <meta property="og:title" content="RDI Job Portal" />
+    <meta property="og:description" content="Discover jobs, apply in one click, and track every stage from application to offer." />
+    <meta property="og:url" content="https://hr.rdi.world/" />
+    <!-- Absolute URL required by crawlers. Update the domain here if it ever changes. -->
+    <meta property="og:image" content="https://hr.rdi.world/RDI.png" />
+    <meta property="og:image:alt" content="RDI Job Portal logo" />
+
+    <!-- Twitter/X card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="RDI Job Portal" />
+    <meta name="twitter:description" content="Discover jobs, apply in one click, and track every stage from application to offer." />
+    <meta name="twitter:image" content="https://hr.rdi.world/RDI.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -26,6 +42,55 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>RDI Job Portal</title>
+
+    <!-- Structured data: Organization (RDI) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Rupani Development Initiatives",
+      "alternateName": "RDI",
+      "url": "https://hr.rdi.world",
+      "logo": "https://hr.rdi.world/RDI.png",
+      "image": "https://hr.rdi.world/RDI.png",
+      "slogan": "Transforming Lives",
+      "description": "Rupani Development Initiatives (RDI) — Transforming Lives. Discover careers and hire talent across our global offices.",
+      "sameAs": [
+        "https://www.linkedin.com/company/rdiworld/",
+        "https://www.facebook.com/rdiworld",
+        "https://www.instagram.com/rdi_world/",
+        "https://www.youtube.com/@rdi_world"
+      ],
+      "address": [
+        { "@type": "PostalAddress", "streetAddress": "8303 Southwest Freeway, Suite 440", "addressLocality": "Houston", "addressRegion": "TX", "postalCode": "77074", "addressCountry": "US" },
+        { "@type": "PostalAddress", "streetAddress": "Naveed Shaheed Road, Zulfiqarabad", "addressLocality": "Gilgit", "addressRegion": "Gilgit-Baltistan", "addressCountry": "PK" },
+        { "@type": "PostalAddress", "streetAddress": "House #13, Street #5, Qilla-e-Fatullah", "addressLocality": "Kabul", "addressCountry": "AF" },
+        { "@type": "PostalAddress", "streetAddress": "WeWork Hub71, 14th Floor, Al Khatem Tower, ADGM Square, Al Maryah Island", "addressLocality": "Abu Dhabi", "addressCountry": "AE" }
+      ],
+      "contactPoint": [
+        { "@type": "ContactPoint", "telephone": "+1-713-777-5059", "contactType": "customer service", "areaServed": "US" },
+        { "@type": "ContactPoint", "telephone": "+92-5811-459709", "contactType": "customer service", "areaServed": "PK" },
+        { "@type": "ContactPoint", "telephone": "+93-79-629-1322", "contactType": "customer service", "areaServed": "AF" },
+        { "@type": "ContactPoint", "telephone": "+971-56-940-3192", "contactType": "customer service", "areaServed": "AE" }
+      ]
+    }
+    </script>
+
+    <!-- Structured data: WebSite + search action -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "RDI Job Portal",
+      "url": "https://hr.rdi.world",
+      "publisher": { "@type": "Organization", "name": "Rupani Development Initiatives" },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": { "@type": "EntryPoint", "urlTemplate": "https://hr.rdi.world/jobs?search={search_term_string}" },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

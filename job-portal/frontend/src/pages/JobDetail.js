@@ -7,10 +7,13 @@ import {
 } from 'lucide-react';
 import { BRAND, FONT, page, injectBrandStyles } from '../components/brand/brandTheme';
 import { jobsService } from '../services/jobsService';
+import { savedJobsService } from '../services/savedJobsService';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { profileService } from '../services/profileService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
+import { injectJobPostingSchema } from '../utils/jobSchema';
+import { Skeleton } from '../components/common/Skeleton';
 
 injectBrandStyles();
 
@@ -72,6 +75,7 @@ const JobDetail = () => {
     const [applied, setApplied] = useState(false);
     const [user, setUser] = useState(null);
     const [saved, setSaved] = useState(false);
+    const [savingBookmark, setSavingBookmark] = useState(false);
     const [resumes, setResumes] = useState([]);
     const [selectedResumeId, setSelectedResumeId] = useState(null);
     const [loadingResumes, setLoadingResumes] = useState(false);
@@ -82,6 +86,47 @@ const JobDetail = () => {
         setUser(currentUser);
         loadJob();
     }, [id]);
+
+    // Inject Google JobPosting structured data (JSON-LD) for this job
+    useEffect(() => {
+        if (!job) return undefined;
+        return injectJobPostingSchema(job);
+    }, [job]);
+
+    // Fetch whether this job is already bookmarked by the logged-in job seeker
+    useEffect(() => {
+        if (!job || !isAuthenticated) return;
+        let active = true;
+        savedJobsService.list()
+            .then(data => {
+                if (!active) return;
+                const list = data?.results || [];
+                setSaved(list.some(j => j.id === job.id));
+            })
+            .catch(() => { /* non-blocking */ });
+        return () => { active = false; };
+    }, [job, isAuthenticated]);
+
+    const handleToggleSave = async () => {
+        if (!isAuthenticated) {
+            navigate('/login', { state: { returnUrl: `/jobs/${id}` } });
+            return;
+        }
+        if (!job || savingBookmark) return;
+        setSavingBookmark(true);
+        // optimistic
+        const prev = saved;
+        setSaved(!prev);
+        try {
+            const res = await savedJobsService.toggle(job.id);
+            setSaved(!!res.saved);
+        } catch (error) {
+            console.error('Error toggling saved job:', error);
+            setSaved(prev); // revert
+        } finally {
+            setSavingBookmark(false);
+        }
+    };
 
     const loadJob = async () => {
         setLoading(true);
@@ -155,9 +200,34 @@ const JobDetail = () => {
 
     if (loading) {
         return (
-            <div style={s.fullCenter}>
-                <div style={s.spinner} />
-                <p style={s.loadingText}>Loading job details...</p>
+            <div style={{ ...page.root, minHeight: '100vh' }}>
+                <UserNavbar />
+                <div style={{ ...s.page, ...(isMobile ? { padding: '18px 14px' } : {}) }}>
+                    <Skeleton width={120} height={16} radius={6} style={{ marginBottom: 24 }} />
+                    <div style={{ ...s.heroCard, padding: isMobile ? '20px 18px' : '28px', border: `1px solid ${BRAND.line}` }}>
+                        <div style={{ display: 'flex', gap: 18, alignItems: 'center', marginBottom: 22 }}>
+                            <Skeleton width={68} height={68} radius={12} style={{ flexShrink: 0 }} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <Skeleton width={110} height={22} radius={6} style={{ marginBottom: 12 }} />
+                                <Skeleton width="60%" height={26} style={{ marginBottom: 10 }} />
+                                <Skeleton width="35%" height={15} />
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', paddingTop: 20, borderTop: `1px solid ${BRAND.line}` }}>
+                            <Skeleton width={120} height={38} radius={8} />
+                            <Skeleton width={120} height={38} radius={8} />
+                            <Skeleton width={120} height={38} radius={8} />
+                        </div>
+                    </div>
+                    <div style={{ ...s.contentCard, marginTop: 16, padding: isMobile ? '18px 16px' : '24px 28px' }}>
+                        <Skeleton width={180} height={18} style={{ marginBottom: 18 }} />
+                        <Skeleton width="100%" height={13} style={{ marginBottom: 10 }} />
+                        <Skeleton width="98%" height={13} style={{ marginBottom: 10 }} />
+                        <Skeleton width="95%" height={13} style={{ marginBottom: 10 }} />
+                        <Skeleton width="90%" height={13} style={{ marginBottom: 10 }} />
+                        <Skeleton width="70%" height={13} />
+                    </div>
+                </div>
             </div>
         );
     }
@@ -213,9 +283,17 @@ const JobDetail = () => {
                                     <p style={s.companyName}>{job.department_name}</p>
                                 </div>
                                 <div style={s.heroActions}>
-                                    <button onClick={() => setSaved(v => !v)} style={{ ...s.iconBtn, ...(saved ? s.iconBtnSaved : {}) }}>
-                                        <Bookmark size={17} strokeWidth={1.75} fill={saved ? BRAND.green : 'none'} color={saved ? BRAND.green : BRAND.slate} />
-                                    </button>
+                                    {isAuthenticated && (
+                                        <button
+                                            onClick={handleToggleSave}
+                                            disabled={savingBookmark}
+                                            title={saved ? 'Remove bookmark' : 'Save job'}
+                                            aria-label={saved ? 'Remove bookmark' : 'Save job'}
+                                            style={{ ...s.iconBtn, ...(saved ? s.iconBtnSaved : {}) }}
+                                        >
+                                            <Bookmark size={17} strokeWidth={1.75} fill={saved ? BRAND.green : 'none'} color={saved ? BRAND.green : BRAND.slate} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

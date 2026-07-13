@@ -25,6 +25,12 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ.get(
     'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1'
 ).split(',') if h.strip()]
 
+# Public site domain used to build absolute URLs in sitemap.xml (no scheme).
+# Defaults to the local frontend in DEBUG so links are clickable while testing,
+# and to the production domain otherwise. Always overridable via env.
+SITE_DOMAIN = os.environ.get('SITE_DOMAIN', 'localhost:3000' if DEBUG else 'hr.rdi.world')
+SITE_PROTOCOL = os.environ.get('SITE_PROTOCOL', 'http' if DEBUG else 'https')
+
 
 # Application definition
 
@@ -35,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+    'django.contrib.sitemaps',
+
     # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',
@@ -148,6 +155,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
+
+# Email configuration (env-overridable). Defaults to the console backend so job
+# alert emails work in dev without SMTP — set EMAIL_BACKEND + SMTP vars in prod.
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'RDI Job Portal <no-reply@rdi.world>')
 
 # REST Framework Configuration
 REST_FRAMEWORK = {

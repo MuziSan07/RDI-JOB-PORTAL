@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 
 // Admin Components
@@ -35,14 +35,23 @@ import ApplicationDetail from './pages/ApplicationDetail';
 import TakeTest from './pages/TakeTest';
 import TestResults from './pages/TestResults';
 import ProfilePage from './pages/ProfilePage';
+import SavedJobs from './pages/SavedJobs';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsAndConditions from './pages/TermsAndConditions';
+import CookiePolicy from './pages/CookiePolicy';
+import NotFound from './pages/NotFound';
 
 // Common Components
 import ProtectedRoute from './components/common/ProtectedRoute';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import CookieConsent from './components/common/CookieConsent';
 
 function App() {
     return (
+        <ErrorBoundary>
         <Router>
             <AuthProvider>
+                <CookieConsent />
                 <Routes>
                     {/* Public Routes - Job Seeker */}
                     <Route path="/" element={<Landing />} />
@@ -50,6 +59,9 @@ function App() {
                     <Route path="/how-it-works" element={<HowItWorks />} />
                     <Route path="/for-employers" element={<ForEmployers />} />
                     <Route path="/contact" element={<Contact />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<TermsAndConditions />} />
+                    <Route path="/cookie-policy" element={<CookiePolicy />} />
                     <Route path="/login" element={<JobSeekerLogin />} />
                     <Route path="/register" element={<JobSeekerRegister />} />
                     <Route path="/jobs" element={<JobsBrowse />} />
@@ -59,6 +71,7 @@ function App() {
                     <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['job_seeker']}><JobSeekerDashboard /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute allowedRoles={['job_seeker']}><ProfilePage /></ProtectedRoute>} />
                     <Route path="/my-applications" element={<ProtectedRoute allowedRoles={['job_seeker']}><MyApplications /></ProtectedRoute>} />
+                    <Route path="/saved-jobs" element={<ProtectedRoute allowedRoles={['job_seeker']}><SavedJobs /></ProtectedRoute>} />
                     <Route path="/my-applications/:id" element={<ProtectedRoute allowedRoles={['job_seeker']}><ApplicationDetail /></ProtectedRoute>} />
                     <Route path="/test/:applicationId" element={<ProtectedRoute allowedRoles={['job_seeker']}><TakeTest /></ProtectedRoute>} />
                     <Route path="/test-results/:applicationId" element={<ProtectedRoute allowedRoles={['job_seeker']}><TestResults /></ProtectedRoute>} />
@@ -182,11 +195,12 @@ function App() {
                         }
                     />
 
-                    {/* 404 - Redirect to home */}
-                    <Route path="*" element={<Navigate to="/" />} />
+                    {/* 404 - Not Found */}
+                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </AuthProvider>
         </Router>
+        </ErrorBoundary>
     );
 }
 

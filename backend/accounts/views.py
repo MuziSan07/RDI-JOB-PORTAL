@@ -228,7 +228,25 @@ def super_admin_dashboard(request):
     ).order_by('-timestamp')[:10]
     
     activity_serializer = ActivityLogSerializer(recent_activities, many=True)
-    
+
+    # Jobs per department (for bar chart) — top 6 by number of jobs posted
+    jobs_per_department = list(
+        Department.objects.annotate(job_count=Count('jobs'))
+        .order_by('-job_count')[:6]
+        .values('id', 'name', 'job_count')
+    )
+
+    # Applications over the last 7 days (for line chart) — one bucket per day
+    applications_last_7_days = []
+    for offset in range(6, -1, -1):
+        day = today - timedelta(days=offset)
+        count = Application.objects.filter(applied_at__date=day).count()
+        applications_last_7_days.append({
+            'date': day.isoformat(),
+            'label': day.strftime('%a'),  # Mon, Tue, ...
+            'count': count,
+        })
+
     dashboard_data = {
         'total_counts': {
             'departments': total_departments,
@@ -252,9 +270,11 @@ def super_admin_dashboard(request):
         'applications_by_status': list(applications_by_status),
         'top_departments_by_jobs': list(top_departments),
         'top_departments_by_employees': list(top_departments_by_employees),
+        'jobs_per_department': jobs_per_department,
+        'applications_last_7_days': applications_last_7_days,
         'recent_activities': activity_serializer.data,
     }
-    
+
     return Response(dashboard_data, status=status.HTTP_200_OK)
 
 
