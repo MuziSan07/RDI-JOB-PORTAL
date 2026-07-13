@@ -38,38 +38,9 @@ from jobs.models import Job
 from applicants.models import Application
 from employees.models import Employee
 from tests.models import Chapter, Question
-from django.db.models.signals import post_migrate
-from django.dispatch import receiver
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
-
-@receiver(post_migrate)
-def create_default_super_admin(sender, **kwargs):
-    # Intentional pre-seeded admin for this project. Defaults kept by request
-    # (hr@rdi.com / @RDI123) but still overridable via env for production.
-    email = os.environ.get('DJANGO_SUPERADMIN_EMAIL', 'hr@rdi.com')
-    username = os.environ.get('DJANGO_SUPERADMIN_USERNAME', 'Rupani Development Initiatives')
-    password = os.environ.get('DJANGO_SUPERADMIN_PASSWORD', '@RDI123')
-
-    user, created = User.objects.get_or_create(
-        email=email,
-        defaults={
-            "username": username,
-            "user_type": "super_admin",
-            "is_staff": True,
-            "is_superuser": True,
-            "is_active": True,
-        },
-    )
-
-    if created:
-        user.set_password(password)
-        user.save()
-        print(f"[OK] Default Super Admin created ({email}).")
-    else:
-        print("[OK] Default Super Admin already exists.")
+# NOTE: the default Super Admin seeder lives in accounts/signals.py (wired via
+# AccountsConfig.ready), which is the single source of truth that runs on migrate.
 
 
 # Helper function to log activity
