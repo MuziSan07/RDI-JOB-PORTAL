@@ -8,10 +8,14 @@ import {
 } from 'lucide-react';
 import { COLORS } from '../constants/colors';
 import { COUNTRIES, idLabelFor, placeholderFor, validateNationalId, getCountry } from '../constants/countries';
+import { DEGREES } from '../constants/degrees';
+import SearchableSelect from '../components/common/SearchableSelect';
 import { profileService } from '../services/profileService';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
+
+const COUNTRY_OPTIONS = COUNTRIES.map(c => ({ value: c.code, label: c.name }));
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -388,10 +392,13 @@ const ProfilePage = () => {
                                     <input style={s.input} value={profileForm.father_name} onChange={e => setProfileForm(p => ({ ...p, father_name: e.target.value }))} placeholder="Father's full name" />
                                 </Field>
                                 <Field label="Country *" icon={<Globe size={14} />}>
-                                    <select style={s.input} value={profileForm.country} onChange={e => setProfileForm(p => ({ ...p, country: e.target.value, cnic: '' }))}>
-                                        <option value="">Select your country…</option>
-                                        {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-                                    </select>
+                                    <SearchableSelect
+                                        value={profileForm.country}
+                                        onChange={(v) => setProfileForm(p => ({ ...p, country: v, cnic: '' }))}
+                                        options={COUNTRY_OPTIONS}
+                                        placeholder="Select your country…"
+                                        searchPlaceholder="Search countries…"
+                                    />
                                 </Field>
                                 <Field label={`${idLabelFor(profileForm.country)} *`} icon={<FileText size={14} />}>
                                     <input
@@ -413,8 +420,15 @@ const ProfilePage = () => {
                                 </Field>
                             </div>
 
-                            <Field label="Education *" icon={<BookOpen size={14} />} full>
-                                <textarea style={s.textarea} rows={3} value={profileForm.education} onChange={e => setProfileForm(p => ({ ...p, education: e.target.value }))} placeholder="e.g. BS Computer Science - FAST NUCES (2020-2024)" />
+                            <Field label="Degree / Education *" icon={<BookOpen size={14} />} full>
+                                <SearchableSelect
+                                    value={profileForm.education}
+                                    onChange={(v) => setProfileForm(p => ({ ...p, education: v }))}
+                                    options={DEGREES}
+                                    placeholder="Select your degree…"
+                                    searchPlaceholder="Search degrees…"
+                                    allowOther
+                                />
                             </Field>
                             <Field label="Experience *" icon={<Clock size={14} />} full>
                                 <textarea style={s.textarea} rows={4} value={profileForm.experience} onChange={e => setProfileForm(p => ({ ...p, experience: e.target.value }))} placeholder="Describe your work experience, skills, and achievements..." />
@@ -488,10 +502,13 @@ const ProfilePage = () => {
                                             <input style={s.input} value={resumeForm.father_name} onChange={e => setResumeForm(p => ({ ...p, father_name: e.target.value }))} placeholder="Father's full name" />
                                         </Field>
                                         <Field label="Country *" icon={<Globe size={14} />}>
-                                            <select style={s.input} value={resumeForm.country} onChange={e => setResumeForm(p => ({ ...p, country: e.target.value, cnic: '' }))}>
-                                                <option value="">Select country…</option>
-                                                {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-                                            </select>
+                                            <SearchableSelect
+                                                value={resumeForm.country}
+                                                onChange={(v) => setResumeForm(p => ({ ...p, country: v, cnic: '' }))}
+                                                options={COUNTRY_OPTIONS}
+                                                placeholder="Select country…"
+                                                searchPlaceholder="Search countries…"
+                                            />
                                         </Field>
                                         <Field label={`${idLabelFor(resumeForm.country)} *`} icon={<FileText size={14} />}>
                                             <input
@@ -512,8 +529,15 @@ const ProfilePage = () => {
                                             <input style={s.input} value={resumeForm.address} onChange={e => setResumeForm(p => ({ ...p, address: e.target.value }))} placeholder="Your address" />
                                         </Field>
                                     </div>
-                                    <Field label="Education *" icon={<BookOpen size={14} />} full>
-                                        <textarea style={s.textarea} rows={3} value={resumeForm.education} onChange={e => setResumeForm(p => ({ ...p, education: e.target.value }))} placeholder="Degree, institution, year..." />
+                                    <Field label="Degree / Education *" icon={<BookOpen size={14} />} full>
+                                        <SearchableSelect
+                                            value={resumeForm.education}
+                                            onChange={(v) => setResumeForm(p => ({ ...p, education: v }))}
+                                            options={DEGREES}
+                                            placeholder="Select your degree…"
+                                            searchPlaceholder="Search degrees…"
+                                            allowOther
+                                        />
                                     </Field>
                                     <Field label="Experience *" icon={<Clock size={14} />} full>
                                         <textarea style={s.textarea} rows={5} value={resumeForm.experience} onChange={e => setResumeForm(p => ({ ...p, experience: e.target.value }))} placeholder="Work experience, skills, achievements..." />

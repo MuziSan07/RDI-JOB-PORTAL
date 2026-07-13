@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.application_list, name='application-list'),
+    path('education-options/', views.education_options, name='education-options'),
     path('export/', views.export_applications, name='export-applications'),
 
     path('apply/<int:job_id>/', views.apply_for_job, name='apply-for-job'),

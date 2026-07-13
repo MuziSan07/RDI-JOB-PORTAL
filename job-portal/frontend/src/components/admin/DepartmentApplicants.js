@@ -22,6 +22,8 @@ const DepartmentApplicants = () => {
     const [searchTerm, setSearchTerm]         = useState('');
     const [statusFilter, setStatusFilter]     = useState('');
     const [jobFilter, setJobFilter]           = useState('');
+    const [educationFilter, setEducationFilter] = useState('');
+    const [educationOptions, setEducationOptions] = useState([]);
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const [showDetailModal, setShowDetailModal]     = useState(false);
     const [showTestModal, setShowTestModal]         = useState(false);
@@ -39,12 +41,13 @@ const DepartmentApplicants = () => {
         fetchApplicants();
         fetchJobs();
         fetchChapters();
-    }, [searchTerm, statusFilter, jobFilter]);
+        fetchEducationOptions();
+    }, [searchTerm, statusFilter, jobFilter, educationFilter]);
 
     const handleExport = async (format) => {
         setExporting(format);
         try {
-            await applicantService.exportApplications(format, searchTerm, statusFilter, jobFilter);
+            await applicantService.exportApplications(format, searchTerm, statusFilter, jobFilter, educationFilter);
         } catch (err) {
             setError('Export failed. Please try again.');
         } finally {
@@ -55,13 +58,19 @@ const DepartmentApplicants = () => {
     const fetchApplicants = async () => {
         try {
             setLoading(true);
-            const data = await applicantService.getAllApplications(searchTerm, statusFilter, jobFilter);
+            const data = await applicantService.getAllApplications(searchTerm, statusFilter, jobFilter, educationFilter);
             setApplicants(data.results || []);
         } catch (err) {
             setError('Failed to load applicants');
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchEducationOptions = async () => {
+        try {
+            setEducationOptions(await applicantService.getEducationOptions());
+        } catch (err) { /* non-critical */ }
     };
 
     const fetchJobs = async () => {
@@ -297,6 +306,16 @@ const DepartmentApplicants = () => {
                                 <option value="">All Jobs</option>
                                 {jobs.map((job) => (
                                     <option key={job.id} value={job.id}>{job.title}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={14} color="#475569" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                        </div>
+                        <div style={s.selectWrap}>
+                            <BookOpen size={14} color="#475569" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                            <select value={educationFilter} onChange={(e) => setEducationFilter(e.target.value)} style={s.select} title="Filter by degree / education">
+                                <option value="">All Education</option>
+                                {educationOptions.map((edu) => (
+                                    <option key={edu} value={edu}>{edu}</option>
                                 ))}
                             </select>
                             <ChevronDown size={14} color="#475569" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />

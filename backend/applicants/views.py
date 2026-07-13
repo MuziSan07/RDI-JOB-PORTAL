@@ -247,17 +247,44 @@ def application_list(request):
     job_filter = request.query_params.get('job', None)
     if job_filter:
         applications = applications.filter(job_id=job_filter)
-    
+
+    # Filter by education / degree (matches the applicant's resume or profile education)
+    education_filter = request.query_params.get('education', None)
+    if education_filter:
+        applications = applications.filter(
+            Q(resume__education__iexact=education_filter) |
+            Q(applicant__education__iexact=education_filter)
+        )
+
     # Sorting
     sort_by = request.query_params.get('sort_by', '-applied_at')
     applications = applications.order_by(sort_by)
     
     serializer = ApplicationSerializer(applications, many=True, context={'request': request})
-    
+
     return Response({
         'count': applications.count(),
         'results': serializer.data
     }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def education_options(request):
+    """Distinct education/degree values among the department's applicants — includes
+    any custom ('Other') degrees applicants typed, so they appear in the filter."""
+    if request.user.user_type != 'department':
+        return Response({'error': 'Only departments can access this'}, status=status.HTTP_403_FORBIDDEN)
+    if not hasattr(request.user, 'department'):
+        return Response({'error': 'Department profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    apps = Application.objects.filter(job__department=request.user.department)
+    resume_edu = apps.exclude(resume__education__isnull=True).exclude(resume__education='') \
+        .values_list('resume__education', flat=True)
+    user_edu = apps.exclude(applicant__education__isnull=True).exclude(applicant__education='') \
+        .values_list('applicant__education', flat=True)
+    values = sorted({v.strip() for v in list(resume_edu) + list(user_edu) if v and v.strip()})
+    return Response({'options': values})
 
 
 @api_view(['GET'])
@@ -626,6 +653,13 @@ def export_applications(request):
     job_filter = request.query_params.get('job', None)
     if job_filter:
         applications = applications.filter(job_id=job_filter)
+
+    education_filter = request.query_params.get('education', None)
+    if education_filter:
+        applications = applications.filter(
+            Q(resume__education__iexact=education_filter) |
+            Q(applicant__education__iexact=education_filter)
+        )
 
     applications = applications.order_by('-applied_at')
     # NOTE: use 'fmt' (not 'format') — DRF reserves the 'format' query param for

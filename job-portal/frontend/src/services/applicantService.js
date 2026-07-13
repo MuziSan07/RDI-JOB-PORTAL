@@ -2,14 +2,21 @@ import api from './api';
 
 export const applicantService = {
     // Get all applications
-    getAllApplications: async (search = '', status = '', job = '', sortBy = '-applied_at') => {
+    getAllApplications: async (search = '', status = '', job = '', education = '', sortBy = '-applied_at') => {
         const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        if (job)    params.append('job', job);
-        if (sortBy) params.append('sort_by', sortBy);
+        if (search)    params.append('search', search);
+        if (status)    params.append('status', status);
+        if (job)       params.append('job', job);
+        if (education) params.append('education', education);
+        if (sortBy)    params.append('sort_by', sortBy);
         const response = await api.get(`/applicants/?${params.toString()}`);
         return response.data;
+    },
+
+    // Distinct education/degree values among this department's applicants (incl. custom)
+    getEducationOptions: async () => {
+        const response = await api.get('/applicants/education-options/');
+        return response.data.options || [];
     },
 
     // Get application by ID
@@ -49,13 +56,14 @@ export const applicantService = {
     },
 
     // Export applications as CSV or PDF with current filters applied
-    exportApplications: (format, search = '', status = '', job = '') => {
+    exportApplications: (format, search = '', status = '', job = '', education = '') => {
         const token = localStorage.getItem('token');
         // Use 'fmt' — DRF reserves 'format' for content negotiation (would 404).
         const params = new URLSearchParams({ fmt: format });
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        if (job)    params.append('job', job);
+        if (search)    params.append('search', search);
+        if (status)    params.append('status', status);
+        if (job)       params.append('job', job);
+        if (education) params.append('education', education);
         const url = `http://localhost:8000/api/applicants/export/?${params.toString()}`;
 
         return fetch(url, { headers: { Authorization: `Bearer ${token}` } })
