@@ -1,0 +1,69 @@
+<svg width="1280" height="320" viewBox="0 0 1280 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RDI Job Portal">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B3D28"/>
+      <stop offset="0.55" stop-color="#083F27"/>
+      <stop offset="1" stop-color="#062A1B"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E7BE5B"/>
+      <stop offset="1" stop-color="#C9972C"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C9972C"/>
+      <stop offset="1" stop-color="#0E7A42"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#0E7A42" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#0E7A42" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Backdrop -->
+  <rect width="1280" height="320" rx="0" fill="url(#bg)"/>
+  <circle cx="235" cy="160" r="220" fill="url(#glow)"/>
+  <rect x="0" y="0" width="1280" height="6" fill="url(#accent)"/>
+
+  <!-- Sunburst mark (abstraction of the RDI logo icon) -->
+  <g transform="translate(200,168)">
+    <g>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="#0E7A42" transform="rotate(0)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="url(#gold)" opacity="0.6" transform="rotate(36)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="#0E7A42" transform="rotate(72)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="url(#gold)" opacity="0.6" transform="rotate(108)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="#0E7A42" transform="rotate(144)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="url(#gold)" opacity="0.6" transform="rotate(180)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="#0E7A42" transform="rotate(216)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="url(#gold)" opacity="0.6" transform="rotate(252)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="#0E7A42" transform="rotate(288)"/>
+      <ellipse cx="0" cy="-64" rx="18" ry="60" fill="url(#gold)" opacity="0.6" transform="rotate(324)"/>
+    </g>
+    <circle cx="0" cy="0" r="26" fill="#062A1B" stroke="url(#gold)" stroke-width="3"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="360" y="150" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="72" font-weight="800" letter-spacing="-2" fill="#FFFFFF">RDI <tspan fill="url(#gold)" font-style="italic">Job Portal</tspan></text>
+
+  <!-- Tagline -->
+  <text x="362" y="196" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="23" font-weight="500" fill="#CFE0D5">Where great careers begin — and ambitious teams grow.</text>
+
+  <!-- Tech chips -->
+  <g font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="600">
+    <g transform="translate(362,232)">
+      <rect x="0" y="0" width="112" height="34" rx="17" fill="#0E7A42" fill-opacity="0.18" stroke="#0E7A42" stroke-opacity="0.5"/>
+      <text x="56" y="22" text-anchor="middle" fill="#9FE3BC">Django · DRF</text>
+    </g>
+    <g transform="translate(486,232)">
+      <rect x="0" y="0" width="86" height="34" rx="17" fill="#0E7A42" fill-opacity="0.18" stroke="#0E7A42" stroke-opacity="0.5"/>
+      <text x="43" y="22" text-anchor="middle" fill="#9FE3BC">React</text>
+    </g>
+    <g transform="translate(584,232)">
+      <rect x="0" y="0" width="132" height="34" rx="17" fill="#C9972C" fill-opacity="0.16" stroke="#C9972C" stroke-opacity="0.5"/>
+      <text x="66" y="22" text-anchor="middle" fill="#E7BE5B">JWT Auth</text>
+    </g>
+    <g transform="translate(728,232)">
+      <rect x="0" y="0" width="168" height="34" rx="17" fill="#C9972C" fill-opacity="0.16" stroke="#C9972C" stroke-opacity="0.5"/>
+      <text x="84" y="22" text-anchor="middle" fill="#E7BE5B">SEO / GEO-ready</text>
+    </g>
+  </g>
+</svg>
