@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -52,7 +51,10 @@ def robots_txt(request):
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # Django's built-in admin is intentionally not routed. Staff manage the
+    # portal through the React admin at /admin/login, which is backed by the
+    # /api/auth/admin/ endpoints; leaving django.contrib.admin exposed would
+    # only add a second, unnecessary login surface.
 
     # SEO
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),

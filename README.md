@@ -141,7 +141,7 @@ On the first migrate, a super admin is seeded automatically. You can override it
 | Email | `hr@rdi.com` |
 | Password | `@RDI123` |
 
-Sign in at the admin login page (`/admin/login`) in the front end, or the Django admin at `http://localhost:8000/admin/`.
+Sign in at the admin login page (`/admin/login`) in the front end. Django's built-in admin is intentionally not routed, so the React admin is the only way in.
 
 > Change these credentials before going to production. Set `DJANGO_SUPERADMIN_EMAIL` and `DJANGO_SUPERADMIN_PASSWORD`.
 
@@ -202,8 +202,11 @@ python manage.py send_job_alerts
 # Standard Django
 python manage.py makemigrations
 python manage.py migrate
-python manage.py createsuperuser
 ```
+
+The portal's super admin is seeded on migrate rather than with `createsuperuser`,
+because admin access is keyed on a user type that `createsuperuser` does not set.
+Use the `DJANGO_SUPERADMIN_*` env vars above to control those credentials.
 
 <div align="center">
 <br/>
