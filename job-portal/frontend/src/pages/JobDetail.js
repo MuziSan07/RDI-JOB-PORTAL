@@ -177,9 +177,11 @@ const JobDetail = () => {
 
     const submitApplication = async () => {
         if (!selectedResumeId) { alert('Please select a resume'); return; }
+        if (!job) return;
         setApplying(true);
         try {
-            await jobsService.applyForJob(id, selectedResumeId);
+            // The URL param may be a slug, but the apply endpoint expects the numeric job id.
+            await jobsService.applyForJob(job.id, selectedResumeId);
             setApplied(true);
             setShowApplyModal(false);
             setTimeout(() => navigate('/my-applications'), 1500);

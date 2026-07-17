@@ -164,62 +164,6 @@ const DepartmentEmployees = () => {
         }
     };
 
-    const EmployeeForm = ({ onSubmit, onClose, submitLabel }) => (
-        <form onSubmit={onSubmit}>
-            {/* Profile Picture */}
-            <div style={s.formGroup}>
-                <label style={s.label}>Profile Picture</label>
-                <div style={s.fileInputWrap}>
-                    {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" style={s.imagePreview} />
-                    ) : (
-                        <div style={s.avatarPlaceholderLg}>
-                            <UserCircle size={40} color="#334155" />
-                        </div>
-                    )}
-                    <label style={s.fileLabel}>
-                        <span style={s.fileLabelText}>Choose image</span>
-                        <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
-                    </label>
-                </div>
-            </div>
-
-            <div style={{ ...s.formGrid, ...(isMobile ? { gridTemplateColumns: '1fr' } : {}) }}>
-                <FormGroup label="Name *">
-                    <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required style={s.input} placeholder="Employee name" />
-                </FormGroup>
-                <FormGroup label="Father Name">
-                    <input type="text" value={formData.father_name} onChange={(e) => setFormData({ ...formData, father_name: e.target.value })} style={s.input} placeholder="Father name" />
-                </FormGroup>
-                <FormGroup label="CNIC">
-                    <input type="text" value={formData.cnic} onChange={(e) => setFormData({ ...formData, cnic: e.target.value })} style={s.input} placeholder="XXXXX-XXXXXXX-X" />
-                </FormGroup>
-                <FormGroup label="Job (Optional)">
-                    <select value={formData.job} onChange={(e) => setFormData({ ...formData, job: e.target.value })} style={s.input}>
-                        <option value="">Select a job</option>
-                        {jobs.map((job) => (
-                            <option key={job.id} value={job.id}>{job.title}</option>
-                        ))}
-                    </select>
-                </FormGroup>
-                <FormGroup label="Designation *">
-                    <input type="text" value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} required style={s.input} placeholder="e.g., Senior Developer" />
-                </FormGroup>
-                <FormGroup label="Salary *">
-                    <input type="number" value={formData.salary} onChange={(e) => setFormData({ ...formData, salary: e.target.value })} required style={s.input} placeholder="Salary amount" />
-                </FormGroup>
-                <FormGroup label="Joining Date *">
-                    <input type="date" value={formData.joining_date} onChange={(e) => setFormData({ ...formData, joining_date: e.target.value })} required style={s.input} />
-                </FormGroup>
-            </div>
-
-            <div style={s.modalFooter}>
-                <button type="button" onClick={onClose} style={s.cancelBtn}>Cancel</button>
-                <button type="submit" style={s.submitBtn}>{submitLabel}</button>
-            </div>
-        </form>
-    );
-
     if (loading) return <Loader />;
 
     return (
@@ -343,14 +287,34 @@ const DepartmentEmployees = () => {
                     {/* Create Modal */}
                     {showCreateModal && (
                         <Modal title="Add New Employee" icon={<Plus size={18} color="#818cf8" />} onClose={() => setShowCreateModal(false)}>
-                            <EmployeeForm onSubmit={submitCreate} onClose={() => setShowCreateModal(false)} submitLabel="Add Employee" />
+                            <EmployeeForm
+                                formData={formData}
+                                setFormData={setFormData}
+                                jobs={jobs}
+                                imagePreview={imagePreview}
+                                handleImageChange={handleImageChange}
+                                isMobile={isMobile}
+                                onSubmit={submitCreate}
+                                onClose={() => setShowCreateModal(false)}
+                                submitLabel="Add Employee"
+                            />
                         </Modal>
                     )}
 
                     {/* Edit Modal */}
                     {showEditModal && (
                         <Modal title="Edit Employee" icon={<Pencil size={18} color="#4ade80" />} onClose={() => setShowEditModal(false)}>
-                            <EmployeeForm onSubmit={submitEdit} onClose={() => setShowEditModal(false)} submitLabel="Update Employee" />
+                            <EmployeeForm
+                                formData={formData}
+                                setFormData={setFormData}
+                                jobs={jobs}
+                                imagePreview={imagePreview}
+                                handleImageChange={handleImageChange}
+                                isMobile={isMobile}
+                                onSubmit={submitEdit}
+                                onClose={() => setShowEditModal(false)}
+                                submitLabel="Update Employee"
+                            />
                         </Modal>
                     )}
 
@@ -401,6 +365,64 @@ const DepartmentEmployees = () => {
 };
 
 /* ─── Sub-components ──────────────────────────────── */
+
+// Declared at module scope on purpose: defining it inside DepartmentEmployees would
+// create a new component type on every keystroke, remounting the inputs and losing focus.
+const EmployeeForm = ({ formData, setFormData, jobs, imagePreview, handleImageChange, isMobile, onSubmit, onClose, submitLabel }) => (
+    <form onSubmit={onSubmit}>
+        {/* Profile Picture */}
+        <div style={s.formGroup}>
+            <label style={s.label}>Profile Picture</label>
+            <div style={s.fileInputWrap}>
+                {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" style={s.imagePreview} />
+                ) : (
+                    <div style={s.avatarPlaceholderLg}>
+                        <UserCircle size={40} color="#334155" />
+                    </div>
+                )}
+                <label style={s.fileLabel}>
+                    <span style={s.fileLabelText}>Choose image</span>
+                    <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                </label>
+            </div>
+        </div>
+
+        <div style={{ ...s.formGrid, ...(isMobile ? { gridTemplateColumns: '1fr' } : {}) }}>
+            <FormGroup label="Name *">
+                <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required style={s.input} placeholder="Employee name" />
+            </FormGroup>
+            <FormGroup label="Father Name">
+                <input type="text" value={formData.father_name} onChange={(e) => setFormData({ ...formData, father_name: e.target.value })} style={s.input} placeholder="Father name" />
+            </FormGroup>
+            <FormGroup label="CNIC">
+                <input type="text" value={formData.cnic} onChange={(e) => setFormData({ ...formData, cnic: e.target.value })} style={s.input} placeholder="XXXXX-XXXXXXX-X" />
+            </FormGroup>
+            <FormGroup label="Job (Optional)">
+                <select value={formData.job} onChange={(e) => setFormData({ ...formData, job: e.target.value })} style={s.input}>
+                    <option value="">Select a job</option>
+                    {jobs.map((job) => (
+                        <option key={job.id} value={job.id}>{job.title}</option>
+                    ))}
+                </select>
+            </FormGroup>
+            <FormGroup label="Designation *">
+                <input type="text" value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} required style={s.input} placeholder="e.g., Senior Developer" />
+            </FormGroup>
+            <FormGroup label="Salary *">
+                <input type="number" value={formData.salary} onChange={(e) => setFormData({ ...formData, salary: e.target.value })} required style={s.input} placeholder="Salary amount" />
+            </FormGroup>
+            <FormGroup label="Joining Date *">
+                <input type="date" value={formData.joining_date} onChange={(e) => setFormData({ ...formData, joining_date: e.target.value })} required style={s.input} />
+            </FormGroup>
+        </div>
+
+        <div style={s.modalFooter}>
+            <button type="button" onClick={onClose} style={s.cancelBtn}>Cancel</button>
+            <button type="submit" style={s.submitBtn}>{submitLabel}</button>
+        </div>
+    </form>
+);
 
 const ActionBtn = ({ icon, label, color, onClick }) => (
     <button
