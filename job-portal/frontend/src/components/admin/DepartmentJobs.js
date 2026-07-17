@@ -4,7 +4,7 @@ import DepartmentNavbar from './DepartmentNavbar';
 import Loader from '../common/Loader';
 import { jobService } from '../../services/jobsService';
 import { useResponsive } from '../../hooks/useResponsive';
-import { getCurrencies, formatJobSalary } from '../../utils/currency';
+import { getCurrencies, formatJobSalary, formatMoney } from '../../utils/currency';
 import { Search, Plus, X, Briefcase, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 
 const DepartmentJobs = () => {
@@ -318,7 +318,7 @@ const DepartmentJobs = () => {
                             </div>
                             <div style={styles.formGroup}>
                                 <label style={styles.label}>Salary Range (display text, optional)</label>
-                                <input type="text" name="salary_range" value={formData.salary_range} onChange={handleInputChange} style={styles.input} placeholder="e.g., $50,000 - $80,000" />
+                                <input type="text" name="salary_range" value={formData.salary_range} onChange={handleInputChange} style={styles.input} placeholder={`e.g., ${formatMoney(50000, formData.salary_currency)} - ${formatMoney(80000, formData.salary_currency)}`} />
                             </div>
                             <div style={{ ...styles.formRow, ...(isMobile ? { flexDirection: 'column', gap: 0 } : {}) }}>
                                 <div style={styles.formGroup}>

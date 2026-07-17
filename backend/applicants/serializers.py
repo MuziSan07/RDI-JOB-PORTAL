@@ -11,6 +11,8 @@ class ApplicationSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source='job.department.name', read_only=True)
     company_logo = serializers.SerializerMethodField()
     job_type = serializers.CharField(source='job.job_type', read_only=True)
+    # Lets the hire form default to the currency the role was advertised in.
+    job_salary_currency = serializers.CharField(source='job.salary_currency', read_only=True)
     applicant_name = serializers.SerializerMethodField()
     applicant_email = serializers.CharField(source='applicant.email', read_only=True)
     applicant_profile_picture = serializers.SerializerMethodField()
@@ -22,7 +24,8 @@ class ApplicationSerializer(serializers.ModelSerializer):
         model = Application
         fields = [
             'id', 'job_id', 'job_title', 'company_name', 'company_logo',
-            'job_type', 'applicant_name', 'applicant_email', 'applicant_profile_picture',
+            'job_type', 'job_salary_currency', 'applicant_name', 'applicant_email',
+            'applicant_profile_picture',
             'status', 'has_test', 'test_score', 'resume_details', 'applied_at', 'updated_at'
         ]
         read_only_fields = ['id', 'applied_at', 'updated_at']

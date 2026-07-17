@@ -564,6 +564,8 @@ def hire_applicant(request, pk):
     # Get required data
     designation = request.data.get('designation', application.job.title)
     salary = request.data.get('salary')
+    # Pay the hire in the currency the role was advertised in unless told otherwise.
+    salary_currency = request.data.get('salary_currency') or application.job.salary_currency or 'USD'
     joining_date = request.data.get('joining_date', timezone.now().date())
     
     if not salary:
@@ -583,6 +585,7 @@ def hire_applicant(request, pk):
         job=application.job,
         designation=designation,
         salary=salary,
+        salary_currency=salary_currency,
         joining_date=joining_date
     )
     

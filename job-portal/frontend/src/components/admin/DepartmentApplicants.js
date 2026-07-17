@@ -12,6 +12,7 @@ import {
     FileText, Briefcase, MapPin, Phone, BookOpen, Award,
     Download,
 } from 'lucide-react';
+import { getCurrencies } from '../../utils/currency';
 
 const DepartmentApplicants = () => {
     const { isMobile, isCompact } = useResponsive();
@@ -35,7 +36,7 @@ const DepartmentApplicants = () => {
 
     const [testFormData,      setTestFormData]      = useState({ chapter: '', deadline: '', pass_percentage: 70 });
     const [interviewFormData, setInterviewFormData] = useState({ interview_link: '', interview_datetime: '', message: '' });
-    const [hireFormData,      setHireFormData]      = useState({ designation: '', salary: '', joining_date: '' });
+    const [hireFormData,      setHireFormData]      = useState({ designation: '', salary: '', salary_currency: 'USD', joining_date: '' });
 
     useEffect(() => {
         fetchApplicants();
@@ -146,6 +147,8 @@ const DepartmentApplicants = () => {
         setHireFormData({
             designation: applicant.job_title || '',
             salary: '',
+            // Default to the currency the role was advertised in.
+            salary_currency: applicant.job_salary_currency || 'USD',
             joining_date: new Date().toISOString().split('T')[0],
         });
         setShowHireModal(true);
@@ -465,8 +468,15 @@ const DepartmentApplicants = () => {
                                 <FormGroup label="Designation *">
                                     <input type="text" value={hireFormData.designation} onChange={(e) => setHireFormData({ ...hireFormData, designation: e.target.value })} required style={s.input} />
                                 </FormGroup>
+                                <FormGroup label="Currency *">
+                                    <select value={hireFormData.salary_currency} onChange={(e) => setHireFormData({ ...hireFormData, salary_currency: e.target.value })} required style={s.input}>
+                                        {getCurrencies().map((c) => (
+                                            <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                                        ))}
+                                    </select>
+                                </FormGroup>
                                 <FormGroup label="Salary *">
-                                    <input type="number" value={hireFormData.salary} onChange={(e) => setHireFormData({ ...hireFormData, salary: e.target.value })} required style={s.input} placeholder="Enter salary amount" />
+                                    <input type="number" min="0" step="0.01" value={hireFormData.salary} onChange={(e) => setHireFormData({ ...hireFormData, salary: e.target.value })} required style={s.input} placeholder={`Amount in ${hireFormData.salary_currency || 'USD'}`} />
                                 </FormGroup>
                                 <FormGroup label="Joining Date *">
                                     <input type="date" value={hireFormData.joining_date} onChange={(e) => setHireFormData({ ...hireFormData, joining_date: e.target.value })} required style={s.input} />
