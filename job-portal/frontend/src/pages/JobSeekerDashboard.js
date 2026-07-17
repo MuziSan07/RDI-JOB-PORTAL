@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
     Briefcase, Clock, CheckCircle, FileText, TrendingUp, User,
     XCircle, Calendar, Award, ChevronRight, ArrowRight, Bell,
-    MapPin, DollarSign, Zap, Target, BarChart2, Star
+    MapPin, Banknote, Zap, Target, BarChart2, Star
 } from 'lucide-react';
 import { COLORS } from '../constants/colors';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
+import { formatJobSalary } from '../utils/currency';
 
 // ─── Status helpers (same as MyApplications for consistency) ────────────────
 const GREEN = '#16A34A'; // Defined green constant
@@ -28,7 +29,7 @@ const STATUS_MAP = {
 };
 const getStatus = (s) => STATUS_MAP[s] || { bg: '#F9FAFB', text: '#374151', border: '#E5E7EB', label: s };
 
-const formatSalary = (r) => (!r || r.trim() === '') ? null : r;
+const formatSalary = (job) => formatJobSalary(job) || null;
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
@@ -329,7 +330,7 @@ const RecommendedJobCard = ({ job, onClick }) => {
         hybrid:  { bg: '#FDF4FF', text: '#7E22CE' },
     };
     const tc = TYPE_COLORS[job.job_type] || { bg: '#F9FAFB', text: '#374151' };
-    const salaryText = formatSalary(job.salary_range);
+    const salaryText = formatSalary(job);
 
     return (
         <div
@@ -352,7 +353,7 @@ const RecommendedJobCard = ({ job, onClick }) => {
             <h3 style={s.jcTitle}>{job.title}</h3>
             <p style={s.jcCompany}>{job.department_name}</p>
             {salaryText && (
-                <div style={s.jcSalary}><DollarSign size={13} color="#64748B" />{salaryText}</div>
+                <div style={s.jcSalary}><Banknote size={13} color="#64748B" />{salaryText}</div>
             )}
             <div style={s.jcFooter}>
                 <span style={s.jcDate}>{new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>

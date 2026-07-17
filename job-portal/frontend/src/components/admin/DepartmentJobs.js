@@ -4,6 +4,7 @@ import DepartmentNavbar from './DepartmentNavbar';
 import Loader from '../common/Loader';
 import { jobService } from '../../services/jobsService';
 import { useResponsive } from '../../hooks/useResponsive';
+import { getCurrencies, formatJobSalary } from '../../utils/currency';
 import { Search, Plus, X, Briefcase, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 
 const DepartmentJobs = () => {
@@ -322,7 +323,11 @@ const DepartmentJobs = () => {
                             <div style={{ ...styles.formRow, ...(isMobile ? { flexDirection: 'column', gap: 0 } : {}) }}>
                                 <div style={styles.formGroup}>
                                     <label style={styles.label}>Currency</label>
-                                    <input type="text" name="salary_currency" value={formData.salary_currency} onChange={handleInputChange} maxLength="3" style={styles.input} placeholder="USD" />
+                                    <select name="salary_currency" value={formData.salary_currency} onChange={handleInputChange} style={styles.input}>
+                                        {getCurrencies().map((c) => (
+                                            <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div style={styles.formGroup}>
                                     <label style={styles.label}>Salary Min</label>
@@ -392,7 +397,7 @@ const DepartmentJobs = () => {
                                 <div style={{ ...styles.infoGrid, ...(isMobile ? { gridTemplateColumns: '1fr' } : {}) }}>
                                     <div style={styles.infoBox}>
                                         <span style={styles.infoLabel}>Salary Range</span>
-                                        <span style={styles.infoValue}>{selectedJob.salary_range || 'Not specified'}</span>
+                                        <span style={styles.infoValue}>{formatJobSalary(selectedJob) || 'Not specified'}</span>
                                     </div>
                                     <div style={styles.infoBox}>
                                         <span style={styles.infoLabel}>Vacancies</span>

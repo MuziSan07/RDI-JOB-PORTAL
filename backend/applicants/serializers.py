@@ -115,6 +115,11 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
             'job_type': obj.job.job_type,
             'selection_type': obj.job.selection_type,
             'salary_range': obj.job.salary_range,
+            'salary_currency': obj.job.salary_currency,
+            'salary_min': obj.job.salary_min,
+            'salary_max': obj.job.salary_max,
+            'salary_period': obj.job.salary_period,
+            'employment_type': obj.job.employment_type,
             'vacancies': obj.job.vacancies,
             'filled_positions': obj.job.filled_positions,
         }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-    ArrowLeft, DollarSign, Briefcase, Calendar, Building2,
+    ArrowLeft, Banknote, Briefcase, Calendar, Building2,
     User, MapPin, CheckCircle, Clock, Users,
     Mail, Award, ChevronRight, Share2, Bookmark, AlertCircle, FileText, Star, X
 } from 'lucide-react';
@@ -13,6 +13,7 @@ import { profileService } from '../services/profileService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
 import { injectJobPostingSchema } from '../utils/jobSchema';
+import { formatJobSalary } from '../utils/currency';
 import { Skeleton } from '../components/common/Skeleton';
 
 injectBrandStyles();
@@ -39,10 +40,7 @@ const btn = {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-const formatSalary = (salaryRange) => {
-    if (!salaryRange || salaryRange.trim() === '') return 'Not specified';
-    return salaryRange;
-};
+const formatSalary = (job) => formatJobSalary(job) || 'Not specified';
 
 const JOB_TYPE_COLORS = {
     remote: { bg: `${BRAND.green}14`, text: BRAND.green, border: `${BRAND.green}33` },
@@ -302,10 +300,10 @@ const JobDetail = () => {
                             {/* Stats strip */}
                             <div style={{ ...s.statsStrip, ...(isMobile ? { flexWrap: 'wrap' } : {}) }}>
                                 <div style={{ ...s.statBox, ...(isMobile ? { flex: '1 1 45%' } : {}) }}>
-                                    <DollarSign size={17} color={BRAND.green} strokeWidth={1.75} />
+                                    <Banknote size={17} color={BRAND.green} strokeWidth={1.75} />
                                     <div>
                                         <p style={s.statLabel}>Salary</p>
-                                        <p style={s.statValue}>{formatSalary(job.salary_range)}</p>
+                                        <p style={s.statValue}>{formatSalary(job)}</p>
                                     </div>
                                 </div>
                                 <div style={{ ...s.statDivider, ...(isMobile ? { display: 'none' } : {}) }} />
@@ -428,9 +426,9 @@ const JobDetail = () => {
 
                                     <div style={s.applyDetails}>
                                         <div style={s.applyDetailRow}>
-                                            <DollarSign size={15} color={BRAND.faint} strokeWidth={1.75} />
+                                            <Banknote size={15} color={BRAND.faint} strokeWidth={1.75} />
                                             <span style={s.applyDetailLabel}>Salary</span>
-                                            <span style={s.applyDetailValue}>{formatSalary(job.salary_range)}</span>
+                                            <span style={s.applyDetailValue}>{formatSalary(job)}</span>
                                         </div>
                                         <div style={s.applyDetailRow}>
                                             <Briefcase size={15} color={BRAND.faint} strokeWidth={1.75} />

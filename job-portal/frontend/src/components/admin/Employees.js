@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Loader from '../common/Loader';
 import { employeeService } from '../../services/employeeService';
 import { departmentService } from '../../services/departmentService';
+import { formatMoney } from '../../utils/currency';
 import { useAuth } from '../../context/AuthContext';
 import { useResponsive } from '../../hooks/useResponsive';
 import { Search, X, Users } from 'lucide-react';
@@ -57,9 +58,9 @@ const Employees = () => {
         }
     };
 
-    const formatSalary = (salary) => {
+    const formatSalary = (salary, currency) => {
         if (!salary) return 'N/A';
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(salary);
+        return formatMoney(salary, currency);
     };
 
     const avatarColors = ['#6366f1', '#a855f7', '#10b981', '#fbbf24', '#f472b6', '#38bdf8'];
@@ -149,7 +150,7 @@ const Employees = () => {
                                             </td>
                                             <td style={styles.td}>{employee.department_name || 'N/A'}</td>
                                             <td style={{ ...styles.td, color: '#10b981', fontWeight: '600' }}>
-                                                {formatSalary(employee.salary)}
+                                                {formatSalary(employee.salary, employee.salary_currency)}
                                             </td>
                                             <td style={{ ...styles.td, color: '#64748b' }}>
                                                 {employee.joining_date ? new Date(employee.joining_date).toLocaleDateString() : 'N/A'}
@@ -249,7 +250,7 @@ const Employees = () => {
                                     )}
                                     <div style={styles.infoBox}>
                                         <span style={styles.infoLabel}>Salary</span>
-                                        <span style={{ ...styles.infoValue, color: '#10b981' }}>{formatSalary(selectedEmployee.salary)}</span>
+                                        <span style={{ ...styles.infoValue, color: '#10b981' }}>{formatSalary(selectedEmployee.salary, selectedEmployee.salary_currency)}</span>
                                     </div>
                                     <div style={styles.infoBox}>
                                         <span style={styles.infoLabel}>Joining Date</span>

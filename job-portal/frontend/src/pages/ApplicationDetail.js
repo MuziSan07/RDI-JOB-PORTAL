@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-    ArrowLeft, DollarSign, Briefcase, Calendar, Clock,
+    ArrowLeft, Banknote, Briefcase, Calendar, Clock,
     CheckCircle, XCircle, FileText, User, AlertCircle,
     Award, ChevronRight, Building2, MapPin, Star, BookOpen
 } from 'lucide-react';
@@ -10,6 +10,7 @@ import { jobsService } from '../services/jobsService';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
+import { formatJobSalary } from '../utils/currency';
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -158,7 +159,7 @@ const ApplicationDetail = () => {
                             <div style={{ ...s.metaStrip, ...(isMobile ? { display: 'grid', gridTemplateColumns: '1fr 1fr' } : {}) }}>
                                 <MetaBox icon={<Calendar size={16} />} label="Applied On"  value={new Date(application.applied_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} />
                                 <MetaBox icon={<Briefcase size={16} />} label="Job Type"   value={jd.job_type?.replace('_', ' ') || '—'} />
-                                <MetaBox icon={<DollarSign size={16} />} label="Salary"    value={jd.salary_range || 'Not specified'} />
+                                <MetaBox icon={<Banknote size={16} />} label="Salary"    value={formatJobSalary(jd) || 'Not specified'} />
                                 <MetaBox icon={<Award size={16} />} label="Selection"      value={jd.selection_type?.replace('_', ' ') || '—'} />
                             </div>
                         </div>

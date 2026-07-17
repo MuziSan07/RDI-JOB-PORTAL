@@ -127,7 +127,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'father_name', 'cnic', 'profile_picture', 'profile_picture_url',
             'department', 'department_name', 'job', 'job_title',
-            'designation', 'salary', 'joining_date', 'created_at'
+            'designation', 'salary', 'salary_currency', 'joining_date', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
 
@@ -152,7 +152,7 @@ class EmployeeDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'father_name', 'cnic', 'profile_picture', 'profile_picture_url',
             'department', 'department_name', 'job', 'job_title',
-            'designation', 'salary', 'joining_date', 'created_at', 'updated_at'
+            'designation', 'salary', 'salary_currency', 'joining_date', 'created_at', 'updated_at'
         ]
 
     def get_profile_picture_url(self, obj):
@@ -167,4 +167,4 @@ class EmployeeDetailSerializer(serializers.ModelSerializer):
 class EmployeeCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
-        fields = ['name', 'father_name', 'cnic', 'profile_picture', 'job', 'designation', 'salary', 'joining_date']
+        fields = ['name', 'father_name', 'cnic', 'profile_picture', 'job', 'designation', 'salary', 'salary_currency', 'joining_date']

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-    Search, MapPin, DollarSign, Briefcase, Filter, User,
+    Search, MapPin, Banknote, Briefcase, Filter, User,
     Clock, CheckCircle, XCircle, AlertCircle, ChevronRight, Star,
     Bell, Settings, FileText, TrendingUp, Award, Calendar
 } from 'lucide-react';
@@ -11,6 +11,7 @@ import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
 import { JobListSkeleton } from '../components/common/Skeleton';
+import { formatJobSalary } from '../utils/currency';
 
 injectBrandStyles();
 
@@ -34,10 +35,7 @@ const btn = {
     },
 };
 
-const formatSalary = (salaryRange) => {
-    if (!salaryRange || salaryRange.trim() === '') return 'Not specified';
-    return salaryRange;
-};
+const formatSalary = (job) => formatJobSalary(job) || 'Not specified';
 
 // ───── status/badge palettes derived from BRAND tokens ─────
 const getStatusColor = (status) => {
@@ -378,7 +376,7 @@ const JobCard = ({ job, onClick, myApplications, isMobile }) => {
                 </span>
             </div>
             <div style={s.cardMeta}>
-                <span style={s.metaItem}><DollarSign size={13} color={BRAND.faint} strokeWidth={1.75} />{formatSalary(job.salary_range)}</span>
+                <span style={s.metaItem}><Banknote size={13} color={BRAND.faint} strokeWidth={1.75} />{formatSalary(job)}</span>
                 <span style={s.metaItem}><Briefcase size={13} color={BRAND.faint} strokeWidth={1.75} />{selectionLabel}</span>
                 <span style={s.metaItem}><User size={13} color={BRAND.faint} strokeWidth={1.75} />{vacanciesLeft > 0 ? `${vacanciesLeft} of ${job.vacancies} open` : 'Positions filled'}</span>
                 <span style={s.metaItem}><Calendar size={13} color={BRAND.faint} strokeWidth={1.75} />{new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>

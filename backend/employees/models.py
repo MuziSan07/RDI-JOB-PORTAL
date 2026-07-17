@@ -17,6 +17,7 @@ class Employee(models.Model):
     job = models.ForeignKey(Job, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
     designation = models.CharField(max_length=255)
     salary = models.DecimalField(max_digits=10, decimal_places=2)
+    salary_currency = models.CharField(max_length=3, default='USD', blank=True)  # ISO 4217
     joining_date = models.DateField()
     
     created_at = models.DateTimeField(auto_now_add=True)

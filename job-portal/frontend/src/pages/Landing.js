@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Search, Briefcase, Users, TrendingUp, DollarSign, ArrowRight, ArrowUpRight,
+    Search, Briefcase, Users, TrendingUp, Banknote, ArrowRight, ArrowUpRight,
     ChevronLeft, ChevronRight, Clock, Globe, Lock, Check, Plus, Minus,
 } from 'lucide-react';
 import BrandNav from '../components/brand/BrandNav';
@@ -10,6 +10,7 @@ import { BRAND, FONT, page, injectBrandStyles } from '../components/brand/brandT
 import { useResponsive } from '../hooks/useResponsive';
 import { useCountUp } from '../hooks/useCountUp';
 import { jobsService } from '../services/jobsService';
+import { formatJobSalary } from '../utils/currency';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 
 injectBrandStyles();
@@ -397,7 +398,7 @@ const Stat = ({ icon: Icon, value, label: text, isMobile, isLast }) => {
 // ───── Job row ─────
 const JobRow = ({ job, isLoggedIn, navigate, isMobile }) => {
     const left = (job.vacancies || 0) - (job.filled_positions || 0);
-    const salary = job.salary_range && job.salary_range.trim() ? job.salary_range : null;
+    const salary = formatJobSalary(job) || null;
     const [hover, setHover] = useState(false);
 
     return (
@@ -421,7 +422,7 @@ const JobRow = ({ job, isLoggedIn, navigate, isMobile }) => {
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', fontSize: 13.5, color: BRAND.slate }}>
                     <span>{job.department_name}</span>
-                    {salary && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><DollarSign size={13} strokeWidth={1.75} /> {salary}</span>}
+                    {salary && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Banknote size={13} strokeWidth={1.75} /> {salary}</span>}
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: left > 0 ? BRAND.green : BRAND.crimson }}>
                         <Clock size={13} strokeWidth={1.75} /> {left > 0 ? `${left} ${left === 1 ? 'opening' : 'openings'}` : 'Filled'}
                     </span>

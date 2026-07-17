@@ -4,6 +4,7 @@ import DepartmentNavbar from './DepartmentNavbar';
 import Loader from '../common/Loader';
 import { employeeService } from '../../services/employeeService';
 import { jobService } from '../../services/jobsService';
+import { getCurrencies, formatMoney } from '../../utils/currency';
 import { useResponsive } from '../../hooks/useResponsive';
 import {
     Users,
@@ -41,6 +42,7 @@ const DepartmentEmployees = () => {
         job: '',
         designation: '',
         salary: '',
+        salary_currency: 'USD',
         joining_date: new Date().toISOString().split('T')[0],
     };
     const [formData, setFormData] = useState(emptyForm);
@@ -106,6 +108,7 @@ const DepartmentEmployees = () => {
         if (data.job) fd.append('job', data.job);
         fd.append('designation', data.designation);
         fd.append('salary', data.salary);
+        fd.append('salary_currency', data.salary_currency || 'USD');
         fd.append('joining_date', data.joining_date);
         return fd;
     };
@@ -133,6 +136,7 @@ const DepartmentEmployees = () => {
             job: employee.job || '',
             designation: employee.designation,
             salary: employee.salary,
+            salary_currency: employee.salary_currency || 'USD',
             joining_date: employee.joining_date,
         });
         setImagePreview(employee.profile_picture_url);
@@ -259,7 +263,7 @@ const DepartmentEmployees = () => {
                                                 <span style={s.designationBadge}>{employee.designation}</span>
                                             </td>
                                             <td style={{ ...s.td, color: '#4ade80', fontWeight: '700' }}>
-                                                ${employee.salary ? Number(employee.salary).toLocaleString() : '—'}
+                                                {employee.salary ? formatMoney(employee.salary, employee.salary_currency) : '—'}
                                             </td>
                                             <td style={{ ...s.td, color: '#64748b', fontSize: '13px' }}>
                                                 {new Date(employee.joining_date).toLocaleDateString()}
@@ -349,7 +353,7 @@ const DepartmentEmployees = () => {
                                     <InfoGrid>
                                         <InfoItem label="Designation" value={selectedEmployee.designation} />
                                         <InfoItem label="Job Title" value={selectedEmployee.job_title || '—'} />
-                                        <InfoItem label="Salary" value={selectedEmployee.salary ? `$${Number(selectedEmployee.salary).toLocaleString()}` : '—'} highlight />
+                                        <InfoItem label="Salary" value={selectedEmployee.salary ? formatMoney(selectedEmployee.salary, selectedEmployee.salary_currency) : '—'} highlight />
                                         <InfoItem label="Joining Date" value={new Date(selectedEmployee.joining_date).toLocaleDateString()} />
                                         <InfoItem label="Department" value={selectedEmployee.department_name} />
                                     </InfoGrid>
@@ -409,8 +413,15 @@ const EmployeeForm = ({ formData, setFormData, jobs, imagePreview, handleImageCh
             <FormGroup label="Designation *">
                 <input type="text" value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} required style={s.input} placeholder="e.g., Senior Developer" />
             </FormGroup>
+            <FormGroup label="Currency *">
+                <select value={formData.salary_currency} onChange={(e) => setFormData({ ...formData, salary_currency: e.target.value })} required style={s.input}>
+                    {getCurrencies().map((c) => (
+                        <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                    ))}
+                </select>
+            </FormGroup>
             <FormGroup label="Salary *">
-                <input type="number" value={formData.salary} onChange={(e) => setFormData({ ...formData, salary: e.target.value })} required style={s.input} placeholder="Salary amount" />
+                <input type="number" min="0" step="0.01" value={formData.salary} onChange={(e) => setFormData({ ...formData, salary: e.target.value })} required style={s.input} placeholder={`Amount in ${formData.salary_currency || 'USD'}`} />
             </FormGroup>
             <FormGroup label="Joining Date *">
                 <input type="date" value={formData.joining_date} onChange={(e) => setFormData({ ...formData, joining_date: e.target.value })} required style={s.input} />

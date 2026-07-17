@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Bookmark, Briefcase, Building2, DollarSign, Trash2,
+    Bookmark, Briefcase, Building2, Banknote, Trash2,
     ArrowRight, Search
 } from 'lucide-react';
 import { BRAND, FONT, page } from '../components/brand/brandTheme';
 import { savedJobsService } from '../services/savedJobsService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
+import { formatJobSalary } from '../utils/currency';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-const formatSalary = (salaryRange) => {
-    if (!salaryRange || String(salaryRange).trim() === '') return 'Not specified';
-    return salaryRange;
-};
+const formatSalary = (job) => formatJobSalary(job) || 'Not specified';
 
 const JOB_TYPE_COLORS = {
     remote: { bg: `${BRAND.green}14`, text: BRAND.green, border: `${BRAND.green}33` },
@@ -212,8 +210,8 @@ const SavedJobs = () => {
                                     </span>
 
                                     <div style={s.metaRow}>
-                                        <DollarSign size={15} color={BRAND.green} strokeWidth={1.75} />
-                                        {formatSalary(job.salary_range)}
+                                        <Banknote size={15} color={BRAND.green} strokeWidth={1.75} />
+                                        {formatSalary(job)}
                                     </div>
 
                                     <div style={s.actions}>
