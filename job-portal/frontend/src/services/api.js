@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// API base URL. In production, set REACT_APP_API_URL at build time (e.g. "/api"
+// so nginx proxies it to Django on the same domain). Falls back to the local
+// dev backend when the variable is not set.
+export const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+
 const api = axios.create({
-    baseURL: 'http://localhost:8000/api',
+    baseURL: API_BASE,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -43,7 +48,7 @@ api.interceptors.response.use(
                     return Promise.reject(error);
                 }
 
-                const response = await axios.post('http://localhost:8000/api/auth/token/refresh/', {
+                const response = await axios.post(`${API_BASE}/auth/token/refresh/`, {
                     refresh: refreshToken,
                 });
 

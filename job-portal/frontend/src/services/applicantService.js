@@ -1,4 +1,4 @@
-import api from './api';
+import api, { API_BASE } from './api';
 
 export const applicantService = {
     // Get all applications
@@ -64,7 +64,7 @@ export const applicantService = {
         if (status)    params.append('status', status);
         if (job)       params.append('job', job);
         if (education) params.append('education', education);
-        const url = `http://localhost:8000/api/applicants/export/?${params.toString()}`;
+        const url = `${API_BASE}/applicants/export/?${params.toString()}`;
 
         return fetch(url, { headers: { Authorization: `Bearer ${token}` } })
             .then(res => {

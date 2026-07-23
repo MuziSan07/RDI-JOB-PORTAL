@@ -25,6 +25,17 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ.get(
     'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1'
 ).split(',') if h.strip()]
 
+# Behind nginx (production), trust the X-Forwarded-Proto header so Django knows
+# the original request was HTTPS. This makes request.build_absolute_uri() emit
+# https:// media/URL links and lets secure cookies work correctly.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Origins allowed to make unsafe (POST/PUT) requests. Required by Django 4+ when
+# the site is served over HTTPS on a real domain.
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get(
+    'CSRF_TRUSTED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000'
+).split(',') if o.strip()]
+
 # Public site domain used to build absolute URLs in sitemap.xml (no scheme).
 # Defaults to the local frontend in DEBUG so links are clickable while testing,
 # and to the production domain otherwise. Always overridable via env.
@@ -135,7 +146,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+# Served under a dedicated prefix (not "/static/") so it never collides with the
+# React build, whose own assets also live under /static/. Overridable via env.
+STATIC_URL = os.environ.get('DJANGO_STATIC_URL', '/django-static/')
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files
