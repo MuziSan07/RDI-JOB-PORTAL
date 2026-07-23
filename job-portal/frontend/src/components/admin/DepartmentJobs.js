@@ -817,6 +817,8 @@ const styles = {
         margin: 0,
         fontSize: '14px',
         color: '#94a3b8',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
         lineHeight: '1.7',
         whiteSpace: 'pre-wrap',
     },

@@ -629,7 +629,7 @@ const s = {
     // Content cards
     contentCard: { background: BRAND.surface, borderRadius: 10, border: `1px solid ${BRAND.line}`, padding: '24px 28px' },
     sectionTitle: { fontSize: 16.5, fontWeight: 700, color: BRAND.ink, margin: '0 0 14px', fontFamily: FONT },
-    bodyText: { fontSize: 14, color: BRAND.slate, lineHeight: 1.8, margin: 0 },
+    bodyText: { fontSize: 14, color: BRAND.slate, lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' },
 
     // Skills
     skillsGrid: { display: 'flex', flexWrap: 'wrap', gap: 8 },

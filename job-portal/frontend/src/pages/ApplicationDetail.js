@@ -453,7 +453,7 @@ const s = {
 
     card:          { background: 'white', borderRadius: 14, border: '1px solid #E2E8F0', padding: '22px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
     sectionTitle:  { display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: '#0F172A', margin: '0 0 16px' },
-    bodyText:      { fontSize: 14, color: '#475569', lineHeight: 1.7, margin: 0 },
+    bodyText:      { fontSize: 14, color: '#475569', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' },
 
     testTopRow:    { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
     testChapter:   { fontSize: 15, fontWeight: 700, color: '#0F172A', margin: '0 0 6px' },

@@ -185,9 +185,9 @@ def job_detail_seo(request, slug):
 <p>{escape(org_name)}</p>
 <ul>{rows_html}</ul>
 <h2>Job description</h2>
-<p>{escape(job.description or '')}</p>
+<p style="white-space:pre-wrap">{escape(job.description or '')}</p>
 <h2>Required skills</h2>
-<p>{escape(job.required_skills or '')}</p>
+<p style="white-space:pre-wrap">{escape(job.required_skills or '')}</p>
 <p><a href="{escape(canonical)}">View this job and apply on RDI Job Portal</a></p>
 </main>
 </body>
