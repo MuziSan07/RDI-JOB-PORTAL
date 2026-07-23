@@ -1,0 +1,48 @@
+# RDI Job Portal — full stack in two containers.
+#
+#   cp .env.docker.example .env    # then edit secrets
+#   docker compose up --build -d
+#
+# The React app + nginx is published on the host; the Django backend is only
+# reachable inside the compose network (nginx proxies to it). Uploaded media and
+# the SQLite database live on named volumes so they survive rebuilds.
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: job-portal-backend
+    env_file:
+      - .env
+    environment:
+      SQLITE_PATH: /app/data/db.sqlite3
+    volumes:
+      - media:/app/media          # uploaded files (shared with nginx, read-only there)
+      - dbdata:/app/data          # SQLite database
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/jobs/public/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 25s
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: ./job-portal
+    container_name: job-portal-nginx
+    ports:
+      - "3000:80"
+      - "8085:80"
+    volumes:
+      - media:/media:ro           # serve uploaded files directly
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  media:
+  dbdata:

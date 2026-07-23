@@ -1,0 +1,4 @@
+# Shell scripts must use LF endings or the shebang breaks inside Linux containers
+# ("#!/bin/sh\r: not found"), regardless of the committer's OS or git autocrlf.
+*.sh text eol=lf
+entrypoint.sh text eol=lf

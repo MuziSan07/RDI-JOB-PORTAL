@@ -71,6 +71,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Serves Django's own static files (e.g. DRF browsable API) straight from the
+    # WSGI app, so no separate static web server is needed in the container.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Add CORS middleware
     'django.middleware.common.CommonMiddleware',
@@ -104,10 +107,13 @@ WSGI_APPLICATION = 'job_portal.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# SQLite path is env-overridable so it can live on a persistent Docker volume in
+# production (e.g. SQLITE_PATH=/app/data/db.sqlite3), while local dev keeps using
+# db.sqlite3 next to manage.py.
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.environ.get('SQLITE_PATH', str(BASE_DIR / 'db.sqlite3')),
     }
 }
 
@@ -150,6 +156,14 @@ USE_TZ = True
 # React build, whose own assets also live under /static/. Overridable via env.
 STATIC_URL = os.environ.get('DJANGO_STATIC_URL', '/django-static/')
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise compresses and serves static files. The non-manifest variant is
+# used so a missing reference can never cause a 500 (the app has almost no static
+# beyond the DRF browsable API).
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
+}
 
 # Media files
 import os
