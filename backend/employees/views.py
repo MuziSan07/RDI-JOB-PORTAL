@@ -14,6 +14,70 @@ from .serializers import (
 from accounts.views import log_activity, get_client_ip
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_employees(request):
+    """Download the employee list as a CSV, honoring the same search/department
+    filters as the table. Available to super admins and department accounts."""
+    import csv
+    import io
+    from django.http import HttpResponse
+
+    if request.user.user_type not in ('super_admin', 'department'):
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.user.user_type == 'super_admin':
+        employees = Employee.objects.all()
+    else:
+        if not hasattr(request.user, 'department'):
+            return Response({'error': 'Department profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        employees = Employee.objects.filter(department=request.user.department)
+
+    employees = employees.select_related('department', 'job', 'user')
+
+    search = request.query_params.get('search')
+    if search:
+        employees = employees.filter(
+            Q(name__icontains=search) |
+            Q(user__username__icontains=search) |
+            Q(user__email__icontains=search) |
+            Q(cnic__icontains=search) |
+            Q(designation__icontains=search) |
+            Q(job__title__icontains=search)
+        )
+
+    department_filter = request.query_params.get('department')
+    if department_filter and request.user.user_type == 'super_admin':
+        employees = employees.filter(department_id=department_filter)
+
+    employees = employees.order_by('-joining_date')
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(['Name', 'Father Name', 'CNIC', 'Designation', 'Department',
+                     'Job', 'Salary', 'Currency', 'Joining Date'])
+    for e in employees:
+        name = e.name or (e.user.get_full_name() if e.user else '') or (e.user.username if e.user else '')
+        writer.writerow([
+            name,
+            e.father_name or '',
+            e.cnic or '',
+            e.designation or '',
+            e.department.name if e.department_id else '',
+            e.job.title if e.job_id else '',
+            e.salary if e.salary is not None else '',
+            e.salary_currency or '',
+            e.joining_date.isoformat() if e.joining_date else '',
+        ])
+
+    log_activity(request.user, 'Employees Exported',
+                 f'Exported {employees.count()} employee record(s)', get_client_ip(request))
+
+    resp = HttpResponse(buffer.getvalue(), content_type='text/csv')
+    resp['Content-Disposition'] = 'attachment; filename="employees_export.csv"'
+    return resp
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def employee_list_create(request):

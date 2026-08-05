@@ -1,6 +1,27 @@
-import api from './api';
+import api, { API_BASE } from './api';
 
 export const employeeService = {
+    // Download the employee list as CSV (respects the current search/department filter).
+    exportEmployees: (search = '', department = '') => {
+        const token = localStorage.getItem('token');
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (department) params.append('department', department);
+        const url = `${API_BASE}/employees/export/?${params.toString()}`;
+        return fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+            .then((res) => { if (!res.ok) throw new Error('Export failed'); return res.blob(); })
+            .then((blob) => {
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.download = 'employees_export.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(objectUrl);
+            });
+    },
+
     getAllEmployees: async (search = '', sortBy = '-joining_date') => {
         const params = new URLSearchParams();
         if (search) params.append('search', search);

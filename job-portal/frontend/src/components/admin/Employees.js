@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import Loader from '../common/Loader';
@@ -7,7 +8,7 @@ import { departmentService } from '../../services/departmentService';
 import { formatMoney } from '../../utils/currency';
 import { useAuth } from '../../context/AuthContext';
 import { useResponsive } from '../../hooks/useResponsive';
-import { Search, X, Users } from 'lucide-react';
+import { Search, X, Users, Download } from 'lucide-react';
 
 const Employees = () => {
     const { user } = useAuth();
@@ -15,12 +16,16 @@ const Employees = () => {
     const [employees, setEmployees] = useState([]);
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchParams] = useSearchParams();
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [departmentFilter, setDepartmentFilter] = useState('');
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
 
-    useEffect(() => {
+    // Sync the search box when arrived-at via the navbar search (?search=).
+    useEffect(() => { setSearchTerm(searchParams.get('search') || ''); }, [searchParams]);
+
+        useEffect(() => {
         fetchEmployees();
         if (user?.user_type === 'super_admin') fetchDepartments();
     }, [searchTerm, departmentFilter]);
@@ -45,6 +50,19 @@ const Employees = () => {
         } catch (err) {
             console.error('Failed to load departments:', err);
             setDepartments([]);
+        }
+    };
+
+    const [exporting, setExporting] = useState(false);
+    const handleExport = async () => {
+        setExporting(true);
+        try {
+            await employeeService.exportEmployees(searchTerm, departmentFilter);
+        } catch (err) {
+            console.error('Export failed:', err);
+            alert('Failed to export employees. Please try again.');
+        } finally {
+            setExporting(false);
         }
     };
 
@@ -75,7 +93,7 @@ const Employees = () => {
                 <div style={{ ...styles.scrollArea, ...(isMobile ? { padding: '90px 16px 24px 16px' } : {}) }}>
 
                     {/* Header */}
-                    <header style={styles.dashboardHeader}>
+                    <header style={{ ...styles.dashboardHeader, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                         <div>
                             <h1 style={styles.welcomeText}>Employees</h1>
                             <p style={styles.subText}>
@@ -84,6 +102,10 @@ const Employees = () => {
                                     : 'View your company employees'}
                             </p>
                         </div>
+                        <button onClick={handleExport} disabled={exporting} style={styles.exportBtn}>
+                            <Download size={16} />
+                            {exporting ? 'Exporting…' : 'Download CSV'}
+                        </button>
                     </header>
 
                     {/* Filters */}
@@ -294,6 +316,12 @@ const styles = {
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: '32px',
+    },
+    exportBtn: {
+        display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px',
+        fontSize: 13, fontWeight: 700, color: '#fff',
+        background: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)',
+        border: 'none', borderRadius: 10, cursor: 'pointer', whiteSpace: 'nowrap',
     },
     welcomeText: {
         fontSize: '26px',

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import Loader from '../common/Loader';
@@ -12,14 +13,18 @@ const Jobs = () => {
     const { isMobile, isCompact } = useResponsive();
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchParams] = useSearchParams();
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [statusFilter, setStatusFilter] = useState('');
     const [jobTypeFilter, setJobTypeFilter] = useState('');
     const [selectionTypeFilter, setSelectionTypeFilter] = useState('');
     const [selectedJob, setSelectedJob] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
 
-    useEffect(() => {
+    // Sync the search box when arrived-at via the navbar search (?search=).
+    useEffect(() => { setSearchTerm(searchParams.get('search') || ''); }, [searchParams]);
+
+        useEffect(() => {
         fetchJobs();
     }, [searchTerm, statusFilter, jobTypeFilter, selectionTypeFilter]);
 

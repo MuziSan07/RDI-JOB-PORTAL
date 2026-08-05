@@ -9,4 +9,5 @@ urlpatterns = [
     # New endpoints for Department portal
     path('<int:pk>/update-status/', views.update_employee_status, name='update-employee-status'),
     path('statistics/', views.employee_statistics, name='employee-statistics'),
+    path('export/', views.export_employees, name='employee-export'),
 ]

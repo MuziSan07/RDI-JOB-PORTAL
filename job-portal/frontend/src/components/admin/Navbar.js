@@ -1,10 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
 import NotificationBell from '../common/NotificationBell';
 
+// Admin pages whose lists support a ?search= query.
+const SEARCHABLE = ['/admin/jobs', '/admin/employees', '/admin/departments'];
+
 const Navbar = ({ title, user }) => {
     const { isCompact, isMobile } = useResponsive();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [term, setTerm] = useState('');
+
+    const runSearch = () => {
+        const q = term.trim();
+        // Filter the current page if it's searchable, otherwise fall back to Jobs.
+        const base = SEARCHABLE.find((p) => location.pathname.startsWith(p)) || '/admin/jobs';
+        navigate(`${base}${q ? `?search=${encodeURIComponent(q)}` : ''}`);
+    };
+
     const navbarStyle = {
         ...styles.navbar,
         ...(isCompact ? { left: 0, paddingLeft: 70, paddingRight: 16 } : {}),
@@ -14,9 +29,19 @@ const Navbar = ({ title, user }) => {
         <div className="admin-navbar" style={navbarStyle}>
             <div style={titleStyle}>{title}</div>
             <div style={styles.actions}>
-                <button style={styles.searchBtn}>
-                    <Search size={20} />
-                </button>
+                {!isMobile && (
+                    <div style={styles.searchWrap}>
+                        <Search size={18} color="#a0aec0" style={{ cursor: 'pointer' }} onClick={runSearch} />
+                        <input
+                            type="text"
+                            value={term}
+                            onChange={(e) => setTerm(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                            placeholder="Search…"
+                            style={styles.searchInput}
+                        />
+                    </div>
+                )}
                 <NotificationBell buttonStyle={styles.notificationBtn} iconColor="#a0aec0" iconSize={20} theme="dark" />
                 
                 {/* User Avatar */}
@@ -58,18 +83,23 @@ const styles = {
         alignItems: 'center',
         gap: '16px',
     },
-    searchBtn: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '8px',
-        border: '1px solid #2d3748',
-        backgroundColor: '#2d3748',
+    searchWrap: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        color: '#a0aec0',
-        transition: 'all 0.2s',
+        gap: '10px',
+        backgroundColor: '#2d3748',
+        border: '1px solid #2d3748',
+        borderRadius: '8px',
+        padding: '9px 14px',
+        width: '260px',
+    },
+    searchInput: {
+        border: 'none',
+        background: 'transparent',
+        outline: 'none',
+        fontSize: '14px',
+        color: '#f8fafc',
+        width: '100%',
     },
     notificationBtn: {
         width: '40px',

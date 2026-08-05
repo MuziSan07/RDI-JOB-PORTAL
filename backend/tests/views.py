@@ -13,7 +13,7 @@ from .serializers import (
     QuestionListSerializer,
     QuestionCreateSerializer
 )
-from accounts.views import log_activity, get_client_ip
+from accounts.views import log_activity, get_client_ip, create_notification
 
 
 @api_view(['GET', 'POST'])
@@ -571,7 +571,19 @@ def submit_test(request, application_id):
     else:
         application.status = 'test_failed'
     application.save()
-    
+
+    # Notify the hiring department that a candidate finished their test.
+    applicant_name = request.user.get_full_name() or request.user.username
+    outcome = 'passed' if test_result.passed else 'did not pass'
+    create_notification(
+        recipient=application.job.department.user,
+        title='Test completed',
+        message=f'{applicant_name} completed the test for "{application.job.title}" '
+                f'({test_result.percentage:.0f}%, {outcome}).',
+        category='test',
+        link='/department/applicants',
+    )
+
     # Log activity
     ip_address = get_client_ip(request)
     log_activity(

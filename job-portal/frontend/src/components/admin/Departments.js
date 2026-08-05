@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import Loader from '../common/Loader';
@@ -10,7 +11,8 @@ const Departments = () => {
     const { isMobile, isCompact } = useResponsive();
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchParams] = useSearchParams();
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -24,7 +26,10 @@ const Departments = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    useEffect(() => {
+    // Sync the search box when arrived-at via the navbar search (?search=).
+    useEffect(() => { setSearchTerm(searchParams.get('search') || ''); }, [searchParams]);
+
+        useEffect(() => {
         fetchDepartments();
     }, [searchTerm]);
 

@@ -636,8 +636,12 @@ def reject_applicant(request, pk):
     if request.user.user_type != 'department' or application.job.department != request.user.department:
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
     
-    # Get rejection reason
-    rejection_reason = request.data.get('rejection_reason', 'No reason provided')
+    # Get rejection reason (the frontend sends it as "reason"; accept either key).
+    rejection_reason = (
+        request.data.get('rejection_reason')
+        or request.data.get('reason')
+        or 'No reason provided'
+    )
     
     # Update application status
     application.status = 'rejected'
