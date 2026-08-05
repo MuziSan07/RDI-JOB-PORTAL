@@ -10,7 +10,7 @@ import { jobsService } from '../services/jobsService';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
-import { formatJobSalary } from '../utils/currency';
+import { formatJobSalary, formatMoney } from '../utils/currency';
 
 // ─── Status config ────────────────────────────────────────────────────────────
 
@@ -120,6 +120,7 @@ const ApplicationDetail = () => {
     const td = application.test_details     || {};
     const iv = application.interview_details || {};
     const rd = application.resume_details   || {};
+    const ed = application.employment_details;  // the offer, present once hired
 
     return (
         <div style={s.root}>
@@ -202,9 +203,22 @@ const ApplicationDetail = () => {
                         {isHired && (
                             <div style={s.hiredBanner}>
                                 <Award size={28} color="#14532D" />
-                                <div>
+                                <div style={{ flex: 1 }}>
                                     <h3 style={s.hiredTitle}>Congratulations! You've been hired 🎉</h3>
                                     <p style={s.hiredSub}>You have been selected for <strong>{jd.title}</strong> at <strong>{cd.name}</strong>.</p>
+                                    {ed && (
+                                        <div style={s.offerGrid}>
+                                            {ed.designation && (
+                                                <div style={s.offerItem}><span style={s.offerLabel}>Designation</span><span style={s.offerValue}>{ed.designation}</span></div>
+                                            )}
+                                            {ed.salary != null && ed.salary !== '' && (
+                                                <div style={s.offerItem}><span style={s.offerLabel}>Allocated Salary</span><span style={{ ...s.offerValue, color: '#15803D' }}>{formatMoney(ed.salary, ed.salary_currency)}</span></div>
+                                            )}
+                                            {ed.joining_date && (
+                                                <div style={s.offerItem}><span style={s.offerLabel}>Joining Date</span><span style={s.offerValue}>{new Date(ed.joining_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span></div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -447,6 +461,10 @@ const s = {
     hiredBanner:   { display: 'flex', gap: 16, alignItems: 'flex-start', background: '#F0FDF4', border: '2px solid #86EFAC', borderRadius: 14, padding: '20px 24px' },
     hiredTitle:    { fontSize: 17, fontWeight: 700, color: '#14532D', margin: '0 0 4px' },
     hiredSub:      { fontSize: 13, color: '#166534', margin: 0 },
+    offerGrid:     { display: 'flex', flexWrap: 'wrap', gap: 20, marginTop: 16, paddingTop: 16, borderTop: '1px solid #BBF7D0' },
+    offerItem:     { display: 'flex', flexDirection: 'column', gap: 3 },
+    offerLabel:    { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#16A34A' },
+    offerValue:    { fontSize: 15, fontWeight: 700, color: '#14532D' },
     rejectedBanner:{ display: 'flex', gap: 16, alignItems: 'flex-start', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 14, padding: '20px 24px' },
     rejectedTitle: { fontSize: 17, fontWeight: 700, color: '#991B1B', margin: '0 0 4px' },
     rejectedReason:{ fontSize: 13, color: '#B91C1C', margin: 0, lineHeight: 1.6 },

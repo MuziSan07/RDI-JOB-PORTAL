@@ -278,6 +278,54 @@ def super_admin_dashboard(request):
     return Response(dashboard_data, status=status.HTTP_200_OK)
 
 
+@api_view(['GET', 'PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def department_profile(request):
+    """A department account views and edits its own profile (name, tagline, bio,
+    CEO name, logo, and login username). Accepts multipart for the logo upload."""
+    if request.user.user_type != 'department' or not hasattr(request.user, 'department'):
+        return Response(
+            {'error': 'Only department accounts can access this resource'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    user = request.user
+    dept = user.department
+
+    def serialized():
+        return {
+            'username': user.username,
+            'email': user.email,  # login identifier — read-only
+            'name': dept.name,
+            'tagline': dept.tagline or '',
+            'bio': dept.bio or '',
+            'ceo_name': dept.ceo_name or '',
+            'logo_url': request.build_absolute_uri(dept.logo.url) if dept.logo else None,
+        }
+
+    if request.method == 'GET':
+        return Response(serialized(), status=status.HTTP_200_OK)
+
+    # ── update (PUT/PATCH) ──
+    data = request.data
+    for field in ('name', 'tagline', 'bio', 'ceo_name'):
+        if field in data and str(data[field]).strip() != '':
+            setattr(dept, field, data[field])
+    if request.FILES.get('logo'):
+        dept.logo = request.FILES['logo']
+    dept.save()
+
+    new_username = str(data.get('username', '')).strip()
+    if new_username and new_username != user.username:
+        user.username = new_username
+        user.save(update_fields=['username'])
+
+    log_activity(user, 'Department Profile Updated',
+                 f'Updated profile for department: {dept.name}', get_client_ip(request))
+
+    return Response({'message': 'Profile updated successfully', **serialized()}, status=status.HTTP_200_OK)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def department_dashboard(request):

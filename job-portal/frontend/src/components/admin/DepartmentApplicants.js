@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import DepartmentSidebar from './DepartmentSidebar';
 import DepartmentNavbar from './DepartmentNavbar';
 import Loader from '../common/Loader';
@@ -20,7 +21,8 @@ const DepartmentApplicants = () => {
     const [jobs, setJobs]                     = useState([]);
     const [chapters, setChapters]             = useState([]);
     const [loading, setLoading]               = useState(true);
-    const [searchTerm, setSearchTerm]         = useState('');
+    const [searchParams] = useSearchParams();
+    const [searchTerm, setSearchTerm]         = useState(searchParams.get('search') || '');
     const [statusFilter, setStatusFilter]     = useState('');
     const [jobFilter, setJobFilter]           = useState('');
     const [educationFilter, setEducationFilter] = useState('');
@@ -37,6 +39,11 @@ const DepartmentApplicants = () => {
     const [testFormData,      setTestFormData]      = useState({ chapter: '', deadline: '', pass_percentage: 70 });
     const [interviewFormData, setInterviewFormData] = useState({ interview_link: '', interview_datetime: '', message: '' });
     const [hireFormData,      setHireFormData]      = useState({ designation: '', salary: '', salary_currency: 'USD', joining_date: '' });
+
+    // Keep the search box in sync when arrived-at via the navbar search (?search=).
+    useEffect(() => {
+        setSearchTerm(searchParams.get('search') || '');
+    }, [searchParams]);
 
     useEffect(() => {
         fetchApplicants();

@@ -65,6 +65,18 @@ export const authService = {
         return response.data;
     },
 
+    // Department profile (own department account)
+    getDepartmentProfile: async () => {
+        const response = await api.get('/auth/department/profile/');
+        return response.data;
+    },
+    updateDepartmentProfile: async (formData) => {
+        const response = await api.patch('/auth/department/profile/', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    },
+
     // Check if user is authenticated
     isAuthenticated: () => {
         return !!localStorage.getItem('token');

@@ -101,14 +101,35 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
     interview_details = serializers.SerializerMethodField()
     applicant_details = serializers.SerializerMethodField()
     resume_details = serializers.SerializerMethodField()
+    employment_details = serializers.SerializerMethodField()
 
     class Meta:
         model = Application
         fields = [
             'id', 'job_details', 'company_details', 'applicant_details',
             'resume_details', 'test_details', 'interview_details',
+            'employment_details',
             'status', 'rejection_reason', 'applied_at', 'updated_at'
         ]
+
+    def get_employment_details(self, obj):
+        """The offer the department actually made — shown to the candidate once
+        hired (salary + currency the admin allocated, designation, joining date)."""
+        if obj.status != 'hired':
+            return None
+        from employees.models import Employee
+        emp = (Employee.objects
+               .filter(user=obj.applicant, job=obj.job)
+               .order_by('-created_at')
+               .first())
+        if not emp:
+            return None
+        return {
+            'designation': emp.designation,
+            'salary': emp.salary,
+            'salary_currency': emp.salary_currency,
+            'joining_date': emp.joining_date,
+        }
 
     def get_job_details(self, obj):
         return {

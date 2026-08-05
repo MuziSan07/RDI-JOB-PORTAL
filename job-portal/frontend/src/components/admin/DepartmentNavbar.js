@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Search, ChevronDown, HelpCircle } from 'lucide-react';
+import { Search, ChevronDown, HelpCircle, X, Mail, BookOpen } from 'lucide-react';
 import { useResponsive } from '../../hooks/useResponsive';
 import NotificationBell from '../common/NotificationBell';
 
 const DepartmentNavbar = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const { isCompact, isMobile } = useResponsive();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showHelp, setShowHelp] = useState(false);
+
+    const runSearch = () => {
+        const q = searchTerm.trim();
+        // The department-wide search jumps to applicants filtered by the term.
+        navigate(`/department/applicants${q ? `?search=${encodeURIComponent(q)}` : ''}`);
+    };
 
     const navbarStyle = {
         ...styles.navbar,
@@ -34,10 +44,13 @@ const DepartmentNavbar = () => {
                 {/* Left Section: Integrated Search */}
                 <div style={styles.leftSection}>
                     <div style={searchWrapperStyle}>
-                        <Search size={18} color="#64748b" />
+                        <Search size={18} color="#64748b" style={{ cursor: 'pointer' }} onClick={runSearch} />
                         <input
                             type="text"
-                            placeholder={isMobile ? 'Search...' : `Search in ${user?.department_name || 'Department'}...`}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+                            placeholder={isMobile ? 'Search applicants...' : `Search applicants in ${user?.department_name || 'Department'}...`}
                             style={styles.searchInput}
                         />
                     </div>
@@ -47,7 +60,7 @@ const DepartmentNavbar = () => {
                 <div style={styles.rightSection}>
                     {!isMobile && (
                     <div style={styles.actionGroup}>
-                        <button style={styles.iconBtn} title="Help">
+                        <button style={styles.iconBtn} title="Help" onClick={() => setShowHelp(true)}>
                             <HelpCircle size={20} />
                         </button>
                         <NotificationBell buttonStyle={styles.iconBtn} iconColor="#94a3b8" iconSize={20} theme="dark" />
@@ -56,7 +69,7 @@ const DepartmentNavbar = () => {
 
                     {!isMobile && <div style={styles.verticalDivider}></div>}
 
-                    <div style={styles.profileArea}>
+                    <div style={styles.profileArea} onClick={() => navigate('/department/settings')} title="Edit profile & settings">
                         {!isMobile && <div style={styles.userText}>
                             <span style={styles.userName}>{user?.username || 'User'}</span>
                             <span style={styles.userRole}>
@@ -87,6 +100,31 @@ const DepartmentNavbar = () => {
                     </div>
                 </div>
             </div>
+
+            {showHelp && (
+                <div style={styles.helpOverlay} onClick={() => setShowHelp(false)}>
+                    <div style={styles.helpModal} onClick={(e) => e.stopPropagation()}>
+                        <div style={styles.helpHeader}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <HelpCircle size={20} color="#818cf8" />
+                                <h3 style={styles.helpTitle}>Need help?</h3>
+                            </div>
+                            <button style={styles.helpClose} onClick={() => setShowHelp(false)}><X size={18} /></button>
+                        </div>
+                        <p style={styles.helpText}>Quick pointers for managing your department:</p>
+                        <ul style={styles.helpList}>
+                            <li><strong>Jobs</strong> — post and manage openings from the Jobs page.</li>
+                            <li><strong>Applicants</strong> — review, assign tests, schedule interviews, and hire.</li>
+                            <li><strong>Employees</strong> — see everyone you've hired and their details.</li>
+                            <li><strong>Settings</strong> — edit your department profile and change your password.</li>
+                        </ul>
+                        <div style={styles.helpContactRow}>
+                            <a href="mailto:hr@rdi.com" style={styles.helpContactBtn}><Mail size={15} /> Contact support</a>
+                            <button style={styles.helpDocsBtn} onClick={() => { setShowHelp(false); navigate('/how-it-works'); }}><BookOpen size={15} /> How it works</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </header>
     );
 };
@@ -214,6 +252,17 @@ const styles = {
         fontWeight: '700',
         fontSize: '14px',
     },
+
+    helpOverlay: { position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 },
+    helpModal: { background: '#0f172a', border: '1px solid #1e293b', borderRadius: 16, padding: 24, width: '100%', maxWidth: 440, color: '#e2e8f0' },
+    helpHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+    helpTitle: { margin: 0, fontSize: 17, fontWeight: 700, color: '#f8fafc' },
+    helpClose: { background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', padding: 4 },
+    helpText: { fontSize: 13.5, color: '#94a3b8', margin: '0 0 10px' },
+    helpList: { margin: '0 0 20px', paddingLeft: 18, fontSize: 13.5, lineHeight: 1.9, color: '#cbd5e1' },
+    helpContactRow: { display: 'flex', gap: 10, flexWrap: 'wrap' },
+    helpContactBtn: { display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', fontSize: 13, fontWeight: 600, color: '#fff', background: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)', borderRadius: 10, textDecoration: 'none' },
+    helpDocsBtn: { display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', fontSize: 13, fontWeight: 600, color: '#c7d2fe', background: '#1e293b', border: '1px solid #334155', borderRadius: 10, cursor: 'pointer' },
 };
 
 export default DepartmentNavbar;
