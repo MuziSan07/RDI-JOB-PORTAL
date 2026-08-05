@@ -5,7 +5,7 @@ import Navbar from './Navbar';
 import Loader from '../common/Loader';
 import { departmentService } from '../../services/departmentService';
 import { useResponsive } from '../../hooks/useResponsive';
-import { Building2, Search, Plus, X, Mail, User, Calendar } from 'lucide-react';
+import { Building2, Search, Plus, X, Mail, User, Calendar, Pencil } from 'lucide-react';
 
 const Departments = () => {
     const { isMobile, isCompact } = useResponsive();
@@ -14,6 +14,7 @@ const Departments = () => {
     const [searchParams] = useSearchParams();
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [showModal, setShowModal] = useState(false);
+    const [editingId, setEditingId] = useState(null);   // null = create, id = edit
     const [formData, setFormData] = useState({
         name: '',
         tagline: '',
@@ -55,6 +56,30 @@ const Departments = () => {
         setFormData({ ...formData, logo: e.target.files[0] });
     };
 
+    const emptyForm = { name: '', tagline: '', bio: '', ceo_name: '', email: '', password: '', logo: null };
+
+    const openCreate = () => {
+        setEditingId(null);
+        setFormData(emptyForm);
+        setError('');
+        setShowModal(true);
+    };
+
+    const handleEdit = (dept) => {
+        setEditingId(dept.id);
+        setFormData({
+            name: dept.name || '',
+            tagline: dept.tagline || '',
+            bio: dept.bio || '',
+            ceo_name: dept.ceo_name || '',
+            email: dept.email || '',
+            password: '',
+            logo: null,   // only sent if a new file is chosen
+        });
+        setError('');
+        setShowModal(true);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -66,17 +91,27 @@ const Departments = () => {
         data.append('bio', formData.bio);
         data.append('ceo_name', formData.ceo_name);
         data.append('email', formData.email);
-        data.append('password', formData.password);
         if (formData.logo) data.append('logo', formData.logo);
 
         try {
-            await departmentService.createDepartment(data);
-            setSuccess('Department created successfully!');
+            if (editingId) {
+                await departmentService.updateDepartment(editingId, data);
+                setSuccess('Department updated successfully!');
+            } else {
+                data.append('password', formData.password);
+                await departmentService.createDepartment(data);
+                setSuccess('Department created successfully!');
+            }
             setShowModal(false);
-            setFormData({ name: '', tagline: '', bio: '', ceo_name: '', email: '', password: '', logo: null });
+            setEditingId(null);
+            setFormData(emptyForm);
             fetchDepartments();
         } catch (err) {
-            setError(err.response?.data?.email?.[0] || 'Failed to create department');
+            setError(
+                err.response?.data?.email?.[0] ||
+                err.response?.data?.error ||
+                `Failed to ${editingId ? 'update' : 'create'} department`
+            );
         }
     };
 
@@ -97,7 +132,7 @@ const Departments = () => {
                             <h1 style={styles.welcomeText}>Departments</h1>
                             <p style={styles.subText}>Manage all company departments</p>
                         </div>
-                        <button onClick={() => setShowModal(true)} style={{ ...styles.createButton, ...(isMobile ? { justifyContent: 'center' } : {}) }}>
+                        <button onClick={openCreate} style={{ ...styles.createButton, ...(isMobile ? { justifyContent: 'center' } : {}) }}>
                             <Plus size={14} color="#f8fafc" />
                             <span>Create Department</span>
                         </button>
@@ -144,6 +179,9 @@ const Departments = () => {
                                         <h3 style={styles.cardTitle}>{dept.name}</h3>
                                         {dept.tagline && <p style={styles.cardTagline}>{dept.tagline}</p>}
                                     </div>
+                                    <button onClick={() => handleEdit(dept)} style={styles.editButton} title="Edit department">
+                                        <Pencil size={15} color="#818cf8" />
+                                    </button>
                                 </div>
 
                                 <div style={styles.divider} />
@@ -181,7 +219,7 @@ const Departments = () => {
                 <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
                     <div style={{ ...styles.modal, ...(isMobile ? { width: '92vw' } : {}) }} onClick={(e) => e.stopPropagation()}>
                         <div style={styles.modalHeader}>
-                            <h2 style={styles.modalTitle}>Create New Department</h2>
+                            <h2 style={styles.modalTitle}>{editingId ? 'Edit Department' : 'Create New Department'}</h2>
                             <button onClick={() => setShowModal(false)} style={styles.closeButton}>
                                 <X size={18} color="#94a3b8" />
                             </button>
@@ -189,7 +227,7 @@ const Departments = () => {
 
                         <form onSubmit={handleSubmit} style={styles.form}>
                             <div style={styles.formGroup}>
-                                <label style={styles.label}>Company Logo</label>
+                                <label style={styles.label}>Company Logo {editingId ? '(leave empty to keep current)' : ''}</label>
                                 <input type="file" accept="image/*" onChange={handleFileChange} style={styles.fileInput} />
                             </div>
                             <div style={{ ...styles.formRow, ...(isMobile ? { gridTemplateColumns: '1fr' } : {}) }}>
@@ -216,14 +254,16 @@ const Departments = () => {
                                     <input type="email" name="email" value={formData.email} onChange={handleInputChange} required style={styles.input} placeholder="Company email" />
                                 </div>
                             </div>
-                            <div style={styles.formGroup}>
-                                <label style={styles.label}>Password *</label>
-                                <input type="password" name="password" value={formData.password} onChange={handleInputChange} required minLength="8" style={styles.input} placeholder="Min 8 characters" />
-                            </div>
+                            {!editingId && (
+                                <div style={styles.formGroup}>
+                                    <label style={styles.label}>Password *</label>
+                                    <input type="password" name="password" value={formData.password} onChange={handleInputChange} required minLength="8" style={styles.input} placeholder="Min 8 characters" />
+                                </div>
+                            )}
 
                             <div style={styles.modalFooter}>
                                 <button type="button" onClick={() => setShowModal(false)} style={styles.cancelButton}>Cancel</button>
-                                <button type="submit" style={styles.submitButton}>Create Department</button>
+                                <button type="submit" style={styles.submitButton}>{editingId ? 'Save Changes' : 'Create Department'}</button>
                             </div>
                         </form>
                     </div>
@@ -365,6 +405,18 @@ const styles = {
     cardMeta: {
         flex: 1,
         minWidth: 0,
+    },
+    editButton: {
+        flexShrink: 0,
+        width: '34px',
+        height: '34px',
+        borderRadius: '9px',
+        border: '1px solid #1e293b',
+        backgroundColor: '#0b1220',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
     },
     cardTitle: {
         margin: '0 0 4px 0',
