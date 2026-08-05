@@ -85,21 +85,6 @@ const Logo = ({ onClick, compact }) => (
             alt="RDI Logo"
             style={{ height: compact ? '38px' : '44px', width: 'auto', objectFit: 'contain', transition: 'height 0.3s ease' }}
         />
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <span style={{
-                fontFamily: "'Fraunces', Georgia, serif",
-                fontSize: 20,
-                fontWeight: 700,
-                letterSpacing: '-0.2px',
-                color: RDI_THEME.greenDark,
-                lineHeight: 1.15,
-            }}>
-                RDI <span style={{ color: RDI_THEME.gold, fontStyle: 'italic', fontWeight: 600 }}>JobPortal</span>
-            </span>
-            <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: '1.4px', color: RDI_THEME.inkMuted, textTransform: 'uppercase', marginTop: 2 }}>
-                Transforming Lives
-            </span>
-        </div>
     </div>
 );
 

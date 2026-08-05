@@ -99,10 +99,7 @@ const BrandFooter = () => {
                 {/* Brand + newsletter */}
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                        <img src="/RDI.png" alt="RDI Logo" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
-                        <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px' }}>
-                            RDI <span style={{ color: RDI_THEME.gold, fontStyle: 'italic' }}>JobPortal</span>
-                        </span>
+                        <img src="/RDI.png" alt="RDI Logo" style={{ height: 40, width: 'auto', objectFit: 'contain', background: '#fff', borderRadius: 8, padding: 4 }} />
                     </div>
                     <p style={{ fontSize: 14.5, color: RDI_THEME.muted, lineHeight: 1.7, maxWidth: 320, margin: '0 0 20px' }}>
                         The hiring platform connecting ambitious talent with employers building brighter futures part of Rupani Development Initiatives.
