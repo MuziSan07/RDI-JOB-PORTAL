@@ -863,25 +863,23 @@ def _parse_bool(value):
 
 # Resume documents: PDF / DOC / DOCX only, max 5 MB. Prevents storing/serving
 # arbitrary (e.g. HTML/SVG with scripts) files from /media.
-_ALLOWED_RESUME_EXT = ('.pdf', '.doc', '.docx')
+_ALLOWED_RESUME_EXT = ('.pdf',)
 _ALLOWED_RESUME_CT = (
     'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/octet-stream',  # some browsers send this for .doc/.docx
+    'application/octet-stream',  # some browsers send this for uploads
 )
 
 
 def _validate_resume_file(f):
-    """Return (ok, error_message) for an uploaded resume document."""
+    """Return (ok, error_message) for an uploaded resume document (PDF only)."""
     if f is None:
         return True, None
     name = (getattr(f, 'name', '') or '').lower()
     if not name.endswith(_ALLOWED_RESUME_EXT):
-        return False, 'Resume file must be a PDF, DOC or DOCX.'
+        return False, 'Resume file must be a PDF.'
     ct = (getattr(f, 'content_type', '') or '').lower()
     if ct and ct not in _ALLOWED_RESUME_CT:
-        return False, 'Invalid file type. Please upload a PDF or Word document.'
+        return False, 'Invalid file type. Please upload a PDF file.'
     if getattr(f, 'size', 0) > 5 * 1024 * 1024:
         return False, 'Resume file must be under 5 MB.'
     return True, None
@@ -907,6 +905,7 @@ def resume_list_create(request):
                 'first_name': r.first_name,
                 'last_name': r.last_name,
                 'father_name': r.father_name,
+                'contact_number': r.contact_number,
                 'address': r.address,
                 'country': r.country,
                 'cnic': r.cnic,
@@ -925,6 +924,7 @@ def resume_list_create(request):
         first_name = request.data.get('first_name', '').strip()
         last_name = request.data.get('last_name', '').strip()
         father_name = request.data.get('father_name', '').strip()
+        contact_number = request.data.get('contact_number', '').strip()
         address = request.data.get('address', '').strip()
         country = (request.data.get('country', '') or '').strip() or None
         cnic = request.data.get('cnic', '').strip()
@@ -934,8 +934,12 @@ def resume_list_create(request):
         is_primary = _parse_bool(request.data.get('is_primary', False))
         resume_file = request.FILES.get('resume_file')
 
-        if not all([title, father_name, address, cnic, experience, education]):
-            return Response({'error': 'title, father_name, address, cnic, experience and education are required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all([title, father_name, contact_number, address, cnic, experience, education]):
+            return Response({'error': 'title, father_name, contact_number, address, cnic, experience and education are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # A resume document (PDF) is mandatory when creating a resume.
+        if resume_file is None:
+            return Response({'error': 'Please upload your resume (PDF).', 'resume_file': 'A PDF resume file is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Validate national ID against selected country
         from .countries import validate_national_id
@@ -943,7 +947,7 @@ def resume_list_create(request):
         if not ok:
             return Response({'error': msg, 'cnic': msg}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validate the uploaded resume document (type/size)
+        # Validate the uploaded resume document (PDF only, size)
         ok, fmsg = _validate_resume_file(resume_file)
         if not ok:
             return Response({'error': fmsg, 'resume_file': fmsg}, status=status.HTTP_400_BAD_REQUEST)
@@ -962,6 +966,7 @@ def resume_list_create(request):
             first_name=first_name,
             last_name=last_name,
             father_name=father_name,
+            contact_number=contact_number,
             address=address,
             country=country,
             cnic=cnic,
@@ -979,6 +984,7 @@ def resume_list_create(request):
         return Response({
             'id': resume.id, 'title': resume.title,
             'first_name': resume.first_name, 'last_name': resume.last_name, 'father_name': resume.father_name,
+            'contact_number': resume.contact_number,
             'address': resume.address, 'country': resume.country, 'cnic': resume.cnic, 'current_job': resume.current_job,
             'experience': resume.experience, 'education': resume.education,
             'resume_file': request.build_absolute_uri(resume.resume_file.url) if resume.resume_file else None,
@@ -1004,6 +1010,7 @@ def resume_detail(request, pk):
         return Response({
             'id': resume.id, 'title': resume.title,
             'first_name': resume.first_name, 'last_name': resume.last_name, 'father_name': resume.father_name,
+            'contact_number': resume.contact_number,
             'address': resume.address, 'country': resume.country, 'cnic': resume.cnic, 'current_job': resume.current_job,
             'experience': resume.experience, 'education': resume.education,
             'resume_file': request.build_absolute_uri(resume.resume_file.url) if resume.resume_file else None,
@@ -1015,6 +1022,7 @@ def resume_detail(request, pk):
         resume.first_name = request.data.get('first_name', resume.first_name)
         resume.last_name = request.data.get('last_name', resume.last_name)
         resume.father_name = request.data.get('father_name', resume.father_name)
+        resume.contact_number = request.data.get('contact_number', resume.contact_number)
         resume.address = request.data.get('address', resume.address)
         new_country = request.data.get('country', resume.country)
         new_country = (new_country or '').strip() or None

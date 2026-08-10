@@ -13,6 +13,7 @@ class User(AbstractUser):
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     father_name = models.CharField(max_length=200, null=True, blank=True)
+    contact_number = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     country = models.CharField(max_length=2, null=True, blank=True)  # ISO 3166-1 alpha-2 code
     cnic = models.CharField(max_length=32, null=True, blank=True, unique=True)  # national ID (format varies by country)
@@ -31,6 +32,7 @@ class Resume(models.Model):
     first_name = models.CharField(max_length=150, blank=True, default='')
     last_name = models.CharField(max_length=150, blank=True, default='')
     father_name = models.CharField(max_length=200)
+    contact_number = models.CharField(max_length=20, blank=True, default='')
     address = models.TextField()
     country = models.CharField(max_length=2, null=True, blank=True)  # ISO 3166-1 alpha-2 code
     cnic = models.CharField(max_length=32)  # national ID (format varies by country)

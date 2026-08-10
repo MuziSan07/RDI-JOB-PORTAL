@@ -36,7 +36,7 @@ const Toast = ({ msg, type, onClose }) => (
     </div>
 );
 
-const emptyResume = { title: '', first_name: '', last_name: '', father_name: '', country: '', cnic: '', address: '', current_job: '', experience: '', education: '' };
+const emptyResume = { title: '', first_name: '', last_name: '', father_name: '', contact_number: '', country: '', cnic: '', address: '', current_job: '', experience: '', education: '' };
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
@@ -60,7 +60,7 @@ const ProfilePage = () => {
 
     // Profile form state
     const [profileForm, setProfileForm] = useState({
-        first_name: '', last_name: '', father_name: '', country: '', cnic: '',
+        first_name: '', last_name: '', father_name: '', contact_number: '', country: '', cnic: '',
         address: '', current_job: '', experience: '', education: '',
     });
 
@@ -84,6 +84,7 @@ const ProfilePage = () => {
                 first_name: profileData.first_name || '',
                 last_name: profileData.last_name || '',
                 father_name: profileData.father_name || '',
+                contact_number: profileData.contact_number || '',
                 country: profileData.country || '',
                 cnic: profileData.cnic || '',
                 address: profileData.address || '',
@@ -157,6 +158,7 @@ const ProfilePage = () => {
             first_name: profileForm.first_name || '',
             last_name: profileForm.last_name || '',
             father_name: profileForm.father_name || '',
+            contact_number: profileForm.contact_number || '',
             country: profileForm.country || '',
             cnic: profileForm.cnic || '',
             address: profileForm.address || '',
@@ -171,7 +173,7 @@ const ProfilePage = () => {
     const openEditResume = (r) => {
         setResumeForm({
             title: r.title, first_name: r.first_name || '', last_name: r.last_name || '',
-            father_name: r.father_name, country: r.country || '', cnic: r.cnic,
+            father_name: r.father_name, contact_number: r.contact_number || '', country: r.country || '', cnic: r.cnic,
             address: r.address, current_job: r.current_job || '',
             experience: r.experience, education: r.education,
         });
@@ -180,17 +182,24 @@ const ProfilePage = () => {
     };
 
     const handleResumeSave = async () => {
-        if (!resumeForm.title || !resumeForm.father_name || !resumeForm.cnic ||
-            !resumeForm.address || !resumeForm.experience || !resumeForm.education) {
+        if (!resumeForm.title || !resumeForm.father_name || !resumeForm.contact_number ||
+            !resumeForm.cnic || !resumeForm.address || !resumeForm.experience || !resumeForm.education) {
             showToast('Please fill all required fields', 'error');
             return;
         }
         if (!resumeForm.country) { showToast('Please select a country', 'error'); return; }
         const idCheck = validateNationalId(resumeForm.country, resumeForm.cnic);
         if (!idCheck.valid) { showToast(idCheck.message, 'error'); return; }
-        if (resumeFile && resumeFile.size > 5 * 1024 * 1024) {
-            showToast('PDF must be under 5 MB', 'error');
+        // A PDF resume file is mandatory when creating a new resume.
+        const isNew = editingResume === 'new';
+        if (isNew && !resumeFile) {
+            showToast('Please upload your resume as a PDF file', 'error');
             return;
+        }
+        if (resumeFile) {
+            const isPdf = resumeFile.type === 'application/pdf' || resumeFile.name.toLowerCase().endsWith('.pdf');
+            if (!isPdf) { showToast('Only PDF files are allowed for the resume', 'error'); return; }
+            if (resumeFile.size > 5 * 1024 * 1024) { showToast('PDF must be under 5 MB', 'error'); return; }
         }
         const payload = { ...resumeForm, ...(resumeFile ? { resume_file: resumeFile } : {}) };
         setSaving(true);
@@ -391,6 +400,9 @@ const ProfilePage = () => {
                                 <Field label="Father's Name *" icon={<User size={14} />}>
                                     <input style={s.input} value={profileForm.father_name} onChange={e => setProfileForm(p => ({ ...p, father_name: e.target.value }))} placeholder="Father's full name" />
                                 </Field>
+                                <Field label="Contact Number" icon={<Phone size={14} />}>
+                                    <input style={s.input} type="tel" value={profileForm.contact_number} onChange={e => setProfileForm(p => ({ ...p, contact_number: e.target.value }))} placeholder="e.g. +92 300 1234567" />
+                                </Field>
                                 <Field label="Country *" icon={<Globe size={14} />}>
                                     <SearchableSelect
                                         value={profileForm.country}
@@ -501,6 +513,9 @@ const ProfilePage = () => {
                                         <Field label="Father's Name *" icon={<User size={14} />}>
                                             <input style={s.input} value={resumeForm.father_name} onChange={e => setResumeForm(p => ({ ...p, father_name: e.target.value }))} placeholder="Father's full name" />
                                         </Field>
+                                        <Field label="Contact Number *" icon={<Phone size={14} />}>
+                                            <input style={s.input} type="tel" value={resumeForm.contact_number} onChange={e => setResumeForm(p => ({ ...p, contact_number: e.target.value }))} placeholder="e.g. +92 300 1234567" />
+                                        </Field>
                                         <Field label="Country *" icon={<Globe size={14} />}>
                                             <SearchableSelect
                                                 value={resumeForm.country}
@@ -543,12 +558,12 @@ const ProfilePage = () => {
                                         <textarea style={s.textarea} rows={5} value={resumeForm.experience} onChange={e => setResumeForm(p => ({ ...p, experience: e.target.value }))} placeholder="Work experience, skills, achievements..." />
                                     </Field>
 
-                                    {/* Optional PDF/DOC upload — attached alongside the structured resume */}
-                                    <Field label="Attach Resume File (PDF/DOC — optional)" icon={<Upload size={14} />} full>
+                                    {/* Mandatory PDF upload — a resume document is required to create a resume */}
+                                    <Field label={`Resume File (PDF)${editingResume === 'new' ? ' *' : ''}`} icon={<Upload size={14} />} full>
                                         <label style={s.uploadBox}>
                                             <input
                                                 type="file"
-                                                accept=".pdf,.doc,.docx,application/pdf"
+                                                accept="application/pdf,.pdf"
                                                 style={{ display: 'none' }}
                                                 onChange={e => setResumeFile(e.target.files?.[0] || null)}
                                             />
@@ -556,7 +571,7 @@ const ProfilePage = () => {
                                             <span style={s.uploadBoxText}>
                                                 {resumeFile
                                                     ? resumeFile.name
-                                                    : 'Click to upload a PDF or DOC (max 5 MB)'}
+                                                    : 'Click to upload your resume — PDF only (max 5 MB)'}
                                             </span>
                                         </label>
                                         {/* existing / newly-selected file indicators */}

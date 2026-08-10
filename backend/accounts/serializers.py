@@ -101,7 +101,7 @@ class JobSeekerRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'username', 'email', 'password', 'confirm_password',
-            'first_name', 'last_name', 'father_name', 'country', 'cnic',
+            'first_name', 'last_name', 'father_name', 'contact_number', 'country', 'cnic',
             'address', 'current_job', 'experience', 'education',
             'profile_picture'
         ]
@@ -177,7 +177,7 @@ class JobSeekerProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
-            'father_name', 'country', 'cnic', 'address', 'current_job',
+            'father_name', 'contact_number', 'country', 'cnic', 'address', 'current_job',
             'experience', 'education', 'profile_picture', 'profile_picture_url',
             'created_at', 'updated_at'
         ]
