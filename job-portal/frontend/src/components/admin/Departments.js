@@ -6,6 +6,7 @@ import Loader from '../common/Loader';
 import { departmentService } from '../../services/departmentService';
 import { useResponsive } from '../../hooks/useResponsive';
 import { Building2, Search, Plus, X, Mail, User, Calendar, Pencil } from 'lucide-react';
+import PasswordInput from '../common/PasswordInput';
 
 const Departments = () => {
     const { isMobile, isCompact } = useResponsive();
@@ -257,7 +258,7 @@ const Departments = () => {
                             {!editingId && (
                                 <div style={styles.formGroup}>
                                     <label style={styles.label}>Password *</label>
-                                    <input type="password" name="password" value={formData.password} onChange={handleInputChange} required minLength="8" style={styles.input} placeholder="Min 8 characters" />
+                                    <PasswordInput name="password" value={formData.password} onChange={handleInputChange} required minLength="8" style={styles.input} placeholder="Min 8 characters" iconColor="#64748b" />
                                 </div>
                             )}
 

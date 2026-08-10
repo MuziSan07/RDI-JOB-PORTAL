@@ -665,20 +665,31 @@ const ActionBtn = ({ icon, label, color, onClick }) => (
     </button>
 );
 
-const Modal = ({ title, icon, onClose, children, wide }) => (
-    <div style={s.modalOverlay} onClick={onClose}>
-        <div style={{ ...s.modal, maxWidth: wide ? '800px' : '560px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={s.modalHeader}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={s.modalIconWrap}>{icon}</div>
-                    <h2 style={s.modalTitle}>{title}</h2>
+const Modal = ({ title, icon, onClose, children, wide }) => {
+    const { isMobile } = useResponsive();
+    return (
+        <div style={s.modalOverlay} onClick={onClose}>
+            <div
+                style={{
+                    ...s.modal,
+                    ...(isMobile
+                        ? { width: '92vw', maxWidth: '92vw' }
+                        : { maxWidth: wide ? '800px' : '560px' }),
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div style={{ ...s.modalHeader, ...(isMobile ? { padding: '18px 20px' } : {}) }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={s.modalIconWrap}>{icon}</div>
+                        <h2 style={s.modalTitle}>{title}</h2>
+                    </div>
+                    <button onClick={onClose} style={s.closeBtn}><X size={18} /></button>
                 </div>
-                <button onClick={onClose} style={s.closeBtn}><X size={18} /></button>
+                <div style={{ ...s.modalBody, ...(isMobile ? { padding: '20px' } : {}) }}>{children}</div>
             </div>
-            <div style={s.modalBody}>{children}</div>
         </div>
-    </div>
-);
+    );
+};
 
 const FormGroup    = ({ label, children })          => <div style={{ marginBottom: '20px' }}><label style={s.label}>{label}</label>{children}</div>;
 const ModalFooter  = ({ onCancel, submitLabel })    => <div style={s.modalFooter}><button type="button" onClick={onCancel} style={s.cancelBtn}>Cancel</button><button type="submit" style={s.submitBtn}>{submitLabel}</button></div>;

@@ -81,7 +81,7 @@ const Logo = ({ onClick, compact }) => (
         <img
             src="/RDI.png"
             alt="RDI Logo"
-            style={{ height: compact ? '38px' : '44px', width: 'auto', objectFit: 'contain', transition: 'height 0.3s ease' }}
+            style={{ height: compact ? '52px' : '60px', width: 'auto', objectFit: 'contain', transition: 'height 0.3s ease' }}
         />
     </div>
 );

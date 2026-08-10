@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { useResponsive } from '../../hooks/useResponsive';
+import PasswordInput from '../common/PasswordInput';
 
 const Login = () => {
     const { isMobile, isCompact } = useResponsive();
@@ -83,14 +84,14 @@ const Login = () => {
 
                         <div style={styles.formGroup}>
                             <label style={styles.label}>Password</label>
-                            <input
-                                type="password"
+                            <PasswordInput
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                 required
                                 placeholder="••••••••"
                                 style={styles.input}
                                 disabled={loading}
+                                iconColor="#718096"
                             />
                         </div>
 

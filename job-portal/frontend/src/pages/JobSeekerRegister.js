@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Lock, AlertCircle, Loader, ArrowRight, Check } from 'lucide-react';
+import { User, Mail, Lock, AlertCircle, Loader, ArrowRight, Check, Eye, EyeOff } from 'lucide-react';
 import { BRAND, FONT, injectBrandStyles } from '../components/brand/brandTheme';
 import { useResponsive } from '../hooks/useResponsive';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
@@ -35,7 +35,7 @@ const Logo = ({ onClick }) => (
         <img
             src="/RDI.png"
             alt="RDI Logo"
-            style={{ height: '44px', width: 'auto', objectFit: 'contain' }}
+            style={{ height: '56px', width: 'auto', objectFit: 'contain' }}
         />
     </div>
 );
@@ -53,6 +53,8 @@ const JobSeekerRegister = () => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -183,13 +185,16 @@ const JobSeekerRegister = () => {
                             <div className="rdi-input-wrap" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 14px', border: `1px solid ${BRAND.line}`, borderRadius: 8, backgroundColor: BRAND.surface, transition: 'border-color 0.15s ease' }}>
                                 <Lock size={15} color={BRAND.faint} strokeWidth={1.75} />
                                 <input
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     placeholder="Min. 8 characters"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     required
                                     style={{ flex: 1, border: 'none', outline: 'none', padding: '12px 0', fontSize: 14, color: BRAND.ink, background: 'transparent', fontFamily: FONT }}
                                 />
+                                <button type="button" onClick={() => setShowPassword((s) => !s)} tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: BRAND.faint, display: 'flex', alignItems: 'center', padding: 4 }}>
+                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
                             </div>
                         </div>
 
@@ -200,13 +205,16 @@ const JobSeekerRegister = () => {
                             <div className="rdi-input-wrap" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 14px', border: `1px solid ${BRAND.line}`, borderRadius: 8, backgroundColor: BRAND.surface, transition: 'border-color 0.15s ease' }}>
                                 <Lock size={15} color={BRAND.faint} strokeWidth={1.75} />
                                 <input
-                                    type="password"
+                                    type={showConfirm ? 'text' : 'password'}
                                     placeholder="Re-enter password"
                                     value={formData.confirm_password}
                                     onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
                                     required
                                     style={{ flex: 1, border: 'none', outline: 'none', padding: '12px 0', fontSize: 14, color: BRAND.ink, background: 'transparent', fontFamily: FONT }}
                                 />
+                                <button type="button" onClick={() => setShowConfirm((s) => !s)} tabIndex={-1} aria-label={showConfirm ? 'Hide password' : 'Show password'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: BRAND.faint, display: 'flex', alignItems: 'center', padding: 4 }}>
+                                    {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
                             </div>
                         </div>
 

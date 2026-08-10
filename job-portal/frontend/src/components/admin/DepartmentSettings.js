@@ -14,6 +14,8 @@ import {
     User,
     Image as ImageIcon,
     Save,
+    Eye,
+    EyeOff,
 } from 'lucide-react';
 
 const DepartmentSettings = () => {
@@ -253,23 +255,33 @@ const DepartmentSettings = () => {
 
 /* ─── Sub-components ──────────────────────────────── */
 
-const FormField = ({ label, icon, value, onChange, type = 'text', required, placeholder, disabled }) => (
-    <div style={s.formGroup}>
-        <label style={s.label}>{label}</label>
-        <div style={s.inputWrap}>
-            <div style={s.inputIcon}>{icon}</div>
-            <input
-                type={type}
-                value={value}
-                onChange={onChange}
-                required={required}
-                placeholder={placeholder}
-                disabled={disabled}
-                style={{ ...s.input, ...(disabled ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}
-            />
+const FormField = ({ label, icon, value, onChange, type = 'text', required, placeholder, disabled }) => {
+    const [show, setShow] = useState(false);
+    const isPassword = type === 'password';
+    const inputType = isPassword ? (show ? 'text' : 'password') : type;
+    return (
+        <div style={s.formGroup}>
+            <label style={s.label}>{label}</label>
+            <div style={s.inputWrap}>
+                <div style={s.inputIcon}>{icon}</div>
+                <input
+                    type={inputType}
+                    value={value}
+                    onChange={onChange}
+                    required={required}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    style={{ ...s.input, ...(isPassword ? { paddingRight: 42 } : {}), ...(disabled ? { opacity: 0.6, cursor: 'not-allowed' } : {}) }}
+                />
+                {isPassword && (
+                    <button type="button" onClick={() => setShow((v) => !v)} tabIndex={-1} aria-label={show ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', padding: 4 }}>
+                        {show ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                )}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const TextAreaField = ({ label, value, onChange, required, placeholder }) => (
     <div style={s.formGroup}>
