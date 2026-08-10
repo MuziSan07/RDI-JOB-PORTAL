@@ -57,7 +57,7 @@ const Landing = () => {
             try {
                 const [statsData, jobsData] = await Promise.all([
                     jobsService.getStatistics(),
-                    jobsService.getPublicJobs({ page_size: 6 }),
+                    jobsService.getPublicJobs({ page_size: 3 }),
                 ]);
                 setStats(statsData);
                 setFeaturedJobs(jobsData.results || []);
@@ -149,7 +149,7 @@ const Landing = () => {
                         </div>
                     ) : (
                         <div style={{ borderTop: `1px solid ${BRAND.line}` }}>
-                            {featuredJobs.map((job) => (
+                            {featuredJobs.slice(0, 3).map((job) => (
                                 <JobRow key={job.id} job={job} isLoggedIn={isLoggedIn} navigate={navigate} isMobile={isMobile} />
                             ))}
                         </div>
