@@ -193,7 +193,8 @@ const DepartmentActivityLogs = () => {
 
 const s = {
     container: { display: 'flex', backgroundColor: '#020617', minHeight: '100vh' },
-    mainContent: { marginLeft: '280px', flex: 1, display: 'flex', flexDirection: 'column' },
+    mainContent: {
+        minWidth: 0, marginLeft: '280px', flex: 1, display: 'flex', flexDirection: 'column' },
     content: { padding: '100px 40px 40px 40px' },
 
     pageHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '36px' },

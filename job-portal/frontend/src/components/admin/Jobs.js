@@ -257,6 +257,7 @@ const styles = {
         minHeight: '100vh',
     },
     mainContent: {
+        minWidth: 0,
         marginLeft: '280px',
         flex: 1,
         display: 'flex',
