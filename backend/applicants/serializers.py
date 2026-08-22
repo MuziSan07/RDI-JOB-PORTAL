@@ -18,6 +18,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
     applicant_profile_picture = serializers.SerializerMethodField()
     has_test = serializers.SerializerMethodField()
     test_score = serializers.SerializerMethodField()
+    has_task = serializers.SerializerMethodField()
     resume_details = serializers.SerializerMethodField()
 
     class Meta:
@@ -26,7 +27,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             'id', 'job_id', 'job_title', 'company_name', 'company_logo',
             'job_type', 'job_salary_currency', 'applicant_name', 'applicant_email',
             'applicant_profile_picture',
-            'status', 'has_test', 'test_score', 'resume_details', 'applied_at', 'updated_at'
+            'status', 'has_test', 'test_score', 'has_task', 'resume_details', 'applied_at', 'updated_at'
         ]
         read_only_fields = ['id', 'applied_at', 'updated_at']
 
@@ -57,6 +58,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'test_assignment') and hasattr(obj.test_assignment, 'result'):
             return obj.test_assignment.result.percentage
         return None
+
+    def get_has_task(self, obj):
+        return hasattr(obj, 'task_assignment')
 
     def get_resume_details(self, obj):
         if obj.resume:
@@ -98,6 +102,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
     job_details = serializers.SerializerMethodField()
     company_details = serializers.SerializerMethodField()
     test_details = serializers.SerializerMethodField()
+    task_details = serializers.SerializerMethodField()
     interview_details = serializers.SerializerMethodField()
     applicant_details = serializers.SerializerMethodField()
     resume_details = serializers.SerializerMethodField()
@@ -107,7 +112,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
         model = Application
         fields = [
             'id', 'job_details', 'company_details', 'applicant_details',
-            'resume_details', 'test_details', 'interview_details',
+            'resume_details', 'test_details', 'task_details', 'interview_details',
             'employment_details',
             'status', 'rejection_reason', 'applied_at', 'updated_at'
         ]
@@ -185,6 +190,38 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
                 'result': result_data,
             }
         return {'has_test': False}
+
+    def get_task_details(self, obj):
+        if hasattr(obj, 'task_assignment'):
+            ta = obj.task_assignment
+            request = self.context.get('request')
+
+            def abs_url(f):
+                if not f:
+                    return None
+                return request.build_absolute_uri(f.url) if request else f.url
+
+            files = [
+                {
+                    'id': sf.id,
+                    'name': sf.original_name or sf.file.name.split('/')[-1],
+                    'url': abs_url(sf.file),
+                    'uploaded_at': sf.uploaded_at,
+                }
+                for sf in ta.files.all()
+            ]
+            return {
+                'has_task': True,
+                'title': ta.title,
+                'description': ta.description,
+                'deadline': ta.deadline,
+                'attachment': abs_url(ta.attachment),
+                'assigned_at': ta.assigned_at,
+                'submitted_at': ta.submitted_at,
+                'submitted': ta.submitted_at is not None,
+                'files': files,
+            }
+        return {'has_task': False}
 
     def get_interview_details(self, obj):
         if hasattr(obj, 'interview'):

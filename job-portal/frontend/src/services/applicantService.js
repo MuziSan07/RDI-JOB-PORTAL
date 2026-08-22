@@ -31,6 +31,29 @@ export const applicantService = {
         return response.data;
     },
 
+    // Assign a document task to an applicant (multipart: title, description, deadline, attachment)
+    assignTask: async (applicationId, { title, description, deadline, attachment }) => {
+        const form = new FormData();
+        form.append('title', title);
+        if (description) form.append('description', description);
+        if (deadline)    form.append('deadline', deadline);
+        if (attachment)  form.append('attachment', attachment);
+        const response = await api.post(`/applicants/${applicationId}/assign-task/`, form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    },
+
+    // Applicant submits one or more documents for their assigned task
+    submitTask: async (applicationId, files) => {
+        const form = new FormData();
+        Array.from(files).forEach((f) => form.append('files', f));
+        const response = await api.post(`/applicants/my-applications/${applicationId}/submit-task/`, form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        return response.data;
+    },
+
     // Schedule interview
     scheduleInterview: async (applicationId, data) => {
         const response = await api.post(`/applicants/${applicationId}/schedule-interview/`, data);

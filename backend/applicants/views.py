@@ -5,7 +5,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
 from django.utils import timezone
 
-from .models import Application, TestAssignment, TestResult, TestAnswer, Interview, SavedJob
+from .models import (
+    Application, TestAssignment, TestResult, TestAnswer, Interview, SavedJob,
+    TaskAssignment, TaskSubmissionFile,
+)
 from .serializers import (
     ApplicationSerializer, 
     ApplicationDetailSerializer,
@@ -152,7 +155,7 @@ def my_application_detail(request, pk):
         application = Application.objects.select_related(
             'job', 'job__department'
         ).prefetch_related(
-            'test_assignment', 'test_assignment__result', 'interview'
+            'test_assignment', 'test_assignment__result', 'task_assignment__files', 'interview'
         ).get(pk=pk, applicant=request.user)
     except Application.DoesNotExist:
         return Response(
@@ -345,7 +348,7 @@ def application_detail(request, pk):
     try:
         application = Application.objects.select_related(
             'job', 'applicant', 'job__department'
-        ).prefetch_related('test_assignment', 'interview').get(pk=pk)
+        ).prefetch_related('test_assignment', 'task_assignment__files', 'interview').get(pk=pk)
     except Application.DoesNotExist:
         return Response(
             {'error': 'Application not found'}, 
@@ -417,8 +420,175 @@ def assign_test(request, pk):
         )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Documents an applicant is allowed to submit for a task.
+_ALLOWED_TASK_EXT = ('.pdf', '.doc', '.docx')
+_ALLOWED_TASK_CT = (
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/octet-stream',
+)
+_MAX_TASK_FILE_MB = 10
+
+
+def _validate_task_file(f):
+    """Return an error string if the uploaded file isn't an allowed doc, else None."""
+    name = (f.name or '').lower()
+    if not name.endswith(_ALLOWED_TASK_EXT):
+        return 'Only PDF, DOC or DOCX files are allowed.'
+    if getattr(f, 'content_type', None) and f.content_type not in _ALLOWED_TASK_CT:
+        return 'Only PDF, DOC or DOCX files are allowed.'
+    if f.size and f.size > _MAX_TASK_FILE_MB * 1024 * 1024:
+        return f'Each file must be under {_MAX_TASK_FILE_MB} MB.'
+    return None
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def assign_task(request, pk):
+    """
+    POST: Assign a document task to an applicant (Department).
+    Accepts multipart: title, description, deadline (optional), attachment (optional).
+    """
+    try:
+        application = Application.objects.get(pk=pk)
+    except Application.DoesNotExist:
+        return Response({'error': 'Application not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Check permissions
+    if request.user.user_type != 'department' or application.job.department != request.user.department:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    # Validate status
+    if application.status != 'applied':
+        return Response(
+            {'error': 'Can only assign a task to newly applied candidates'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    title = (request.data.get('title') or '').strip()
+    if not title:
+        return Response({'error': 'Task title is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    description = (request.data.get('description') or '').strip()
+
+    # Normalise the deadline to a timezone-aware datetime when provided.
+    deadline = request.data.get('deadline') or None
+    if deadline:
+        from django.utils.dateparse import parse_datetime
+        parsed = parse_datetime(deadline)
+        if parsed is None:
+            return Response({'error': 'Invalid deadline.'}, status=status.HTTP_400_BAD_REQUEST)
+        if timezone.is_naive(parsed):
+            parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
+        deadline = parsed
+
+    attachment = request.FILES.get('attachment')
+    if attachment is not None:
+        err = _validate_task_file(attachment)
+        if err:
+            return Response({'error': err}, status=status.HTTP_400_BAD_REQUEST)
+
+    task = TaskAssignment.objects.create(
+        application=application,
+        title=title,
+        description=description,
+        deadline=deadline,
+        attachment=attachment,
+    )
+
+    application.status = 'task_assigned'
+    application.save()
+
+    ip_address = get_client_ip(request)
+    log_activity(
+        request.user,
+        'Task Assigned',
+        f'Assigned task "{title}" to {application.applicant.username} for {application.job.title}',
+        ip_address
+    )
+
+    create_notification(
+        application.applicant,
+        'Task assigned',
+        f'A task has been assigned for your application to "{application.job.title}". '
+        f'Upload your documents before the deadline.',
+        category='application',
+        link='/my-applications',
+    )
+
+    return Response(
+        ApplicationDetailSerializer(application, context={'request': request}).data.get('task_details'),
+        status=status.HTTP_201_CREATED,
+    )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def submit_task(request, pk):
+    """
+    POST: Applicant uploads one or more documents for their assigned task.
+    Accepts multipart with one or more 'files'.
+    """
+    try:
+        application = Application.objects.get(pk=pk, applicant=request.user)
+    except Application.DoesNotExist:
+        return Response({'error': 'Application not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if not hasattr(application, 'task_assignment'):
+        return Response({'error': 'No task has been assigned for this application'}, status=status.HTTP_400_BAD_REQUEST)
+
+    task = application.task_assignment
+
+    files = request.FILES.getlist('files')
+    if not files:
+        return Response({'error': 'Please upload at least one document (PDF or DOC).'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Validate every file before saving any of them.
+    for f in files:
+        err = _validate_task_file(f)
+        if err:
+            return Response({'error': err}, status=status.HTTP_400_BAD_REQUEST)
+
+    # A resubmission replaces the previous files.
+    task.files.all().delete()
+    for f in files:
+        TaskSubmissionFile.objects.create(task=task, file=f, original_name=f.name)
+
+    task.submitted_at = timezone.now()
+    task.save()
+
+    application.status = 'task_submitted'
+    application.save()
+
+    ip_address = get_client_ip(request)
+    log_activity(
+        request.user,
+        'Task Submitted',
+        f'Submitted task "{task.title}" for {application.job.title}',
+        ip_address
+    )
+
+    # Notify the department that owns the job.
+    dept_user = getattr(application.job.department, 'user', None)
+    if dept_user:
+        create_notification(
+            dept_user,
+            'Task submitted',
+            f'{application.applicant.username} submitted the task "{task.title}" '
+            f'for "{application.job.title}".',
+            category='application',
+            link=f'/admin/applicants?search={application.applicant.username}',
+        )
+
+    return Response(
+        ApplicationDetailSerializer(application, context={'request': request}).data.get('task_details'),
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(['POST'])
@@ -436,8 +606,9 @@ def schedule_interview(request, pk):
     if request.user.user_type != 'department' or application.job.department != request.user.department:
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
     
-    # Validate status (can schedule after test_passed or directly from applied for interview-only jobs)
-    valid_statuses = ['test_passed', 'applied']
+    # Validate status (can schedule after test_passed / task_submitted, or directly
+    # from applied for interview-only jobs)
+    valid_statuses = ['test_passed', 'task_submitted', 'applied']
     if application.status not in valid_statuses:
         return Response(
             {'error': f'Can only schedule interview for candidates with status: {", ".join(valid_statuses)}'},

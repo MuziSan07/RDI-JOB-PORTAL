@@ -6,6 +6,8 @@ from tests.models import Chapter
 class Application(models.Model):
     STATUS_CHOICES = (
         ('applied', 'Applied'),
+        ('task_assigned', 'Task Assigned'),
+        ('task_submitted', 'Task Submitted'),
         ('test_assigned', 'Test Assigned'),
         ('test_completed', 'Test Completed'),
         ('test_passed', 'Test Passed'),
@@ -82,6 +84,38 @@ class Interview(models.Model):
     interview_datetime = models.DateTimeField()
     message = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"{self.application.applicant.username} - {self.interview_datetime}"
+
+
+class TaskAssignment(models.Model):
+    """A free-form task the department gives an applicant. The applicant uploads
+    one or more documents (PDF/DOC) as their submission, which the department
+    then reviews from the applicant detail view."""
+    application = models.OneToOneField(Application, on_delete=models.CASCADE, related_name='task_assignment')
+    title = models.CharField(max_length=300)
+    description = models.TextField(blank=True, default='')
+    deadline = models.DateTimeField(null=True, blank=True)
+    # Optional brief/reference document supplied by the department.
+    attachment = models.FileField(upload_to='task_briefs/', null=True, blank=True)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    # Set the moment the applicant submits their files.
+    submitted_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.application.applicant.username} - {self.title}"
+
+
+class TaskSubmissionFile(models.Model):
+    """One uploaded document belonging to a task submission."""
+    task = models.ForeignKey(TaskAssignment, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(upload_to='task_submissions/')
+    original_name = models.CharField(max_length=255, blank=True, default='')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['uploaded_at']
+
+    def __str__(self):
+        return f"{self.task.application.applicant.username} - {self.original_name or self.file.name}"

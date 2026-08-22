@@ -10,12 +10,14 @@ urlpatterns = [
     path('my-applications/', views.my_applications, name='my-applications'),
     path('my-applications/<int:pk>/', views.my_application_detail, name='my-application-detail'),
     path('my-applications/<int:pk>/withdraw/', views.withdraw_application, name='withdraw-application'),
+    path('my-applications/<int:pk>/submit-task/', views.submit_task, name='submit-task'),
 
     path('saved-jobs/', views.saved_jobs_list, name='saved-jobs'),
     path('saved-jobs/toggle/<int:job_id>/', views.toggle_saved_job, name='toggle-saved-job'),
 
     path('<int:pk>/', views.application_detail, name='application-detail'),
     path('<int:pk>/assign-test/', views.assign_test, name='assign-test'),
+    path('<int:pk>/assign-task/', views.assign_task, name='assign-task'),
     path('<int:pk>/schedule-interview/', views.schedule_interview, name='schedule-interview'),
     path('<int:pk>/update-status/', views.update_status, name='update-status'),
     path('<int:pk>/hire/', views.hire_applicant, name='hire-applicant'),

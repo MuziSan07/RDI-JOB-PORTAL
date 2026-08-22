@@ -15,6 +15,8 @@ import UserNavbar from '../components/brand/UserNavbar';
 
 const STATUS_MAP = {
     applied:              { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE', label: 'Applied',            icon: Clock },
+    task_assigned:        { bg: '#F0FDFA', text: '#0F766E', border: '#99F6E4', label: 'Task Assigned',      icon: FileText },
+    task_submitted:       { bg: '#EFF6FF', text: '#0369A1', border: '#BAE6FD', label: 'Task Submitted',     icon: CheckCircle },
     test_assigned:        { bg: '#FFF7ED', text: '#C2410C', border: '#FED7AA', label: 'Test Assigned',       icon: FileText },
     test_completed:       { bg: '#F5F3FF', text: '#6D28D9', border: '#DDD6FE', label: 'Test Completed',      icon: FileText },
     test_passed:          { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0', label: 'Test Passed',         icon: CheckCircle },
@@ -32,6 +34,7 @@ const getStatus = (status) => STATUS_MAP[status] || { bg: '#F9FAFB', text: '#374
 const STATUS_PIPELINE = [
     { key: '',                   label: 'All' },
     { key: 'applied',            label: 'Applied' },
+    { key: 'task_assigned',      label: 'Task Assigned' },
     { key: 'test_assigned',      label: 'Test Assigned' },
     { key: 'test_passed',        label: 'Test Passed' },
     { key: 'test_failed',        label: 'Test Failed' },
@@ -263,7 +266,7 @@ const AppListCard = ({ app, onClick }) => {
     const [hovered, setHovered] = useState(false);
     const st = getStatus(app.status);
     const Icon = st.icon;
-    const isActionable = ['test_assigned', 'interview_scheduled'].includes(app.status);
+    const isActionable = ['task_assigned', 'test_assigned', 'interview_scheduled'].includes(app.status);
 
     return (
         <div

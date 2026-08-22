@@ -41,6 +41,8 @@ const formatSalary = (job) => formatJobSalary(job) || 'Not specified';
 const getStatusColor = (status) => {
     const map = {
         applied: { bg: `${BRAND.ink}0d`, text: BRAND.ink, label: 'Applied' },
+        task_assigned: { bg: `${BRAND.green}17`, text: BRAND.green, label: 'Task Assigned' },
+        task_submitted: { bg: `${BRAND.ink}0d`, text: BRAND.slate, label: 'Task Submitted' },
         test_assigned: { bg: `${BRAND.gold}17`, text: BRAND.gold, label: 'Test Assigned' },
         test_completed: { bg: `${BRAND.ink}0d`, text: BRAND.slate, label: 'Test Done' },
         test_passed: { bg: `${BRAND.green}17`, text: BRAND.green, label: 'Test Passed' },

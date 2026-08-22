@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
     ArrowLeft, Banknote, Briefcase, Calendar, Clock,
     CheckCircle, XCircle, FileText, User, AlertCircle,
-    Award, ChevronRight, Building2, MapPin, Star, BookOpen
+    Award, ChevronRight, Building2, MapPin, Star, BookOpen,
+    Upload, Download, FileCheck, X
 } from 'lucide-react';
 import { COLORS } from '../constants/colors';
 import { jobsService } from '../services/jobsService';
+import { applicantService } from '../services/applicantService';
 import { jobSeekerAuthService } from '../services/jobSeekerAuthService';
 import { useResponsive } from '../hooks/useResponsive';
 import UserNavbar from '../components/brand/UserNavbar';
@@ -16,6 +18,8 @@ import { formatJobSalary, formatMoney } from '../utils/currency';
 
 const STATUS_MAP = {
     applied:              { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE', label: 'Applied',             icon: Clock },
+    task_assigned:        { bg: '#F0FDFA', text: '#0F766E', border: '#99F6E4', label: 'Task Assigned',       icon: Upload },
+    task_submitted:       { bg: '#EFF6FF', text: '#0369A1', border: '#BAE6FD', label: 'Task Submitted',      icon: FileCheck },
     test_assigned:        { bg: '#FFF7ED', text: '#C2410C', border: '#FED7AA', label: 'Test Assigned',       icon: FileText },
     test_completed:       { bg: '#F5F3FF', text: '#6D28D9', border: '#DDD6FE', label: 'Test Completed',      icon: FileText },
     test_passed:          { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0', label: 'Test Passed',         icon: CheckCircle },
@@ -33,7 +37,7 @@ const getStatus = (s) => STATUS_MAP[s] || { bg: '#F9FAFB', text: '#374151', bord
 
 const PIPELINE = [
     { key: 'applied',             label: 'Applied' },
-    { key: 'test',                label: 'Test' },
+    { key: 'test',                label: 'Assessment' },
     { key: 'interview',           label: 'Interview' },
     { key: 'waiting',             label: 'Review' },
     { key: 'notice_period',       label: 'Notice' },
@@ -42,7 +46,7 @@ const PIPELINE = [
 
 const getPipelineStep = (status) => {
     if (['applied'].includes(status))                                         return 0;
-    if (['test_assigned','test_completed','test_passed','test_failed'].includes(status)) return 1;
+    if (['task_assigned','task_submitted','test_assigned','test_completed','test_passed','test_failed'].includes(status)) return 1;
     if (['interview_scheduled','interview_completed'].includes(status))       return 2;
     if (status === 'waiting')                                                 return 3;
     if (status === 'notice_period')                                           return 4;
@@ -61,6 +65,9 @@ const ApplicationDetail = () => {
     const [loading, setLoading]         = useState(true);
     const [withdrawing, setWithdrawing] = useState(false);
     const [user, setUser]               = useState(null);
+    const [taskFiles, setTaskFiles]     = useState([]);
+    const [submittingTask, setSubmittingTask] = useState(false);
+    const [taskError, setTaskError]     = useState('');
 
     useEffect(() => {
         const currentUser = jobSeekerAuthService.getCurrentUser();
@@ -78,6 +85,39 @@ const ApplicationDetail = () => {
             console.error('Error loading application:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const ALLOWED_TASK = ['.pdf', '.doc', '.docx'];
+
+    const handleTaskFilesChange = (fileList) => {
+        setTaskError('');
+        const files = Array.from(fileList || []);
+        const bad = files.find(f => !ALLOWED_TASK.some(ext => f.name.toLowerCase().endsWith(ext)));
+        if (bad) {
+            setTaskError('Only PDF, DOC or DOCX files are allowed.');
+            return;
+        }
+        const tooBig = files.find(f => f.size > 10 * 1024 * 1024);
+        if (tooBig) {
+            setTaskError('Each file must be under 10 MB.');
+            return;
+        }
+        setTaskFiles(files);
+    };
+
+    const handleSubmitTask = async () => {
+        if (!taskFiles.length) { setTaskError('Please select at least one document.'); return; }
+        setSubmittingTask(true);
+        setTaskError('');
+        try {
+            await applicantService.submitTask(id, taskFiles);
+            setTaskFiles([]);
+            await loadApplication();
+        } catch (err) {
+            setTaskError(err.response?.data?.error || 'Failed to submit task. Please try again.');
+        } finally {
+            setSubmittingTask(false);
         }
     };
 
@@ -118,6 +158,7 @@ const ApplicationDetail = () => {
     const jd = application.job_details      || {};
     const cd = application.company_details  || {};
     const td = application.test_details     || {};
+    const task = application.task_details   || {};
     const iv = application.interview_details || {};
     const rd = application.resume_details   || {};
     const ed = application.employment_details;  // the offer, present once hired
@@ -233,6 +274,98 @@ const ApplicationDetail = () => {
                                         <p style={s.rejectedReason}>{application.rejection_reason}</p>
                                     )}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Task section */}
+                        {task.has_task && (
+                            <div style={s.card}>
+                                <h2 style={s.sectionTitle}><Upload size={16} /> Assigned Task</h2>
+                                <p style={s.testChapter}>{task.title}</p>
+                                {task.description && (
+                                    <p style={{ color: '#475569', fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: '8px 0 0' }}>
+                                        {task.description}
+                                    </p>
+                                )}
+                                {task.deadline && (
+                                    <p style={s.testDeadline}>
+                                        <Clock size={13} /> Deadline: {new Date(task.deadline).toLocaleString()}
+                                    </p>
+                                )}
+                                {task.attachment && (
+                                    <a href={task.attachment} target="_blank" rel="noopener noreferrer"
+                                       style={{ ...s.taskFileRow, marginTop: 12, display: 'inline-flex' }}>
+                                        <FileText size={15} color={COLORS.primary} />
+                                        <span style={{ color: COLORS.primary, fontSize: 13, fontWeight: 600 }}>Download task brief</span>
+                                    </a>
+                                )}
+
+                                {/* Already-submitted files */}
+                                {task.submitted && task.files?.length > 0 && (
+                                    <div style={{ marginTop: 18 }}>
+                                        <div style={s.taskSubHead}>
+                                            <CheckCircle size={15} color="#15803D" />
+                                            <span>Submitted {task.submitted_at ? `on ${new Date(task.submitted_at).toLocaleString()}` : ''}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+                                            {task.files.map(f => (
+                                                <a key={f.id} href={f.url} target="_blank" rel="noopener noreferrer" style={s.taskFileRow}>
+                                                    <FileCheck size={15} color="#0F766E" />
+                                                    <span style={{ flex: 1, fontSize: 13, color: '#0F172A', wordBreak: 'break-all' }}>{f.name}</span>
+                                                    <Download size={14} color={COLORS.primary} />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Upload interface — available while assigned or to replace a submission */}
+                                {!isRejected && !isHired && (
+                                    <div style={{ marginTop: 18 }}>
+                                        <label style={s.taskUploadBox}>
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="application/pdf,.pdf,.doc,.docx"
+                                                style={{ display: 'none' }}
+                                                onChange={(e) => handleTaskFilesChange(e.target.files)}
+                                            />
+                                            <Upload size={20} color={COLORS.primary} />
+                                            <span style={{ fontSize: 13, color: '#475569', fontWeight: 600 }}>
+                                                {task.submitted ? 'Upload new files to replace your submission' : 'Click to upload your documents'}
+                                            </span>
+                                            <span style={{ fontSize: 12, color: '#94A3B8' }}>PDF, DOC or DOCX — up to 10 MB each</span>
+                                        </label>
+
+                                        {taskFiles.length > 0 && (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
+                                                {taskFiles.map((f, i) => (
+                                                    <div key={i} style={s.taskFileRow}>
+                                                        <FileText size={15} color={COLORS.primary} />
+                                                        <span style={{ flex: 1, fontSize: 13, color: '#0F172A', wordBreak: 'break-all' }}>{f.name}</span>
+                                                        <button
+                                                            onClick={() => setTaskFiles(taskFiles.filter((_, idx) => idx !== i))}
+                                                            style={s.taskFileRemove}
+                                                            title="Remove"
+                                                        ><X size={14} /></button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {taskError && (
+                                            <p style={{ color: '#B91C1C', fontSize: 13, margin: '10px 0 0' }}>{taskError}</p>
+                                        )}
+
+                                        <button
+                                            onClick={handleSubmitTask}
+                                            disabled={submittingTask || !taskFiles.length}
+                                            style={{ ...s.takeTestBtn, marginTop: 14, opacity: (submittingTask || !taskFiles.length) ? 0.6 : 1 }}
+                                        >
+                                            {submittingTask ? 'Submitting...' : task.submitted ? 'Resubmit Task' : 'Submit Task'}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -477,6 +610,10 @@ const s = {
     testChapter:   { fontSize: 15, fontWeight: 700, color: '#0F172A', margin: '0 0 6px' },
     testDeadline:  { display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: '#64748B', margin: '0 0 4px' },
     takeTestBtn:   { background: COLORS.primary, color: 'white', border: 'none', padding: '11px 22px', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: 'pointer', flexShrink: 0 },
+    taskUploadBox: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: '100%', padding: '22px 16px', background: '#F8FAFC', border: '2px dashed #CBD5E1', borderRadius: 12, cursor: 'pointer', textAlign: 'center', boxSizing: 'border-box' },
+    taskFileRow:   { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 9, textDecoration: 'none' },
+    taskFileRemove:{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 2 },
+    taskSubHead:   { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 600, color: '#15803D' },
     resultBox:     { borderRadius: 12, border: '1px solid', padding: '18px 20px', marginTop: 4 },
     resultRow:     { display: 'flex', gap: 32, marginBottom: 14 },
     resultStat:    { display: 'flex', flexDirection: 'column' },

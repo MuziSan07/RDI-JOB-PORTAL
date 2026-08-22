@@ -11,7 +11,7 @@ import {
     Users, Search, Filter, Eye, ClipboardList, Video, Clock,
     Bell, UserCheck, UserX, ChevronDown, X, Calendar,
     FileText, Briefcase, MapPin, Phone, BookOpen, Award,
-    Download,
+    Download, Upload, FileCheck,
 } from 'lucide-react';
 import { getCurrencies } from '../../utils/currency';
 
@@ -30,6 +30,7 @@ const DepartmentApplicants = () => {
     const [selectedApplicant, setSelectedApplicant] = useState(null);
     const [showDetailModal, setShowDetailModal]     = useState(false);
     const [showTestModal, setShowTestModal]         = useState(false);
+    const [showTaskModal, setShowTaskModal]         = useState(false);
     const [showInterviewModal, setShowInterviewModal] = useState(false);
     const [showHireModal, setShowHireModal]         = useState(false);
     const [error, setError]     = useState('');
@@ -37,6 +38,8 @@ const DepartmentApplicants = () => {
     const [exporting, setExporting] = useState('');
 
     const [testFormData,      setTestFormData]      = useState({ chapter: '', deadline: '', pass_percentage: 70 });
+    const [taskFormData,      setTaskFormData]      = useState({ title: '', description: '', deadline: '' });
+    const [taskAttachment,    setTaskAttachment]    = useState(null);
     const [interviewFormData, setInterviewFormData] = useState({ interview_link: '', interview_datetime: '', message: '' });
     const [hireFormData,      setHireFormData]      = useState({ designation: '', salary: '', salary_currency: 'USD', joining_date: '' });
 
@@ -124,6 +127,29 @@ const DepartmentApplicants = () => {
         } catch (err) { setError(err.response?.data?.error || 'Failed to assign test'); }
     };
 
+    const handleAssignTask = (applicant) => {
+        setSelectedApplicant(applicant);
+        setTaskFormData({ title: '', description: '', deadline: '' });
+        setTaskAttachment(null);
+        setShowTaskModal(true);
+    };
+
+    const submitAssignTask = async (e) => {
+        e.preventDefault();
+        setError(''); setSuccess('');
+        try {
+            await applicantService.assignTask(selectedApplicant.id, {
+                title: taskFormData.title,
+                description: taskFormData.description,
+                deadline: taskFormData.deadline || null,
+                attachment: taskAttachment,
+            });
+            setSuccess('Task assigned successfully!');
+            setShowTaskModal(false);
+            fetchApplicants();
+        } catch (err) { setError(err.response?.data?.error || 'Failed to assign task'); }
+    };
+
     const handleScheduleInterview = (applicant) => {
         setSelectedApplicant(applicant);
         setInterviewFormData({ interview_link: '', interview_datetime: '', message: '' });
@@ -186,6 +212,8 @@ const DepartmentApplicants = () => {
     // ── Status helpers ──────────────────────────────────────────────────────
     const statusConfig = {
         applied:              { bg: '#0f1e35', color: '#60a5fa', border: '#1e3a5f', label: 'Applied' },
+        task_assigned:        { bg: '#0f1f1e', color: '#2dd4bf', border: '#134e4a', label: 'Task Assigned' },
+        task_submitted:       { bg: '#0a1a2a', color: '#38bdf8', border: '#0e3a5c', label: 'Task Submitted' },
         test_assigned:        { bg: '#1f1505', color: '#fbbf24', border: '#3d2a0a', label: 'Test Assigned' },
         test_completed:       { bg: '#0a1a2a', color: '#38bdf8', border: '#0e3a5c', label: 'Test Completed' },
         test_passed:          { bg: '#052e16', color: '#4ade80', border: '#14532d', label: 'Test Passed' },
@@ -213,7 +241,8 @@ const DepartmentApplicants = () => {
         statusConfig[status]?.label || status.replace(/_/g, ' ').toUpperCase();
 
     const canAssignTest        = (a) => a.status === 'applied';
-    const canScheduleInterview = (a) => ['test_passed', 'applied'].includes(a.status);
+    const canAssignTask        = (a) => a.status === 'applied';
+    const canScheduleInterview = (a) => ['test_passed', 'task_submitted', 'applied'].includes(a.status);
     const canMoveToWaiting     = (a) => a.status === 'interview_scheduled';
     const canMoveToNotice      = (a) => a.status === 'waiting';
     const canHire              = (a) => a.status === 'notice_period';
@@ -397,6 +426,9 @@ const DepartmentApplicants = () => {
                                                     {canAssignTest(applicant) && (
                                                         <ActionBtn icon={<ClipboardList size={13} />} label="Assign Test" color="#fbbf24" onClick={() => handleAssignTest(applicant)} />
                                                     )}
+                                                    {canAssignTask(applicant) && (
+                                                        <ActionBtn icon={<Upload size={13} />} label="Assign Task" color="#2dd4bf" onClick={() => handleAssignTask(applicant)} />
+                                                    )}
                                                     {canScheduleInterview(applicant) && (
                                                         <ActionBtn icon={<Video size={13} />} label="Interview" color="#38bdf8" onClick={() => handleScheduleInterview(applicant)} />
                                                     )}
@@ -450,6 +482,38 @@ const DepartmentApplicants = () => {
                         </Modal>
                     )}
 
+                    {/* ── Assign Task Modal ── */}
+                    {showTaskModal && (
+                        <Modal title="Assign Task" icon={<Upload size={18} color="#2dd4bf" />} onClose={() => setShowTaskModal(false)}>
+                            <form onSubmit={submitAssignTask}>
+                                <FormGroup label="Task Title *">
+                                    <input type="text" value={taskFormData.title} onChange={(e) => setTaskFormData({ ...taskFormData, title: e.target.value })} required style={s.input} placeholder="e.g. Write a sample lesson plan" />
+                                </FormGroup>
+                                <FormGroup label="Instructions">
+                                    <textarea value={taskFormData.description} onChange={(e) => setTaskFormData({ ...taskFormData, description: e.target.value })} rows="4" style={s.textarea} placeholder="Describe what the applicant needs to do and submit..." />
+                                </FormGroup>
+                                <FormGroup label="Deadline (Optional)">
+                                    <input type="datetime-local" value={taskFormData.deadline} onChange={(e) => setTaskFormData({ ...taskFormData, deadline: e.target.value })} style={s.input} />
+                                </FormGroup>
+                                <FormGroup label="Reference File (Optional — PDF/DOC)">
+                                    <label style={s.fileDrop}>
+                                        <input
+                                            type="file"
+                                            accept="application/pdf,.pdf,.doc,.docx"
+                                            style={{ display: 'none' }}
+                                            onChange={(e) => setTaskAttachment(e.target.files?.[0] || null)}
+                                        />
+                                        <Upload size={16} color="#2dd4bf" />
+                                        <span style={{ fontSize: '13px', color: '#94a3b8' }}>
+                                            {taskAttachment ? taskAttachment.name : 'Attach a brief for the applicant (optional)'}
+                                        </span>
+                                    </label>
+                                </FormGroup>
+                                <ModalFooter onCancel={() => setShowTaskModal(false)} submitLabel="Assign Task" />
+                            </form>
+                        </Modal>
+                    )}
+
                     {/* ── Schedule Interview Modal ── */}
                     {showInterviewModal && (
                         <Modal title="Schedule Interview" icon={<Video size={18} color="#38bdf8" />} onClose={() => setShowInterviewModal(false)}>
@@ -498,6 +562,7 @@ const DepartmentApplicants = () => {
                         const ad = selectedApplicant.applicant_details || {};
                         const rd = selectedApplicant.resume_details || {};
                         const td = selectedApplicant.test_details || {};
+                        const task = selectedApplicant.task_details || {};
                         const iv = selectedApplicant.interview_details || {};
                         const jd = selectedApplicant.job_details || {};
                         return (
@@ -606,6 +671,51 @@ const DepartmentApplicants = () => {
                                         </DetailSection>
                                     )}
 
+                                    {/* ── Task ── */}
+                                    {task.has_task && (
+                                        <DetailSection title="Task Details" icon={<Upload size={13} color="#2dd4bf" />}>
+                                            <div style={{ marginBottom: '14px' }}>
+                                                <div style={s.infoLabel}>Title</div>
+                                                <div style={s.infoValue}>{task.title}</div>
+                                            </div>
+                                            {task.description && (
+                                                <div style={{ marginBottom: '14px' }}>
+                                                    <div style={s.infoLabel}>Instructions</div>
+                                                    <p style={s.textContent}>{task.description}</p>
+                                                </div>
+                                            )}
+                                            <InfoGrid>
+                                                {task.deadline && <InfoItem label="Deadline" value={new Date(task.deadline).toLocaleString()} />}
+                                                <InfoItem label="Status" value={task.submitted ? 'Submitted' : 'Awaiting submission'} />
+                                                {task.submitted_at && <InfoItem label="Submitted At" value={new Date(task.submitted_at).toLocaleString()} />}
+                                            </InfoGrid>
+                                            {task.attachment && (
+                                                <div style={{ marginTop: '14px' }}>
+                                                    <div style={s.infoLabel}>Reference File</div>
+                                                    <a href={task.attachment} target="_blank" rel="noopener noreferrer" style={s.link}>
+                                                        <FileText size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />Download brief
+                                                    </a>
+                                                </div>
+                                            )}
+                                            <div style={{ marginTop: '16px' }}>
+                                                <div style={s.infoLabel}>Submitted Documents</div>
+                                                {task.files && task.files.length > 0 ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                                                        {task.files.map((f) => (
+                                                            <a key={f.id} href={f.url} target="_blank" rel="noopener noreferrer" style={s.fileRow}>
+                                                                <FileCheck size={15} color="#2dd4bf" />
+                                                                <span style={{ flex: 1, color: '#f1f5f9', fontSize: '13px', wordBreak: 'break-all' }}>{f.name}</span>
+                                                                <Download size={14} color="#818cf8" />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p style={{ color: '#475569', fontSize: '13px', margin: '6px 0 0' }}>No documents submitted yet.</p>
+                                                )}
+                                            </div>
+                                        </DetailSection>
+                                    )}
+
                                     {/* ── Interview ── */}
                                     {iv.has_interview && (
                                         <DetailSection title="Interview Details" last>
@@ -627,11 +737,11 @@ const DepartmentApplicants = () => {
                                         </DetailSection>
                                     )}
 
-                                    {/* No test / interview yet */}
-                                    {!td.has_test && !iv.has_interview && (
+                                    {/* No test / task / interview yet */}
+                                    {!td.has_test && !task.has_task && !iv.has_interview && (
                                         <DetailSection title="Pipeline" last>
                                             <p style={{ color: '#475569', fontSize: '13px', margin: 0 }}>
-                                                No test or interview assigned yet.
+                                                No test, task or interview assigned yet.
                                             </p>
                                         </DetailSection>
                                     )}
@@ -752,6 +862,8 @@ const s = {
     label:        { display: 'block', marginBottom: '8px', fontSize: '12px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' },
     input:        { width: '100%', padding: '12px 16px', fontSize: '14px', backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '10px', color: '#f1f5f9', outline: 'none', boxSizing: 'border-box' },
     textarea:     { width: '100%', padding: '12px 16px', fontSize: '14px', backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '10px', color: '#f1f5f9', outline: 'none', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
+    fileDrop:     { display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '14px 16px', backgroundColor: '#020617', border: '1px dashed #334155', borderRadius: '10px', cursor: 'pointer', boxSizing: 'border-box' },
+    fileRow:      { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '10px', textDecoration: 'none' },
     modalFooter:  { display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '28px' },
     cancelBtn:    { padding: '11px 22px', fontSize: '13px', fontWeight: '600', color: '#64748b', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '10px', cursor: 'pointer' },
     submitBtn:    { padding: '11px 22px', fontSize: '13px', fontWeight: '700', color: 'white', background: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)', border: 'none', borderRadius: '10px', cursor: 'pointer', boxShadow: '0 4px 14px rgba(99,102,241,0.35)' },

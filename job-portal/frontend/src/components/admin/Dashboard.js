@@ -22,6 +22,8 @@ import {
 // Human-readable labels + palette for application-status donut slices
 const STATUS_META = {
     applied: { label: 'Applied', color: '#818cf8' },
+    task_assigned: { label: 'Task Assigned', color: '#2dd4bf' },
+    task_submitted: { label: 'Task Submitted', color: '#38bdf8' },
     test_assigned: { label: 'Test Assigned', color: '#60a5fa' },
     test_completed: { label: 'Test Completed', color: '#22d3ee' },
     test_passed: { label: 'Test Passed', color: '#34d399' },
