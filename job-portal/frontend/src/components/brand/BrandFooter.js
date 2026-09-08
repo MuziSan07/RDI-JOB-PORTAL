@@ -102,8 +102,16 @@ const BrandFooter = () => {
                         <img src="/RDI.png" alt="RDI Logo" style={{ height: 56, width: 'auto', objectFit: 'contain', background: '#fff', borderRadius: 10, padding: 6 }} />
                     </div>
                     <p style={{ fontSize: 14.5, color: RDI_THEME.muted, lineHeight: 1.7, maxWidth: 320, margin: '0 0 20px' }}>
-                        The hiring platform connecting ambitious talent with employers building brighter futures part of Rupani Development Initiatives.
+                        Connecting skilled professionals with purpose-driven enterprises. A core talent initiative of Rupani Development Initiatives.
                     </p>
+
+                    {/* Get in Touch */}
+                    <p style={{ fontSize: 13, fontWeight: 700, color: '#cfe0d5', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Get in Touch</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, margin: '0 0 20px' }}>
+                        <a href="mailto:hr@rdi.world" className="rdi-fnav" style={{ color: RDI_THEME.muted, fontSize: 14, textDecoration: 'none', fontFamily: FONT }}>hr@rdi.world</a>
+                        <a href="mailto:careers@rdi.world" className="rdi-fnav" style={{ color: RDI_THEME.muted, fontSize: 14, textDecoration: 'none', fontFamily: FONT }}>careers@rdi.world</a>
+                        <span style={{ color: RDI_THEME.muted, fontSize: 13.5, lineHeight: 1.6, marginTop: 4 }}>Gilgit-Baltistan &amp; Regional Operations across Pakistan &amp; Afghanistan</span>
+                    </div>
 
                     <p style={{ fontSize: 13, fontWeight: 700, color: '#cfe0d5', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Get job alerts</p>
                     <form onSubmit={submit} style={{ display: 'flex', gap: 8, maxWidth: 360, flexDirection: isMobile ? 'column' : 'row' }}>
@@ -135,7 +143,7 @@ const BrandFooter = () => {
             {/* Bottom bar */}
             <div style={{ borderTop: `1px solid ${RDI_THEME.line}`, marginTop: 48 }}>
                 <div style={{ maxWidth: 1180, margin: '0 auto', padding: isMobile ? '22px 16px' : '24px', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                    <p style={{ fontSize: 13.5, color: RDI_THEME.muted, margin: 0, order: isMobile ? 2 : 1 }}>© {new Date().getFullYear()} RDI JobPortal. All rights reserved.</p>
+                    <p style={{ fontSize: 13.5, color: RDI_THEME.muted, margin: 0, order: isMobile ? 2 : 1 }}>© {new Date().getFullYear()} RDI Talent Portal. All rights reserved.</p>
                     <div style={{ display: 'flex', gap: 10, order: isMobile ? 1 : 2 }}>
                         {SOCIAL.map((s) => (
                             <a

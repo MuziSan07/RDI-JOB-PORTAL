@@ -71,26 +71,26 @@ const ForEmployers = () => {
 
     // ── Data ──
     const valueProps = [
-        { icon: Search, title: 'Reach qualified candidates', body: 'Publish to a curated pool of active, work-ready job seekers and surface your roles to people whose skills actually match.' },
-        { icon: Target, title: 'Built-in skill assessments', body: 'Attach role-specific tests to any posting and let scored results rank applicants automatically before the first call.' },
-        { icon: BarChart2, title: 'Applicant tracking dashboard', body: 'Move candidates through stages, leave notes, and keep your whole hiring team aligned in one shared pipeline.' },
-        { icon: Clock, title: 'Faster time-to-hire', body: 'Automated screening, one-click shortlists, and templated outreach cut weeks off your average requisition cycle.' },
-        { icon: ShieldCheck, title: 'Verified candidate profiles', body: 'Profiles include validated contact details, work history, and completed assessments less noise, more signal.' },
-        { icon: FileText, title: 'Activity & audit logs', body: 'Every action is timestamped and traceable, giving HR and compliance a clear record of each hiring decision.' },
+        { icon: Search, title: 'Access Qualified Talent', body: 'Publish requisitions to a vetted pool of active professionals, aligning open roles directly with verified candidate competencies.' },
+        { icon: Target, title: 'Integrated Competency Evaluations', body: 'Integrate practical evaluations directly into job postings to rank candidates based on objective performance prior to panel review.' },
+        { icon: BarChart2, title: 'Centralized Selection Pipeline', body: 'Track candidate progression seamlessly across evaluation stages while maintaining panel visibility on a single platform.' },
+        { icon: Clock, title: 'Accelerated Placement Cycles', body: 'Automated screening and structured shortlisting optimize evaluation velocity across all active requisitions.' },
+        { icon: ShieldCheck, title: 'Verified Professional Portfolios', body: 'Candidate profiles feature authenticated credentials, professional histories, and completed skill assessments for reliable evaluation.' },
+        { icon: FileText, title: 'Audit Logs & Governance Records', body: 'All portal actions are fully documented and traceable, providing leadership and review committees complete governance over selection decisions.' },
     ];
 
     const steps = [
-        { stepNum: '01', title: 'Post a role', body: 'Create a polished job listing in minutes with smart templates, salary ranges, and required skills.' },
-        { stepNum: '02', title: 'Receive & screen', body: 'Applications flow straight into your dashboard, auto-sorted by match score and completeness.' },
-        { stepNum: '03', title: 'Assess & interview', body: 'Send assessments, compare results side by side, and schedule interviews with your top candidates.' },
-        { stepNum: '04', title: 'Hire & log', body: 'Extend the offer, mark the role filled, and keep a full audit trail of how the decision was made.' },
+        { stepNum: '01', title: 'Define & Publish Requisition', body: 'Publish clear role specifications using standardized templates, operational parameters, and technical prerequisites.' },
+        { stepNum: '02', title: 'Automated Competency Screening', body: 'Applications populate directly into your pipeline, systematically categorized by verified skill fit and assessment scores.' },
+        { stepNum: '03', title: 'Panel Evaluation & Selection', body: 'Review practical assessment metrics, conduct comparative candidate evaluations, and execute structured panel interviews.' },
+        { stepNum: '04', title: 'Offer Issuance & Integration', body: 'Issue official offers, transition selected talent into operations, and archive a complete record of selection decisions.' },
     ];
 
     const stats = [
-        { value: 12, suffix: ' Days', label: 'Avg days to hire', percentage: 85 },
-        { value: 25000, suffix: '+', label: 'Candidate pool', percentage: 95 },
-        { value: 92, suffix: '%', label: 'Qualified-match rate', percentage: 92 },
-        { value: 40, suffix: '+', label: 'Partner departments', percentage: 70 },
+        { value: 12, suffix: ' Days', label: 'Average Time-to-Placement', percentage: 85 },
+        { value: 25000, suffix: '+', label: 'Verified Candidate Network', percentage: 95 },
+        { value: 92, suffix: '%', label: 'Competency Alignment Rate', percentage: 92 },
+        { value: 40, suffix: '+', label: 'Enterprise Partner Entities', percentage: 70 },
     ];
 
     const stories = [
@@ -98,7 +98,7 @@ const ForEmployers = () => {
             initials: 'MR',
             name: 'Maria Reyes',
             role: 'Head of Talent, Northwind Logistics',
-            quote: '“We filled three roles in under two weeks. The built-in assessments meant every candidate on our shortlist was already vetted interviews went from guesswork to genuinely productive conversations.”'
+            quote: '“We successfully filled three key requisitions within two weeks. The integrated evaluations ensured that every shortlisted candidate possessed verified technical capabilities, turning panel interviews into highly focused selection decisions.”'
         },
         {
             initials: 'AH',
@@ -141,20 +141,20 @@ const ForEmployers = () => {
                         fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', 
                         textTransform: 'uppercase', color: BRAND.green, marginBottom: 20 
                     }}>
-                        <Terminal size={14} /> Pipeline Optimization Engine
+                        Pipeline Optimization Engine
                     </div>
                     <h1 style={{
                         fontSize: isMobile ? '38px' : isTablet ? '48px' : '64px',
                         fontWeight: 700, letterSpacing: '-2.5px', lineHeight: 1.06,
                         color: BRAND.ink, margin: '0 0 24px 0', maxWidth: '960px'
                     }}>
-                        Hire exceptional talent, <span style={{ color: BRAND.green }}>faster.</span>
+                        Acquire Qualified Talent with <span style={{ color: BRAND.green }}>Precision and Speed</span>
                     </h1>
-                    <p style={{ 
-                        fontSize: isMobile ? '16px' : '18px', color: BRAND.slate, 
-                        maxWidth: '620px', margin: '0 0 36px 0', lineHeight: 1.65 
+                    <p style={{
+                        fontSize: isMobile ? '16px' : '18px', color: BRAND.slate,
+                        maxWidth: '620px', margin: '0 0 36px 0', lineHeight: 1.65
                     }}>
-                        Reach thousands of verified, assessment-ready candidates and run your entire hiring process postings, screening, interviews, and offers on one structured platform.
+                        Access a vetted network of assessment-ready professionals and manage your entire recruitment cycle on a unified institutional platform, covering job requisitions, candidate screening, panel evaluations, and formal offer issuance.
                     </p>
 
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'flex-start' }}>
@@ -165,16 +165,16 @@ const ForEmployers = () => {
                                 border: 'none', padding: '13px 24px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT 
                             }}
                         >
-                            Post a job <ArrowRight size={16} />
+                            Publish Requisition <ArrowRight size={16} />
                         </button>
-                        <button 
-                            onClick={() => navigate('/contact')} 
-                            style={{ 
-                                display: 'inline-flex', alignItems: 'center', gap: 8, backgroundColor: 'transparent', color: BRAND.ink, 
-                                border: `1px solid ${BRAND.line}`, padding: '13px 24px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT 
+                        <button
+                            onClick={() => navigate('/contact')}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 8, backgroundColor: 'transparent', color: BRAND.ink,
+                                border: `1px solid ${BRAND.line}`, padding: '13px 24px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT
                             }}
                         >
-                            Talk to sales
+                            Contact Talent Operations
                         </button>
                     </div>
                 </div>
@@ -190,8 +190,8 @@ const ForEmployers = () => {
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
                         eyebrowText="System Features"
-                        title="Everything you need to hire with confidence"
-                        subtitle="Powerful, recruiter-friendly tools that turn a flood of applications into a clear, ranked shortlist."
+                        title="Enterprise Infrastructure Built for Merit-Based Selection"
+                        subtitle="Standardized evaluation tools designed to streamline applicant pools into objective, competency-ranked shortlists."
                         isMobile={isMobile}
                     />
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2,1fr)' : 'repeat(3,1fr)', gap: '1px', backgroundColor: BRAND.line, width: '100%' }}>
@@ -225,8 +225,8 @@ const ForEmployers = () => {
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
                         eyebrowText="Execution Protocol"
-                        title="From open role to signed offer"
-                        subtitle="A clear four-step flow that keeps candidates moving and your team in sync."
+                        title="A Structured Pathway to Enterprise Hiring"
+                        subtitle="A standardized four-stage framework ensuring transparent candidate progression and panel coordination."
                         isMobile={isMobile}
                     />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', width: '100%', borderLeft: `2px solid ${BRAND.line}` }}>
@@ -277,8 +277,8 @@ const ForEmployers = () => {
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
                         eyebrowText="Performance Metrics"
-                        title="Hiring outcomes you can measure"
-                        subtitle="Aggregated metrics from employers running their requisitions on our platform."
+                        title="Measurable Talent Acquisition Outcomes"
+                        subtitle="Aggregated operational indicators reflecting recruitment efficiency across enterprise partner entities."
                         isMobile={isMobile}
                     />
                     <div style={{
@@ -402,10 +402,10 @@ const ForEmployers = () => {
                         <Activity size={14} /> Initialization Terminal
                     </div>
                     <h2 style={{ fontSize: isMobile ? '32px' : '44px', fontWeight: 700, letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px 0', color: BRAND.ink }}>
-                        Start hiring today
+                        Build Your Organizational Capacity
                     </h2>
                     <p style={{ fontSize: isMobile ? '15px' : '17px', lineHeight: 1.6, color: BRAND.slate, margin: '0 0 32px 0', maxWidth: '600px' }}>
-                        Post your first role in minutes and meet a pipeline of verified, assessment-ready candidates.
+                        Publish active requisitions and access a pipeline of vetted, assessment-ready professionals across key operational domains.
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'flex-start' }}>
                         <button onClick={() => navigate('/admin/login')} style={{
@@ -413,14 +413,14 @@ const ForEmployers = () => {
                             border: 'none', padding: '14px 28px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600,
                             cursor: 'pointer', fontFamily: FONT,
                         }}>
-                            <Send size={16} /> Start hiring today
+                            <Send size={16} /> Publish Requisition
                         </button>
                         <button onClick={() => navigate('/contact')} style={{
                             display: 'inline-flex', alignItems: 'center', gap: 8, backgroundColor: 'transparent',
                             color: BRAND.ink, border: `1px solid ${BRAND.line}`, padding: '13px 26px',
                             borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT,
                         }}>
-                            Talk to sales
+                            Contact Talent Operations
                         </button>
                     </div>
                 </div>

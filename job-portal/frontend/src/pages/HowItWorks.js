@@ -43,53 +43,53 @@ const SectionHead = ({ eyebrowText, title, subtitle, isMobile }) => (
 );
 
 const SEEKER_STEPS = [
-    { title: 'Create your profile', desc: 'Set up a free account, add your resume, skills, and experience once Your profile becomes your reusable, one-click application kit' },
-    { title: 'Discover & match', desc: 'Search by title, skill, or department or let smart matching surface roles that actually fit Filter by remote, hybrid, salary, and more' },
-    { title: 'Apply + take assessment', desc: 'Apply in a single click For relevant roles, complete a short, role-specific skills assessment right inside your application no extra logins' },
-    { title: 'Track & get hired', desc: 'Follow every stage update in real time applied, screening, assessment, interview, and offer then step into your next chapter' },
+    { title: 'Build Your Master Profile', desc: 'Set up a verified professional profile with your qualifications, skills, and experience to serve as your standardized application portfolio.' },
+    { title: 'Targeted Opportunity Discovery', desc: 'Explore requisitions matched by skill set, domain, and location—filtering by onsite, hybrid, or remote operational models.' },
+    { title: 'Apply & Complete Evaluations', desc: 'Submit your application directly and complete inline, role-tailored competency assessments to demonstrate practical capability.' },
+    { title: 'Transparent Stage Tracking', desc: 'Monitor evaluation updates in real time across screening, technical review, interviews, and final candidate selection.' },
 ];
 
 const DEEP_DIVES = [
     {
-        eyebrowText: 'Real-time tracking',
+        eyebrowText: 'Selection Visibility',
         icon: TrendingUp,
-        title: 'Always know exactly where you stand',
-        body: 'No more refreshing your inbox or guessing Every application moves through clear, visible stages, and the moment an employer updates your status, you see it One timeline, one source of truth',
-        bullets: ['Live status from applied to offer', 'Email + in-app notifications', 'Full history for every application'],
+        title: 'End-to-End Application Transparency',
+        body: 'Eliminate uncertainty throughout the recruitment process. Each application moves through structured, visible milestones, providing candidate update synchronization on a unified status dashboard.',
+        bullets: ['Real-time progression tracking from submission to offer', 'Automated portal notifications and direct stage alerts', 'Comprehensive application history and evaluation records'],
         mock: 'tracking',
     },
     {
-        eyebrowText: 'Built-in assessments',
+        eyebrowText: 'Skills Verification',
         icon: ShieldCheck,
-        title: 'Prove your skills before the interview',
-        body: 'Stand out with role-specific assessments that run right inside your application Candidates show real ability, and employers get objective signal instead of guesswork from a resume alone',
-        bullets: ['Role-tailored questions', 'Auto-scored, instant submission', 'Fairer shortlisting for everyone'],
+        title: 'Demonstrate Competency Through In-Line Evaluations',
+        body: 'Highlight practical capabilities through role-tailored evaluations embedded directly into the application flow. Candidates demonstrate verified technical aptitude, giving selection committees objective merit metrics over static resume data.',
+        bullets: ['Role-specific practical evaluations', 'Standardized scoring and immediate review submission', 'Equitable, merit-based candidate shortlisting'],
         mock: 'assessment',
     },
     {
-        eyebrowText: 'One-click apply',
+        eyebrowText: 'Streamlined Submission',
         icon: Zap,
-        title: 'Apply to your next role in seconds',
-        body: 'Build your profile and upload your resume once From then on, applying to any open role is a single click your details, skills, and documents travel with you automatically',
-        bullets: ['Reusable profile & resume', 'No repetitive forms', 'Save roles and apply later'],
+        title: 'Unified Profile & Rapid Requisition Submission',
+        body: 'Establish a centralized professional profile once to streamline future applications. Verified credentials, skill matrices, and documentation transfer seamlessly across all open requisitions within the network.',
+        bullets: ['Centralized master portfolio and credentials', 'Zero redundant data entry across partner requisitions', 'Bookmark requisitions for targeted application'],
         mock: 'oneclick',
     },
 ];
 
 const WHY_STATS = [
-    { value: '1-click', label: 'to apply once your profile is set', percentage: 100 },
-    { value: '< 5 min', label: 'average time to post a job', percentage: 85 },
-    { value: '94%', label: 'match success rate', percentage: 94 },
-    { value: '100%', label: 'verified employers & departments', percentage: 100 },
+    { value: 'Instant', label: 'Once master profile is verified', percentage: 100 },
+    { value: '< 5 Min', label: 'Average institutional requisition setup', percentage: 85 },
+    { value: '94%', label: 'Competency match precision rate', percentage: 94 },
+    { value: '100%', label: 'Vetted partner entities & departments', percentage: 100 },
 ];
 
 const FAQS = [
-    { q: 'How do I apply to a job?', a: 'Create a free account, complete your profile and upload a resume, then open any role and hit Apply Once your profile is set, applying to future roles is a single click' },
-    { q: 'What are the skill assessments?', a: 'Some roles include a short, role-specific assessment that runs right inside your application It is auto-scored on submission and helps employers fairly compare candidates on real ability rather than resumes alone' },
-    { q: 'Is JobPortal free for job seekers?', a: 'Yes Browsing roles, creating a profile, applying, taking assessments, and tracking your applications are all completely free for candidates there are no hidden fees' },
-    { q: 'How does application tracking work?', a: 'Every application moves through clear, visible stages applied, screening, assessment, interview, and offer The moment an employer updates your status you see it in real time, with email and in-app notifications' },
-    { q: 'Do I need an account to browse jobs?', a: 'You can browse and search every open role without an account You only need to sign up when you are ready to apply, take an assessment, or track your progress' },
-    { q: 'How do employers post a job?', a: 'Employers sign in to the employer dashboard, click Post a Job, and publish a verified opening in minutes setting requirements, vacancies, salary, and work type Applicants then arrive with complete profiles ready to review' },
+    { q: 'How do I submit an application for an active role?', a: 'Create a free account, complete your profile and upload a resume, then open any role and hit Apply Once your profile is set, applying to future roles is a single click' },
+    { q: 'What do the integrated competency assessments entail?', a: 'Select requisitions incorporate practical, role-tailored evaluations completed directly within the application workflow. Responses are scored using standardized criteria, allowing selection committees to evaluate candidates objectively based on verified capability rather than resume credentials alone.' },
+    { q: 'Is candidate registration and application free of charge?', a: 'Yes Browsing roles, creating a profile, applying, taking assessments, and tracking your applications are all completely free for candidates there are no hidden fees' },
+    { q: 'How does the real-time application tracking system operate?', a: 'Every application moves through clear, visible stages applied, screening, assessment, interview, and offer The moment an employer updates your status you see it in real time, with email and in-app notifications' },
+    { q: 'Can I explore active requisitions without an account?', a: 'You can browse and search every open role without an account You only need to sign up when you are ready to apply, take an assessment, or track your progress' },
+    { q: 'How do enterprise partners publish new requisitions?', a: 'Employers sign in to the employer dashboard, click Post a Job, and publish a verified opening in minutes setting requirements, vacancies, salary, and work type Applicants then arrive with complete profiles ready to review' },
 ];
 
 const HowItWorks = () => {
@@ -122,13 +122,13 @@ const HowItWorks = () => {
                         fontWeight: 700, letterSpacing: '-2.5px', lineHeight: 1.06,
                         color: BRAND.ink, margin: '0 0 24px 0', maxWidth: '960px'
                     }}>
-                        Your next role, from <span style={{ color: BRAND.green }}>first click</span> to first day.
+                        Your Career Pathway, <span style={{ color: BRAND.green }}>From Initial Application to Placement</span>
                     </h1>
-                    <p style={{ 
-                        fontSize: isMobile ? '16px' : '18px', color: BRAND.slate, 
-                        maxWidth: '620px', margin: '0 0 36px 0', lineHeight: 1.65 
+                    <p style={{
+                        fontSize: isMobile ? '16px' : '18px', color: BRAND.slate,
+                        maxWidth: '620px', margin: '0 0 36px 0', lineHeight: 1.65
                     }}>
-                        JobPortal turns the messy hiring journey into a few clear steps whether you are searching for the role that changes everything, or building the team that will.
+                        The RDI Talent Portal provides a structured, merit-based selection framework—connecting skilled professionals with high-impact roles across our enterprise ecosystem.
                     </p>
 
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'flex-start', marginBottom: 40 }}>
@@ -139,7 +139,7 @@ const HowItWorks = () => {
                                 border: 'none', padding: '13px 24px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT 
                             }}
                         >
-                            Get started free <ArrowRight size={16} />
+                            Get Started <ArrowRight size={16} />
                         </button>
                         <button 
                             onClick={() => navigate('/jobs')} 
@@ -148,14 +148,14 @@ const HowItWorks = () => {
                                 border: `1px solid ${BRAND.line}`, padding: '13px 24px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT 
                             }}
                         >
-                            Browse open roles
+                            Explore Open Roles
                         </button>
                     </div>
 
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, borderTop: `1px solid ${BRAND.line}`, paddingTop: 24 }}>
                         {[
                             { icon: Search, label: 'For job seekers' },
-                            { icon: Briefcase, label: 'For employers' },
+                            { icon: Briefcase, label: 'For institutional employers' },
                         ].map((a, idx) => (
                             <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '13px', fontWeight: 700, color: BRAND.slate, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 <a.icon size={14} style={{ color: BRAND.green }} /> {a.label}
@@ -175,9 +175,9 @@ const HowItWorks = () => {
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
-                        eyebrowText="Candidate Pipeline"
-                        title="Find, apply, and get hired in four steps"
-                        subtitle="One profile powers everything Build it once, then move from discovery to offer without the busywork"
+                        eyebrowText="Candidate Selection Pipeline"
+                        title="A Transparent 4-Step Path to Placement"
+                        subtitle="Build a unified professional profile once to unlock opportunities across partner enterprises without administrative friction."
                         isMobile={isMobile}
                     />
                     
@@ -283,9 +283,9 @@ const HowItWorks = () => {
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
-                        eyebrowText="System Architecture"
-                        title="The features that make it feel effortless"
-                        subtitle="A closer look at the algorithmic modules built to handle processing volume"
+                        eyebrowText="Platform Capabilities"
+                        title="Infrastructure Built for Efficiency and Merit"
+                        subtitle="Core functional modules designed to streamline candidate evaluation, ensure transparency, and accelerate time-to-placement."
                         isMobile={isMobile}
                     />
 
@@ -332,9 +332,9 @@ const HowItWorks = () => {
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
-                        eyebrowText="Metrics & Signal"
-                        title="Built to respect everyone's time"
-                        subtitle="Aggregated system parameters proving platform optimization performance values"
+                        eyebrowText="Performance & Impact Metrics"
+                        title="Engineered for Efficiency, Merit, and Operational Scale"
+                        subtitle="Key operational indicators reflecting system efficiency and merit-based recruitment throughput."
                         isMobile={isMobile}
                     />
                     <div style={{
@@ -367,9 +367,9 @@ const HowItWorks = () => {
             }}>
                 <div style={{ maxWidth: '860px', margin: '0 auto' }}>
                     <SectionHead
-                        eyebrowText="Documentation"
-                        title="Questions, answered"
-                        subtitle="Everything you might want to know before you get started"
+                        eyebrowText="Knowledge Base & Support"
+                        title="Frequently Asked Questions"
+                        subtitle="Essential information regarding candidate registration, evaluation procedures, and institutional participation."
                         isMobile={isMobile}
                     />
 
@@ -409,13 +409,13 @@ const HowItWorks = () => {
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: BRAND.green, marginBottom: 16 }}>
-                        // Initialization Module
+                        // Candidate Onboarding
                     </div>
                     <h2 style={{ fontSize: isMobile ? '32px' : '44px', fontWeight: 700, letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px 0', color: BRAND.ink }}>
-                        Deploy your profile
+                        Create Your Professional Profile
                     </h2>
                     <p style={{ fontSize: isMobile ? '15px' : '17px', lineHeight: 1.6, color: BRAND.slate, margin: '0 0 32px 0', maxWidth: '600px' }}>
-                        Still have questions? The best way to learn is to dive in and compile your account environment parameters
+                        Begin exploring opportunities across the RDI enterprise ecosystem by setting up your master candidate portfolio today.
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'flex-start' }}>
                         <button onClick={() => navigate('/register')} style={{
@@ -423,7 +423,7 @@ const HowItWorks = () => {
                             border: 'none', padding: '14px 28px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600,
                             cursor: 'pointer', fontFamily: FONT,
                         }}>
-                            Create a free account
+                            Register Candidate Account
                         </button>
                     </div>
                 </div>
@@ -446,17 +446,17 @@ const DeepDiveMock = ({ kind }) => {
 
     if (kind === 'tracking') {
         const stages = [
-            { label: 'Application submitted', done: true },
-            { label: 'Screening', done: true },
-            { label: 'Skills assessment', done: true },
-            { label: 'Interview', done: false, active: true },
-            { label: 'Offer', done: false },
+            { label: 'Application registered', done: true },
+            { label: 'Credential review', done: true },
+            { label: 'Competency evaluation', done: true },
+            { label: 'Panel interview', done: false, active: true },
+            { label: 'Selection offer', done: false },
         ];
         return (
             <div style={shell}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, borderBottom: `1px solid ${BRAND.line}`, paddingBottom: 12 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: BRAND.ink, fontFamily: 'monospace' }}>MODULE // FRONTEND_ENG</div>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: BRAND.green, fontFamily: 'monospace' }}>[IN_PROGRESS]</span>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: BRAND.ink, fontFamily: 'monospace' }}>CANDIDATE_PIPELINE // SELECTION_STAGE</div>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: BRAND.green, fontFamily: 'monospace' }}>[IN_EVALUATION]</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     {stages.map((s, idx) => (
@@ -523,7 +523,7 @@ const DeepDiveMock = ({ kind }) => {
                 width: '100%', padding: '12px 0', border: 'none', backgroundColor: BRAND.green, color: '#fff', 
                 fontFamily: 'monospace', fontWeight: 700, fontSize: '13px', cursor: 'default' 
             }}>
-                EXECUTE_ONE_CLICK_APPLICATION
+                SUBMIT_UNIFIED_APPLICATION
             </button>
         </div>
     );

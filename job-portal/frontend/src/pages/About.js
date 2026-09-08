@@ -80,20 +80,20 @@ const TEAM = [
 ];
 
 const VALUES = [
-    { icon: ShieldCheck, title: 'Transparency', text: 'Verified employers, real salary ranges, and honest status updates. No black boxes, no ghosting you always know where you stand.' },
-    { icon: Zap, title: 'Speed', text: 'One profile, instant apply, and same-day shortlists. We cut the friction so great matches happen in days, not months.' },
-    { icon: Target, title: 'Fairness', text: 'Skills-first matching that looks past pedigree. Every candidate is judged on what they can do, not who they know.' },
-    { icon: Award, title: 'Craft', text: 'A product we obsess over. Fast, accessible, and a joy to use on any device because hiring deserves better tools.' },
-    { icon: Heart, title: 'People-first', text: 'Behind every application is a person and a livelihood. We design with empathy and treat both sides with respect.' },
-    { icon: Star, title: 'Trust', text: 'Your data is yours. Bank-grade security, strict privacy, and zero spam we earn trust and never trade it.' },
+    { icon: ShieldCheck, title: 'Transparency', text: 'Authenticated enterprise requisitions, clear compensation parameters, and real-time status visibility across all evaluation stages.' },
+    { icon: Zap, title: 'Operational Efficiency', text: 'Unified candidate portfolios, streamlined application processing, and rapid shortlisting to accelerate placement timelines.' },
+    { icon: Target, title: 'Meritocracy', text: 'Competency-based evaluation frameworks that prioritize practical capability and demonstrated expertise over subjective factors.' },
+    { icon: Award, title: 'Platform Excellence', text: 'Purpose-built infrastructure designed for reliable performance, intuitive accessibility, and seamless device compatibility.' },
+    { icon: Heart, title: 'Human-Centric Design', text: 'Recognizing each application as a vital step in a professional career, we foster respectful and equitable engagement across all stakeholders.' },
+    { icon: Star, title: 'Data Integrity & Privacy', text: 'Comprehensive data security and strict privacy protocols, safeguarding candidate and organizational information at every level.' },
 ];
 
 const MILESTONES = [
-    { year: '2021', title: 'A frustrating job hunt', text: 'Three founders, fed up with broken portals and unanswered applications, sketched a fairer hiring platform on a whiteboard.' },
-    { year: '2022', title: 'JobPortal goes live', text: 'We launched with 40 verified employers and a single promise: every applicant hears back. The first 1,000 candidates signed up in eight weeks.' },
-    { year: '2023', title: 'Verified departments', text: 'We introduced department-level verification and skills-first matching, cutting average time-to-offer nearly in half across the platform.' },
-    { year: '2024', title: 'Nationwide reach', text: 'Partnerships expanded to companies across Pakistan, with localized roles and a mobile-first experience built for how people actually search.' },
-    { year: '2025', title: '50,000 careers moved', text: 'Crossed 50,000 successful hires and a 96% satisfaction score and we are just getting started on the next chapter.' },
+    { year: '2021', title: 'Platform Conceptualization', text: 'Initiated research to address structural inefficiencies in regional recruitment and design an equitable, merit-based selection model.' },
+    { year: '2022', title: 'Initial Platform Deployment', text: 'Launched platform operations with 40 vetted partner organizations, establishing guaranteed candidate feedback and onboarding over 1,000 job seekers.' },
+    { year: '2023', title: 'Integration of Competency Frameworks', text: 'Introduced department-level verification and standardized skills assessments, significantly reducing average time-to-placement.' },
+    { year: '2024', title: 'Ecosystem & Regional Expansion', text: 'Expanded institutional partnerships across regional development hubs, tailoring localized roles and optimizing mobile access for diverse candidate pools.' },
+    { year: '2025', title: 'Operational Scale & Institutional Impact', text: 'Achieved over 50,000 successful candidate placements while maintaining a 96% participant satisfaction rating across enterprise partners.' },
 ];
 
 const About = () => {
@@ -123,7 +123,7 @@ const About = () => {
                         color: BRAND.green, 
                         marginBottom: 20 
                     }}>
-                        1,200+ Hires this year
+                        1,200+ Professional Placements Across the RDI Network
                     </div>
                     <h1 style={{
                         fontSize: isMobile ? '38px' : isTablet ? '48px' : '64px',
@@ -134,7 +134,7 @@ const About = () => {
                         margin: '0 0 24px 0',
                         maxWidth: '960px'
                     }}>
-                        Where great careers begin, and <span style={{ color: BRAND.green }}>ambitious teams</span> grow.
+                        Where Professional Pathways Begin and <span style={{ color: BRAND.green }}>Sustainable Organizations Grow</span>
                     </h1>
                     <p style={{ 
                         fontSize: isMobile ? '16px' : '18px', 
@@ -154,16 +154,16 @@ const About = () => {
                                 border: 'none', padding: '13px 24px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT 
                             }}
                         >
-                            Join us <ArrowRight size={16} />
+                            Get Started <ArrowRight size={16} />
                         </button>
-                        <button 
-                            onClick={() => navigate('/jobs')} 
-                            style={{ 
-                                display: 'inline-flex', alignItems: 'center', gap: 8, backgroundColor: 'transparent', color: BRAND.ink, 
-                                border: `1px solid ${BRAND.line}`, padding: '13px 24px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT 
+                        <button
+                            onClick={() => navigate('/jobs')}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 8, backgroundColor: 'transparent', color: BRAND.ink,
+                                border: `1px solid ${BRAND.line}`, padding: '13px 24px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT
                             }}
                         >
-                            Browse jobs
+                            Explore Open Roles
                         </button>
                     </div>
 
@@ -176,9 +176,9 @@ const About = () => {
                         alignItems: 'center'
                     }}>
                         {[
-                            { big: '50K+', small: 'Careers moved successfully' },
-                            { big: '1,200+', small: 'Verified enterprise employers' },
-                            { big: '96%', small: 'Candidate satisfaction score' },
+                            { big: '50K+', small: 'Careers advanced successfully' },
+                            { big: '1,200+', small: 'Verified enterprise partners' },
+                            { big: '96%', small: 'Candidate satisfaction rate' },
                         ].map((s, i) => (
                             <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 <div style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-1px', color: BRAND.ink }}>{s.big}</div>
@@ -202,16 +202,16 @@ const About = () => {
                             Our Mission
                         </div>
                         <h2 style={{ fontSize: isMobile ? '30px' : '40px', fontWeight: 700, letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 20px 0' }}>
-                            Make hiring honest, fast, and built around actual human talent.
+                            Establish Transparent, Efficient, and Merit-Based Recruitment Frameworks
                         </h2>
                         <p style={{ fontSize: isMobile ? '15px' : '16.5px', lineHeight: 1.65, color: BRAND.slate, margin: '0 0 32px 0' }}>
-                            The job market is full of friction endless forms, silent rejections, and matches that miss the mark. We exist to fix that. JobPortal connects real candidates with verified opportunities, gives both sides clarity at every step, and lets talent be judged on what truly matters: their skills.
+                            Traditional recruitment processes often introduce unnecessary administrative friction, delayed communication, and unaligned placement. The RDI Talent Portal bridges skilled professionals with verified institutional requisitions—providing operational transparency at every stage and evaluating candidates strictly on merit and practical capability.
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                             {[
-                                'Every applicant gets a clear, timely response no ghosting system anomalies.',
-                                'Employers undergo rigorous verification processing before any role goes live.',
-                                'Skills-first matching matrices that surface the right people faster.',
+                                'Every applicant receives direct, timely updates throughout the evaluation lifecycle.',
+                                'Enterprise partners undergo thorough verification before posting active requisitions.',
+                                'Skills-based evaluation matrices ensure precise candidate-role alignment.',
                             ].map((line, idx) => (
                                 <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                                     <CheckCircle2 size={18} color={BRAND.green} style={{ flexShrink: 0, marginTop: 3 }} />
@@ -233,10 +233,10 @@ const About = () => {
                     }}>
                         <Globe size={32} color={BRAND.green} style={{ marginBottom: 16 }} />
                         <div style={{ fontSize: '56px', fontWeight: 700, letterSpacing: '-2px', lineHeight: 1, color: BRAND.ink }}>11</div>
-                        <p style={{ fontSize: '16px', fontWeight: 700, margin: '6px 0 16px 0', color: BRAND.ink }}>Days to offer, on average</p>
+                        <p style={{ fontSize: '16px', fontWeight: 700, margin: '6px 0 16px 0', color: BRAND.ink }}>Average Days to Offer</p>
                         <div style={{ height: '1px', backgroundColor: BRAND.line, margin: '0 0 16px 0' }} />
                         <p style={{ fontSize: '14px', lineHeight: 1.6, color: BRAND.slate, margin: 0 }}>
-                            That's roughly 3x faster than the regional average because absolute operational clarity and good tools beat internal corporate bureaucracy every time.
+                            This efficiency significantly outperforms regional benchmarks by replacing manual administrative overhead with structured evaluation workflows and direct candidate communication.
                         </p>
                     </div>
                 </div>
@@ -253,8 +253,8 @@ const About = () => {
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
                         eyebrowText="By the numbers"
-                        title="Impact we're proud of"
-                        subtitle="Real outcomes from a structured performance engine built to move professional files forward."
+                        title="Measurable Ecosystem Impact"
+                        subtitle="Quantifiable outcomes reflecting operational performance and talent deployment across regional and institutional initiatives."
                         isMobile={isMobile}
                     />
                     <div style={{
@@ -268,10 +268,10 @@ const About = () => {
                         width: '100%',
                         boxSizing: 'border-box'
                     }}>
-                        <Stat target={51200} label="Candidates hired" />
-                        <Stat target={1200} label="Partner companies" />
-                        <Stat target={11} suffix="" label="Avg. days to offer" />
-                        <Stat target={96} suffix="%" label="Satisfaction score" />
+                        <Stat target={51200} label="Successful Placements" />
+                        <Stat target={1200} label="Enterprise & Partner Entities" />
+                        <Stat target={11} suffix="" label="Average Days to Offer" />
+                        <Stat target={96} suffix="%" label="Satisfaction Score" />
                     </div>
                 </div>
             </section>
@@ -286,8 +286,8 @@ const About = () => {
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
                         eyebrowText="What we stand for"
-                        title="The values behind every decision"
-                        subtitle="Six design principles that shape how we configure our codebase logic rules and treat candidates."
+                        title="Core Principles Driving Organizational Selection"
+                        subtitle="Core operational values that govern platform architecture, evaluation protocols, and candidate engagements."
                         isMobile={isMobile}
                     />
                     <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: '20px', width: '100%' }}>
@@ -324,8 +324,8 @@ const About = () => {
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <SectionHead
                         eyebrowText="Our journey"
-                        title="From whiteboard to 50,000 hires"
-                        subtitle="A pristine historical register tracking exactly how our operations expanded globally."
+                        title="Evolution of the RDI Talent Network"
+                        subtitle="A chronicle tracking the strategic expansion and institutional growth of our recruitment infrastructure."
                         isMobile={isMobile}
                     />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
@@ -575,10 +575,10 @@ const About = () => {
                         Join the mission
                     </div>
                     <h2 style={{ fontSize: isMobile ? '32px' : '44px', fontWeight: 700, letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px 0', color: BRAND.ink }}>
-                        Build your career or your team with us.
+                        Advance Your Career or Strengthen Your Organizational Team
                     </h2>
                     <p style={{ fontSize: isMobile ? '15px' : '17px', lineHeight: 1.6, color: BRAND.slate, margin: '0 0 32px 0', maxWidth: '600px' }}>
-                        Whether you're chasing your next role or hiring the talent that will define your company, JobPortal is built for you. It's free to get started.
+                        Whether seeking a transformative career opportunity or recruiting professionals to drive organizational growth, the RDI Talent Portal provides the framework to achieve your objectives.
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'flex-start' }}>
                         <button onClick={() => navigate('/register')} style={{
@@ -586,14 +586,14 @@ const About = () => {
                             border: 'none', padding: '14px 28px', borderRadius: 6, fontSize: '14.5px', fontWeight: 600,
                             cursor: 'pointer', fontFamily: FONT,
                         }}>
-                            Create your free account <ArrowRight size={16} />
+                            Create Candidate Account <ArrowRight size={16} />
                         </button>
                         <button onClick={() => navigate('/jobs')} style={{
                             display: 'inline-flex', alignItems: 'center', gap: 8, backgroundColor: 'transparent',
                             color: BRAND.ink, border: `1px solid ${BRAND.line}`, padding: '13px 26px',
                             borderRadius: 6, fontSize: '14.5px', fontWeight: 600, cursor: 'pointer', fontFamily: FONT,
                         }}>
-                            Explore open roles
+                            Explore Open Roles
                         </button>
                     </div>
                 </div>

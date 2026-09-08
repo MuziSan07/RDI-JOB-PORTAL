@@ -11,7 +11,7 @@ import { useResponsive } from '../hooks/useResponsive';
 injectBrandStyles();
 
 const SUBJECTS = [
-    'General inquiry',
+    'General Operational Inquiry',
     'Job seeker support',
     'Employer / hiring',
     'Partnership',
@@ -19,15 +19,14 @@ const SUBJECTS = [
 ];
 
 const CONTACT_INFO = [
-    { icon: Mail, label: 'Email us', value: 'hello@jobportal.com', sub: 'We reply within one business day.' },
-    { icon: Phone, label: 'Call us', value: '+92 300 1234567', sub: 'Mon–Fri, during working hours.' },
-    { icon: Clock, label: 'Working hours', value: 'Mon–Fri · 9am–6pm PKT', sub: 'Weekends & public holidays closed.' },
+    { icon: Mail, label: 'Email us', value: 'support@rdi.world', sub: 'Inquiries are logged and addressed within one business day.' },
+    { icon: Phone, label: 'Call us', value: '+92 300 1234567', sub: 'Available Monday through Friday during standard business hours.' },
+    { icon: Clock, label: 'Working hours', value: 'Mon–Fri · 9:00 AM – 6:00 PM PKT', sub: 'Closed on weekends and official public holidays.' },
 ];
 
 const FAQS = [
-    { q: 'How long does it take to get a reply?', a: 'Our support team monitors incoming requests systematically. You will receive an actionable response within 24 business hours.' },
-    { q: 'Can I change my account type later?', a: 'Accounts are explicitly partitioned between seekers and employers to maintain pristine data logs. You can create separate profiles using separate email credentials.' },
-    
+    { q: 'What is the standard response time for submitted inquiries?', a: 'All inquiries submitted through the contact desk are logged immediately and assigned to the appropriate operational unit. Our team typically reviews and responds to messages within one business day (Monday through Friday, 9:00 AM – 6:00 PM PKT).' },
+    { q: 'Can an active profile be updated or reclassified between candidate and employer account types?', a: 'Account classifications are separated to maintain strict data privacy and verification standards. If you need to switch your account status or manage both hiring requisitions and job applications under the same organization, please submit an Enterprise Partner Inquiry above, and our desk will assist with account reclassification or multi-role configuration.' },
 ];
 
 const Contact = () => {
@@ -39,7 +38,7 @@ const Contact = () => {
     const [form, setForm] = useState({
         name: '',
         email: '',
-        subject: 'General inquiry',
+        subject: 'General Operational Inquiry',
         message: '',
         company: '',
         role: 'seeker'
@@ -86,16 +85,16 @@ const Contact = () => {
                         margin: '0 0 24px 0',
                         maxWidth: '920px'
                     }}>
-                        Where clear answers begin, and <span style={{ color: BRAND.green }}>ambitious partnerships</span> grow.
+                        Where Direct Support Begins and <span style={{ color: BRAND.green }}>Strategic Partnerships Grow</span>
                     </h1>
-                    <p style={{ 
-                        fontSize: isMobile ? '16px' : '18px', 
-                        color: BRAND.slate, 
-                        maxWidth: '620px', 
-                        margin: 0, 
-                        lineHeight: 1.65 
+                    <p style={{
+                        fontSize: isMobile ? '16px' : '18px',
+                        color: BRAND.slate,
+                        maxWidth: '620px',
+                        margin: 0,
+                        lineHeight: 1.65
                     }}>
-                        Have questions about our verification process, step-by-step role tracking, or enterprise platform onboarding? Drop a transmission below and track every stage.
+                        Have inquiries regarding platform verification, candidate evaluation tracking, or enterprise onboarding? Submit a request below to connect directly with our operations team.
                     </p>
                 </div>
             </section>
@@ -120,10 +119,10 @@ const Contact = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 32, width: '100%' }}>
                         <div>
                             <h2 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px', marginBottom: 12, margin: 0 }}>
-                                Communication Lines
+                                Direct Communication Channels
                             </h2>
                             <p style={{ color: BRAND.slate, lineHeight: 1.55, margin: 0, fontSize: '14.5px' }}>
-                                Use our direct channels for formal queries or platform performance logs.
+                                Connect with our desk directly for formal operational inquiries and technical platform support.
                             </p>
                         </div>
 
@@ -171,10 +170,10 @@ const Contact = () => {
                                 <MapPin size={13} /> Our Head Office
                             </div>
                             <h3 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px', margin: '0 0 10px', color: '#ffffff' }}>
-                                Come say hello
+                                Visit Our Operations Center
                             </h3>
                             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.55, margin: '0 0 20px' }}>
-                                Our verification desk handles physical enterprise routing processing loops systematically here.
+                                Our administrative desk coordinates institutional onboarding, verification processing, and partner relations onsite.
                             </p>
                             {/* <a 
                                 href="https://maps.google.com" 
@@ -213,8 +212,8 @@ const Contact = () => {
                         ) : (
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                                 <div>
-                                    <h3 style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.4px', margin: '0 0 4px' }}>Send a direct dispatch</h3>
-                                    <p style={{ fontSize: '13.5px', color: BRAND.slate, margin: 0 }}>Fill out the details below to route your query instantly.</p>
+                                    <h3 style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.4px', margin: '0 0 4px' }}>Submit an Inquiry</h3>
+                                    <p style={{ fontSize: '13.5px', color: BRAND.slate, margin: 0 }}>Complete the parameters below to route your inquiry to the appropriate department.</p>
                                 </div>
 
                                 {/* Dual Mode Toggle Component Segment */}
@@ -229,7 +228,7 @@ const Contact = () => {
                                             border: form.role === 'seeker' ? `1px solid ${BRAND.line}` : '1px solid transparent'
                                         }}
                                     >
-                                        I am a Job Seeker
+                                        Candidate Inquiry
                                     </button>
                                     <button
                                         type="button"
@@ -241,7 +240,7 @@ const Contact = () => {
                                             border: form.role === 'employer' ? `1px solid ${BRAND.line}` : '1px solid transparent'
                                         }}
                                     >
-                                        I am an Employer
+                                        Enterprise Partner Inquiry
                                     </button>
                                 </div>
 
@@ -249,7 +248,7 @@ const Contact = () => {
                                     <div>
                                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: 6 }}>Full Name</label>
                                         <input
-                                            type="text" required placeholder="Waqas Ali"
+                                            type="text" required placeholder="Full Name"
                                             value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
                                             style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${BRAND.line}`, borderRadius: 6, padding: '11px 14px', fontSize: '14px', outline: 'none', background: BRAND.surface, fontFamily: FONT }}
                                         />
@@ -257,7 +256,7 @@ const Contact = () => {
                                     <div>
                                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: 6 }}>Email Address</label>
                                         <input
-                                            type="email" required placeholder="waqas@example.com"
+                                            type="email" required placeholder="email@domain.com"
                                             value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
                                             style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${BRAND.line}`, borderRadius: 6, padding: '11px 14px', fontSize: '14px', outline: 'none', background: BRAND.surface, fontFamily: FONT }}
                                         />
@@ -279,7 +278,7 @@ const Contact = () => {
                                 )}
 
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: 6 }}>Topic of Dispatch</label>
+                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: 6 }}>Inquiry Topic</label>
                                     <select
                                         value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })}
                                         style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${BRAND.line}`, borderRadius: 6, padding: '11px 14px', fontSize: '14px', outline: 'none', background: BRAND.surface, fontFamily: FONT, cursor: 'pointer' }}
@@ -291,7 +290,7 @@ const Contact = () => {
                                 <div>
                                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: 6 }}>Message Body</label>
                                     <textarea
-                                        required rows={4} placeholder="Type your inquiry logs or notes clean here..."
+                                        required rows={4} placeholder="Detail your specific inquiry, platform question, or support request here..."
                                         value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })}
                                         style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${BRAND.line}`, borderRadius: 6, padding: '11px 14px', fontSize: '14px', outline: 'none', background: BRAND.surface, fontFamily: FONT, resize: 'vertical' }}
                                     />
@@ -306,7 +305,7 @@ const Contact = () => {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontFamily: FONT
                                     }}
                                 >
-                                    {loading ? 'Dispatching...' : <>Send Dispatch <Send size={14} /></>}
+                                    {loading ? 'Submitting...' : <>Submit Inquiry <Send size={14} /></>}
                                 </button>
                             </form>
                         )}

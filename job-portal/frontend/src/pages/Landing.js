@@ -83,15 +83,15 @@ const Landing = () => {
                     {isLoggedIn ? (
                         <div style={{ marginBottom: 20 }}>{label(`Welcome back, ${user?.first_name || user?.username}`, BRAND.green)}</div>
                     ) : (
-                        <div style={{ marginBottom: 20 }}>{label('1,200+ hires this year', BRAND.green)}</div>
+                        <div style={{ marginBottom: 20 }}>{label('1,200+ Professional Placements Across the RDI Network', BRAND.green)}</div>
                     )}
 
                     <h1 style={{ fontSize: heroTitleSize, fontWeight: 700, lineHeight: 1.08, letterSpacing: '-2px', margin: '0 0 24px', maxWidth: 820, color: BRAND.ink }}>
-                        Where great careers begin, and <span style={{ color: BRAND.green }}>ambitious teams</span> grow.
+                        Catalyzing Sustainable Careers. <span style={{ color: BRAND.green }}>Driving Enterprise Growth.</span>
                     </h1>
 
                     <p style={{ fontSize: isMobile ? 16 : 18, color: BRAND.slate, lineHeight: 1.65, margin: '0 0 44px', maxWidth: 560 }}>
-                        Discover roles across top departments, apply in one click, and track every stage from application to offer.
+                        Discover high-impact opportunities across key growth sectors, submit unified applications, and track your evaluation transparently from submission to placement.
                     </p>
 
                     {/* Search */}
@@ -103,7 +103,7 @@ const Landing = () => {
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                    placeholder="Job title, skill, or company"
+                                    placeholder="Search by keyword, role title, or skill set..."
                                     style={{ flex: 1, border: 'none', outline: 'none', fontSize: 15, color: BRAND.ink, background: 'transparent', fontFamily: FONT, width: '100%' }}
                                 />
                             </div>
@@ -114,7 +114,7 @@ const Landing = () => {
                     </div>
 
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 22px', color: BRAND.muted, fontSize: 13.5 }}>
-                        {['Remote', 'Engineering', 'Design', 'Marketing', 'Finance'].map((t) => (
+                        {['Business Development', 'Healthcare Operations & Medical Billing', 'Engineering & Technology', 'Marketing & Communications', 'Finance & Administration'].map((t) => (
                             <button key={t} onClick={() => navigate(`/jobs?search=${t}`)} className="brand-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: FONT, fontSize: 13.5, color: BRAND.muted, padding: 0, borderBottom: '1px solid transparent' }}>
                                 {t}
                             </button>
@@ -131,10 +131,13 @@ const Landing = () => {
                     <div style={{ display: 'flex', flexDirection: isCompact ? 'column' : 'row', alignItems: isCompact ? 'flex-start' : 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: 44 }}>
                         <div>
                             <div style={{ marginBottom: 12 }}>{label('Open positions')}</div>
-                            <h2 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 700, letterSpacing: '-1.1px', margin: 0, color: BRAND.ink }}>Featured opportunities</h2>
+                            <h2 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 700, letterSpacing: '-1.1px', margin: 0, color: BRAND.ink }}>Active Career Opportunities</h2>
+                            <p style={{ fontSize: 15, color: BRAND.slate, lineHeight: 1.6, margin: '12px 0 0', maxWidth: 520 }}>
+                                Explore current openings across RDI enterprise partners, community initiatives, and technology hubs.
+                            </p>
                         </div>
                         <button onClick={() => navigate('/jobs')} style={btn.text} className="brand-link">
-                            View all jobs <ArrowRight size={15} strokeWidth={2} />
+                            Browse All Openings <ArrowRight size={15} strokeWidth={2} />
                         </button>
                     </div>
 
@@ -163,28 +166,28 @@ const Landing = () => {
                 tone="green"
                 isMobile={isMobile}
                 isCompact={isCompact}
-                eyebrowText="For job seekers"
-                title="Your next role, without the guesswork."
-                body="Build your profile once and let it work for you. See exactly where every application stands, take role-specific assessments inline, and never wonder if your resume disappeared into a black hole."
+                eyebrowText="For Emerging & Experienced Professionals"
+                title="Clear career pathways, transparent evaluations, and direct access to growth-oriented organizations."
+                body="Create a unified professional profile to unlock ongoing opportunities. Monitor your application status in real time, complete objective competency assessments, and engage with verified employers through an equitable, transparent process."
                 bullets={[
-                    'One profile, unlimited applications',
-                    'Real-time status on every stage',
-                    'Skills assessments built into the flow',
-                    'Alerts the moment a matching role opens',
+                    'Unified Candidate Profile — Submit once to access multiple enterprise roles across the RDI ecosystem.',
+                    'End-to-End Evaluation Tracking — Monitor every phase of your application transparently, from review to selection.',
+                    'Integrated Competency Testing — Demonstrate practical skills through role-tailored evaluations inline.',
+                    'Automated Opportunity Matching — Receive tailored notifications as new positions aligned with your expertise open.',
                 ]}
-                cta={{ label: 'Create your profile', onClick: () => navigate('/register') }}
+                cta={{ label: 'Build Candidate Profile', onClick: () => navigate('/register') }}
             />
 
             {/* ───── WHY JOBPORTAL ───── */}
             <section style={{ background: BRAND.surfaceAlt, padding: isMobile ? '56px 0' : '100px 0', borderTop: `1px solid ${BRAND.line}`, borderBottom: `1px solid ${BRAND.line}` }}>
                 <div style={{ ...page.section, display: 'grid', gridTemplateColumns: isCompact ? '1fr' : '0.85fr 1.15fr', gap: isCompact ? 40 : 80 }}>
                     <div>
-                        <div style={{ marginBottom: 14 }}>{label('Why JobPortal')}</div>
+                        <div style={{ marginBottom: 14 }}>{label('Why RDI Talent Portal')}</div>
                         <h2 style={{ fontSize: isMobile ? 28 : 36, fontWeight: 700, letterSpacing: '-1.1px', margin: '0 0 16px', color: BRAND.ink }}>
-                            Built for people who value their time.
+                            Designed for Professional Excellence and Merit
                         </h2>
                         <p style={{ fontSize: 15.5, color: BRAND.slate, lineHeight: 1.7, margin: 0, maxWidth: 340 }}>
-                            A hiring experience without the noise for candidates and employers alike.
+                            An efficient, transparent talent ecosystem engineered to connect vetted professionals with sustainable organizational roles.
                         </p>
                     </div>
 
@@ -211,23 +214,23 @@ const Landing = () => {
                 tone="gold"
                 isMobile={isMobile}
                 isCompact={isCompact}
-                eyebrowText="For employers"
-                title="Hire people who actually fit the role."
-                body="Post a role in minutes, screen with built-in assessments, and see every candidate ranked by fit not just by who applied first. RDI JobPortal handles the busywork so your team can focus on the conversation."
+                eyebrowText="For Institutional & Enterprise Partners"
+                title="Build capable teams with precision, merit, and transparency."
+                body="Publish requisitions efficiently, evaluate applicants using standardized competency assessments, and identify top talent based on objective performance metrics. The platform automates administrative overhead, enabling leadership to focus on strategic talent acquisition."
                 bullets={[
-                    'Verified employer profile in one review',
-                    'Applicant tracking across every stage',
-                    'Custom assessments per role',
-                    'Analytics on time-to-hire and drop-off',
+                    'Verified Institutional Profiles',
+                    'End-to-End Talent Pipeline Management',
+                    'Tailored Technical & Skill Evaluations',
+                    'Recruitment Analytics & Time-to-Hire Insights',
                 ]}
-                cta={{ label: 'Post your first job', onClick: () => navigate('/for-employers') }}
+                cta={{ label: 'Publish an Opportunity', onClick: () => navigate('/for-employers') }}
             />
 
             {/* ───── HOW IT WORKS ───── */}
             <section style={{ background: BRAND.surface, padding: isMobile ? '56px 0' : '100px 0' }}>
                 <div style={page.section}>
                     <div style={{ marginBottom: 12 }}>{label('Simple process')}</div>
-                    <h2 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 700, letterSpacing: '-1.1px', margin: '0 0 48px', color: BRAND.ink }}>From search to offer in three steps.</h2>
+                    <h2 style={{ fontSize: isMobile ? 28 : 38, fontWeight: 700, letterSpacing: '-1.1px', margin: '0 0 48px', color: BRAND.ink }}>Structured 3-Step Selection Process</h2>
 
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', borderTop: `1px solid ${BRAND.line}` }}>
                         {STEPS.map((s, i) => (
@@ -262,7 +265,7 @@ const Landing = () => {
                     <div>
                         <div style={{ marginBottom: 14 }}>{label('Questions')}</div>
                         <h2 style={{ fontSize: isMobile ? 26 : 34, fontWeight: 700, letterSpacing: '-1px', margin: 0, color: BRAND.ink }}>
-                            Frequently asked.
+                            Frequently Asked Questions
                         </h2>
                     </div>
                     <FAQList items={FAQS} />
@@ -275,11 +278,11 @@ const Landing = () => {
                     <div style={page.section}>
                         <div style={{ display: 'flex', flexDirection: isCompact ? 'column' : 'row', alignItems: isCompact ? 'flex-start' : 'center', justifyContent: 'space-between', gap: 20 }}>
                             <div>
-                                <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 6px', color: BRAND.ink }}>Create a free account to apply</h3>
-                                <p style={{ fontSize: 14.5, color: BRAND.slate, margin: 0 }}>Browse freely sign up only when you're ready to apply.</p>
+                                <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 6px', color: BRAND.ink }}>Ready to Advance Your Professional Career?</h3>
+                                <p style={{ fontSize: 14.5, color: BRAND.slate, margin: 0 }}>Join the RDI talent network today to access high-impact career opportunities across key growth industries.</p>
                             </div>
                             <div style={{ display: 'flex', gap: 10, flexShrink: 0, width: isCompact ? '100%' : 'auto' }}>
-                                <button onClick={() => navigate('/register')} style={{ ...btn.primary, flex: isCompact ? 1 : 'none' }}>Sign Up Free</button>
+                                <button onClick={() => navigate('/register')} style={{ ...btn.primary, flex: isCompact ? 1 : 'none' }}>Create Candidate Account</button>
                                 <button onClick={() => navigate('/login')} style={{ ...btn.ghost, flex: isCompact ? 1 : 'none' }}>Sign In</button>
                             </div>
                         </div>
@@ -370,10 +373,10 @@ const SplitSection = ({ reverse, tone, isMobile, isCompact, eyebrowText, title, 
 // ───── Stats row ─────
 const StatsRow = ({ stats, isMobile }) => {
     const items = [
-        { icon: Briefcase, value: stats.total_jobs || 0, label: 'Active Jobs' },
-        { icon: Globe, value: stats.total_companies || 0, label: 'Companies Hiring' },
-        { icon: Users, value: stats.total_applications || 0, label: 'Applications' },
-        { icon: TrendingUp, value: 94, label: 'Match Success %' },
+        { icon: Briefcase, value: stats.total_jobs || 0, label: 'Active Opportunities' },
+        { icon: Globe, value: stats.total_companies || 0, label: 'Partner Enterprises Hiring' },
+        { icon: Users, value: stats.total_applications || 0, label: 'Vetted Candidate Applications' },
+        { icon: TrendingUp, value: 94, label: 'Merit Match Rate', suffix: '%' },
     ];
     return (
         <div style={{ borderTop: `1px solid ${BRAND.line}` }}>
@@ -384,12 +387,12 @@ const StatsRow = ({ stats, isMobile }) => {
     );
 };
 
-const Stat = ({ icon: Icon, value, label: text, isMobile, isLast }) => {
+const Stat = ({ icon: Icon, value, label: text, suffix = '+', isMobile, isLast }) => {
     const [n, ref] = useCountUp(value);
     return (
         <div ref={ref} style={{ padding: isMobile ? '20px 0' : '28px 28px 28px 0', borderRight: (!isMobile && !isLast) ? `1px solid ${BRAND.line}` : 'none' }}>
             <Icon size={18} color={BRAND.faint} strokeWidth={1.75} style={{ marginBottom: 10 }} />
-            <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-1px', lineHeight: 1, color: BRAND.ink }}>{n.toLocaleString()}+</div>
+            <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-1px', lineHeight: 1, color: BRAND.ink }}>{n.toLocaleString()}{suffix}</div>
             <div style={{ fontSize: 13, color: BRAND.muted, marginTop: 6 }}>{text}</div>
         </div>
     );
@@ -417,7 +420,7 @@ const JobRow = ({ job, isLoggedIn, navigate, isMobile }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
                     <h3 style={{ fontSize: 17.5, fontWeight: 700, margin: 0, color: BRAND.ink }}>{job.title}</h3>
                     <span style={{ fontSize: 12, fontWeight: 600, color: BRAND.muted, textTransform: 'capitalize' }}>
-                        · {job.job_type?.replace('_', ' ') || 'Full time'}
+                        {job.job_type?.replace('_', ' ') || 'Onsite'} | {job.employment_type?.replace('_', ' ') || 'Full-time'}
                     </span>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', fontSize: 13.5, color: BRAND.slate }}>
@@ -439,7 +442,7 @@ const JobRow = ({ job, isLoggedIn, navigate, isMobile }) => {
                         cursor: (isLoggedIn && left === 0) ? 'not-allowed' : 'pointer',
                     }}
                 >
-                    {isLoggedIn ? 'Apply' : <><Lock size={13} strokeWidth={1.75} /> Apply</>}
+                    {isLoggedIn ? 'Apply Now' : <><Lock size={13} strokeWidth={1.75} /> Apply Now</>}
                     <ArrowUpRight size={15} strokeWidth={2} style={{ transform: hover ? 'translate(2px,-2px)' : 'none', transition: 'transform .15s ease' }} />
                 </button>
             </div>
@@ -534,18 +537,18 @@ const FAQList = ({ items }) => {
 
 // ───── Content data ─────
 const FEATURES = [
-    { icon: TrendingUp, title: 'Smart job matching', desc: 'Roles surfaced by skills and fit, so you spend time applying not endlessly scrolling.' },
-    { icon: ArrowRight, title: 'One-click apply', desc: 'Save your profile and resume once, then apply to any role in seconds.' },
-    { icon: Clock, title: 'Live application tracking', desc: 'Watch every stage update in real time applied, test, interview, and offer.' },
-    { icon: Lock, title: 'Verified employers', desc: 'Every department and company on the platform is verified before posting.' },
-    { icon: Briefcase, title: 'Built-in assessments', desc: 'Showcase your skills with role-specific tests, right inside your application.' },
-    { icon: Globe, title: 'Remote & onsite', desc: 'Filter by remote, hybrid, or onsite to find work that fits your life.' },
+    { icon: TrendingUp, title: 'Competency Alignment', desc: 'Roles matched based on technical skill sets and institutional fit, eliminating redundant search efforts.' },
+    { icon: ArrowRight, title: 'Streamlined Application Workflow', desc: 'Maintain a verified master profile and apply across active openings seamlessly.' },
+    { icon: Clock, title: 'Transparent Status Updates', desc: 'Track your application progression live across screening, assessment, interview, and selection.' },
+    { icon: Lock, title: 'Vetted Partner Entities', desc: 'Every participating enterprise and department undergoes verification to maintain institutional standards.' },
+    { icon: Briefcase, title: 'Objective Skills Verification', desc: 'Highlight technical capabilities through practical, role-specific assessments embedded directly into the platform.' },
+    { icon: Globe, title: 'Diverse Operational Models', desc: 'Filter opportunities by onsite, hybrid, or remote modalities aligned with institutional requirements.' },
 ];
 
 const STEPS = [
-    { icon: Search, title: 'Discover', desc: 'Search and filter thousands of openings, or let smart matching bring roles to you.' },
-    { icon: ArrowRight, title: 'Apply', desc: 'Build your profile once and apply in one click complete any assessments inline.' },
-    { icon: Users, title: 'Get hired', desc: 'Track interviews and offers in real time, and step into your next chapter.' },
+    { icon: Search, title: 'Explore Opportunities', desc: 'Browse active requisitions or receive targeted role recommendations tailored to your profile.' },
+    { icon: ArrowRight, title: 'Submit & Evaluate', desc: 'Apply using your master profile and complete practical competency evaluations inline.' },
+    { icon: Users, title: 'Track & Onboard', desc: 'Monitor evaluation outcomes in real time and transition smoothly into your new organizational role.' },
 ];
 
 const TESTIMONIALS = [
@@ -555,11 +558,9 @@ const TESTIMONIALS = [
 ];
 
 const FAQS = [
-    { q: 'Is it free to create an account?', a: 'Yes. Creating a profile, browsing roles, and applying are all free for job seekers no hidden fees at any stage.' },
-    { q: 'How does application tracking work?', a: 'Every application moves through clear stages applied, under review, assessment, interview, offer and you get notified the moment your status changes.' },
-    { q: 'Can employers see my profile before I apply?', a: 'No. Your profile is only shared with an employer once you submit an application to one of their roles.' },
-    { q: 'How are employers verified?', a: 'Every department and company is reviewed before their first posting goes live, so listings on JobPortal are always genuine.' },
-    { q: 'What if a role has an assessment?', a: 'Assessments are built directly into the application flow you complete them inline, with no separate account or tool required.' },
+    { q: 'Is there any cost to create an account or apply?', a: 'No. Candidate registration, profile creation, and job applications are completely free for all applicants.' },
+    { q: 'How are candidates evaluated during the selection process?', a: 'Candidates are evaluated based on merit, profile credentials, and objective assessment scores tailored to specific job requirements.' },
+    { q: 'How do enterprise partner verifications work?', a: 'All participating organizations and subsidiaries undergo institutional verification by RDI to ensure safe, legitimate, and structured employment opportunities.' },
 ];
 
 export default Landing;
