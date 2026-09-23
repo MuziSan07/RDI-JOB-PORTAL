@@ -13,10 +13,10 @@ class JobSerializer(serializers.ModelSerializer):
             'title', 'description', 'required_skills', 'job_type',
             'selection_type', 'salary_range', 'salary_currency', 'salary_min',
             'salary_max', 'salary_period', 'employment_type', 'location_city',
-            'location_country', 'status', 'vacancies',
-            'filled_positions', 'created_at', 'updated_at'
+            'location_country', 'status', 'application_deadline', 'is_expired',
+            'vacancies', 'filled_positions', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'slug', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'slug', 'is_expired', 'created_at', 'updated_at']
     
     def get_department_logo(self, obj):
         if obj.department.logo:
@@ -43,7 +43,8 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'title', 'description', 'required_skills', 'job_type',
             'selection_type', 'salary_range', 'salary_currency', 'salary_min',
             'salary_max', 'salary_period', 'employment_type', 'location_city',
-            'location_country', 'status', 'vacancies',
+            'location_country', 'status', 'application_deadline', 'is_expired',
+            'is_accepting_applications', 'vacancies',
             'filled_positions', 'total_applications', 'created_at', 'updated_at'
         ]
     
@@ -65,7 +66,7 @@ class JobCreateSerializer(serializers.ModelSerializer):
             'title', 'description', 'required_skills', 'job_type',
             'selection_type', 'salary_range', 'salary_currency', 'salary_min',
             'salary_max', 'salary_period', 'employment_type', 'location_city',
-            'location_country', 'vacancies'
+            'location_country', 'application_deadline', 'vacancies'
         ]
     
     def validate_vacancies(self, value):

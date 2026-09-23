@@ -54,6 +54,14 @@ def apply_for_job(request, job_id):
     except Job.DoesNotExist:
         return Response({'error': 'Job not found or closed'}, status=status.HTTP_404_NOT_FOUND)
 
+    # Reject applications past the last applying date, even if the job's status
+    # has not yet been flipped to closed by the scheduled task.
+    if job.is_expired:
+        return Response(
+            {'error': 'The last date to apply for this job has passed.', 'code': 'deadline_passed'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     # Check already applied
     if Application.objects.filter(job=job, applicant=request.user).exists():
         return Response({'error': 'You have already applied for this job'}, status=status.HTTP_400_BAD_REQUEST)

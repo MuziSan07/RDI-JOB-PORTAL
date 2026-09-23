@@ -55,11 +55,27 @@ class Job(models.Model):
     location_city = models.CharField(max_length=120, blank=True, default='')
     location_country = models.CharField(max_length=60, blank=True, default='')  # name or ISO code
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    # Last date on which candidates may apply. After this date the job is
+    # treated as closed and new applications are rejected. Null = no deadline.
+    application_deadline = models.DateField(null=True, blank=True)
     vacancies = models.IntegerField(default=1)
     filled_positions = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
+    @property
+    def is_expired(self):
+        """True once the application deadline has passed."""
+        if not self.application_deadline:
+            return False
+        from django.utils import timezone
+        return self.application_deadline < timezone.now().date()
+
+    @property
+    def is_accepting_applications(self):
+        """A job takes applications only while it is open and not past its deadline."""
+        return self.status == 'open' and not self.is_expired
+
     def save(self, *args, **kwargs):
         # Auto-generate a unique, SEO-friendly slug from the title.
         if not self.slug:

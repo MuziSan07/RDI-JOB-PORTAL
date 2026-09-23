@@ -31,6 +31,7 @@ const DepartmentJobs = () => {
         salary_period: 'MONTH',
         location_city: '',
         location_country: '',
+        application_deadline: '',
         vacancies: 1,
     });
     const [error, setError] = useState('');
@@ -63,11 +64,13 @@ const DepartmentJobs = () => {
         setError('');
         setSuccess('');
         try {
+            // Send null (not an empty string) for an unset date so the backend DateField accepts it.
+            const payload = { ...formData, application_deadline: formData.application_deadline || null };
             if (isEditing) {
-                await jobService.updateJob(selectedJob.id, formData);
+                await jobService.updateJob(selectedJob.id, payload);
                 setSuccess('Job updated successfully!');
             } else {
-                await jobService.createJob(formData);
+                await jobService.createJob(payload);
                 setSuccess('Job created successfully!');
             }
             setShowModal(false);
@@ -94,6 +97,7 @@ const DepartmentJobs = () => {
             salary_period: job.salary_period || 'MONTH',
             location_city: job.location_city || '',
             location_country: job.location_country || '',
+            application_deadline: job.application_deadline || '',
             vacancies: job.vacancies,
         });
         setIsEditing(true);
@@ -128,7 +132,7 @@ const DepartmentJobs = () => {
     };
 
     const resetForm = () => {
-        setFormData({ title: '', description: '', required_skills: '', job_type: 'onsite', selection_type: 'test', employment_type: 'FULL_TIME', salary_range: '', salary_currency: 'USD', salary_min: '', salary_max: '', salary_period: 'MONTH', location_city: '', location_country: '', vacancies: 1 });
+        setFormData({ title: '', description: '', required_skills: '', job_type: 'onsite', selection_type: 'test', employment_type: 'FULL_TIME', salary_range: '', salary_currency: 'USD', salary_min: '', salary_max: '', salary_period: 'MONTH', location_city: '', location_country: '', application_deadline: '', vacancies: 1 });
         setIsEditing(false);
         setSelectedJob(null);
     };
@@ -315,6 +319,11 @@ const DepartmentJobs = () => {
                                     <label style={styles.label}>Vacancies *</label>
                                     <input type="number" name="vacancies" value={formData.vacancies} onChange={handleInputChange} required min="1" style={styles.input} />
                                 </div>
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Last Applying Date</label>
+                                <input type="date" name="application_deadline" value={formData.application_deadline} onChange={handleInputChange} style={styles.input} />
+                                <small style={{ color: '#64748b', fontSize: '12px' }}>The job automatically closes after this date. Leave empty for no deadline.</small>
                             </div>
                             <div style={styles.formGroup}>
                                 <label style={styles.label}>Salary Range (display text, optional)</label>

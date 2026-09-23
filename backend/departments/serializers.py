@@ -21,6 +21,18 @@ class DepartmentSerializer(serializers.ModelSerializer):
             return obj.logo.url
         return None
 
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        # Keep the linked login account's email in sync with the department's
+        # email. Admin login looks the user up by email, so if we only updated
+        # Department.email the department would still have to sign in with the
+        # old address.
+        user = getattr(instance, 'user', None)
+        if user and user.email != instance.email:
+            user.email = instance.email
+            user.save(update_fields=['email'])
+        return instance
+
 class DepartmentCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     

@@ -192,6 +192,10 @@ const JobDetail = () => {
     };
 
     const vacanciesLeft = job ? (job.vacancies || 0) - (job.filled_positions || 0) : 0;
+    // A job stops taking applications when it is closed or past its last applying date.
+    const isExpired = !!(job && job.is_expired);
+    const isClosed = !!(job && (job.status === 'closed' || job.is_expired));
+    const canApply = vacanciesLeft > 0 && !isClosed;
     const selectionSteps = job ? (SELECTION_STEPS[job.selection_type] || ['Apply', 'Review', 'Decision']) : [];
     const jobTypeStyle = job ? (JOB_TYPE_COLORS[job.job_type] || { bg: BRAND.surfaceAlt, text: BRAND.muted, border: BRAND.line }) : {};
 
@@ -445,15 +449,26 @@ const JobDetail = () => {
                                             <span style={s.applyDetailLabel}>Posted</span>
                                             <span style={s.applyDetailValue}>{new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                                         </div>
+                                        {job.application_deadline && (
+                                            <div style={s.applyDetailRow}>
+                                                <Calendar size={15} color={isExpired ? BRAND.crimson : BRAND.faint} strokeWidth={1.75} />
+                                                <span style={s.applyDetailLabel}>Apply by</span>
+                                                <span style={{ ...s.applyDetailValue, ...(isExpired ? { color: BRAND.crimson } : {}) }}>
+                                                    {new Date(job.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <button
                                         onClick={handleApply}
-                                        disabled={vacanciesLeft === 0}
-                                        style={{ ...btn.primary, width: '100%', ...(vacanciesLeft === 0 ? s.applyBtnDisabled : {}) }}
+                                        disabled={!canApply}
+                                        style={{ ...btn.primary, width: '100%', ...(!canApply ? s.applyBtnDisabled : {}) }}
                                     >
-                                        {vacanciesLeft === 0 ? 'No Vacancies' : isAuthenticated ? 'Apply Now' : 'Sign In to Apply'}
-                                        {vacanciesLeft > 0 && <ChevronRight size={17} strokeWidth={2} />}
+                                        {isClosed ? (isExpired ? 'Applications Closed' : 'Closed')
+                                            : vacanciesLeft === 0 ? 'No Vacancies'
+                                            : isAuthenticated ? 'Apply Now' : 'Sign In to Apply'}
+                                        {canApply && <ChevronRight size={17} strokeWidth={2} />}
                                     </button>
 
                                     {!isAuthenticated && (
@@ -470,7 +485,9 @@ const JobDetail = () => {
                             <h4 style={s.quickInfoTitle}>Job Overview</h4>
                             <div style={s.quickInfoRow}>
                                 <span style={s.quickInfoLabel}>Status</span>
-                                <span style={{ ...s.quickInfoBadge, background: `${BRAND.green}17`, color: BRAND.green }}>Open</span>
+                                <span style={{ ...s.quickInfoBadge, background: isClosed ? `${BRAND.crimson}14` : `${BRAND.green}17`, color: isClosed ? BRAND.crimson : BRAND.green }}>
+                                    {isClosed ? 'Closed' : 'Open'}
+                                </span>
                             </div>
                             <div style={s.quickInfoRow}>
                                 <span style={s.quickInfoLabel}>Total Vacancies</span>
