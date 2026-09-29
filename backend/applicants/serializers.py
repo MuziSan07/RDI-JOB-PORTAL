@@ -1,8 +1,23 @@
 from rest_framework import serializers
+from django.conf import settings
 from .models import Application, TestAssignment, TestResult, TestAnswer, Interview
 from jobs.models import Job
 from accounts.models import User, Resume
 from tests.models import Chapter, Question
+
+
+def abs_media_url(request, file_field):
+    """Absolute URL for a media file, forced to https in production.
+
+    Behind the HTTPS reverse proxy the request scheme can come through as http,
+    so build_absolute_uri() may yield an http:// link that browsers block as
+    mixed content. Upgrade it to https outside local development."""
+    if not file_field:
+        return None
+    url = request.build_absolute_uri(file_field.url) if request else file_field.url
+    if not settings.DEBUG and isinstance(url, str) and url.startswith('http://'):
+        url = 'https://' + url[len('http://'):]
+    return url
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
@@ -74,6 +89,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
                 'current_job': r.current_job,
                 'experience': r.experience,
                 'education': r.education,
+                'resume_file': abs_media_url(self.context.get('request'), r.resume_file),
             }
         return None
 
@@ -269,6 +285,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
                 'experience': r.experience,
                 'education': r.education,
                 'is_primary': r.is_primary,
+                'resume_file': abs_media_url(self.context.get('request'), r.resume_file),
             }
         # Fall back to user profile data if no resume attached
         u = obj.applicant
@@ -282,6 +299,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
             'experience': u.experience or '',
             'education': u.education or '',
             'is_primary': False,
+            'resume_file': None,
         }
 
 

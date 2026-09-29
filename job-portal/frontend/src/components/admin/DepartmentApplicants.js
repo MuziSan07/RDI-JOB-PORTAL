@@ -423,6 +423,9 @@ const DepartmentApplicants = () => {
                                             <td style={s.td}>
                                                 <div style={s.actions}>
                                                     <ActionBtn icon={<Eye size={13} />} label="View" color="#6366f1" onClick={() => handleViewDetails(applicant)} />
+                                                    {applicant.resume_details?.resume_file && (
+                                                        <ActionBtn icon={<FileText size={13} />} label="Resume" color="#a78bfa" onClick={() => window.open(applicant.resume_details.resume_file, '_blank', 'noopener,noreferrer')} />
+                                                    )}
                                                     {canAssignTest(applicant) && (
                                                         <ActionBtn icon={<ClipboardList size={13} />} label="Assign Test" color="#fbbf24" onClick={() => handleAssignTest(applicant)} />
                                                     )}
@@ -620,6 +623,11 @@ const DepartmentApplicants = () => {
                                         )}
                                         {!rd.education && !rd.experience && (
                                             <p style={{ color: '#475569', fontSize: '13px' }}>No resume data available</p>
+                                        )}
+                                        {rd.resume_file && (
+                                            <a href={rd.resume_file} target="_blank" rel="noopener noreferrer" style={{ ...s.link, display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 14 }}>
+                                                <FileText size={14} /> View attached resume (PDF)
+                                            </a>
                                         )}
                                     </DetailSection>
 

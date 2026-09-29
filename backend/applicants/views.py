@@ -906,9 +906,11 @@ def export_applications(request):
 
     dept = request.user.department
 
+    from .serializers import abs_media_url
+
     def _pdf_url(r):
         if r and getattr(r, 'resume_file', None):
-            return request.build_absolute_uri(r.resume_file.url)
+            return abs_media_url(request, r.resume_file) or ''
         return ''
 
     def _row_values(app):
@@ -1162,7 +1164,7 @@ def export_applications(request):
 
             # Link the applicant name to their uploaded PDF resume when available
             if r and getattr(r, 'resume_file', None):
-                pdf_url = request.build_absolute_uri(r.resume_file.url)
+                pdf_url = abs_media_url(request, r.resume_file)
                 name_cell = f'<a href="{pdf_url}" color="#4f46e5"><b>{full_name}</b></a> <font color="#4f46e5" size="7">[PDF]</font>'
             else:
                 name_cell = f'<b>{full_name}</b>'
