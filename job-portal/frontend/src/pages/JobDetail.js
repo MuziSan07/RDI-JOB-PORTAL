@@ -391,20 +391,6 @@ const JobDetail = () => {
                                 </div>
                             </div>
                             {job.department_bio && <p style={s.bodyText}>{job.department_bio}</p>}
-                            <div style={s.companyMeta}>
-                                {job.department_ceo && (
-                                    <div style={s.companyMetaItem}>
-                                        <User size={15} color={BRAND.faint} strokeWidth={1.75} />
-                                        <span>CEO: <strong>{job.department_ceo}</strong></span>
-                                    </div>
-                                )}
-                                {job.department_email && (
-                                    <div style={s.companyMetaItem}>
-                                        <Mail size={15} color={BRAND.faint} strokeWidth={1.75} />
-                                        <span>{job.department_email}</span>
-                                    </div>
-                                )}
-                            </div>
                         </div>
                     </div>
 
